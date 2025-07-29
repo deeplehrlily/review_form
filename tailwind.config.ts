@@ -1,11 +1,8 @@
 import type { Config } from "tailwindcss"
-import defaultConfig from "shadcn/ui/tailwind.config"
 
 const config = {
   darkMode: ["class"],
-  ...defaultConfig,
   content: [
-    ...defaultConfig.content,
     "./pages/**/*.{ts,tsx}",
     "./components/**/*.{ts,tsx}",
     "./app/**/*.{ts,tsx}",
@@ -14,7 +11,6 @@ const config = {
   ],
   prefix: "",
   theme: {
-    ...defaultConfig.theme,
     container: {
       center: true,
       padding: "2rem",
@@ -23,7 +19,6 @@ const config = {
       },
     },
     extend: {
-      ...defaultConfig.theme.extend,
       fontFamily: {
         sans: ["var(--font-sans)"],
       },
