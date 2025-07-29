@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useMemo, useActionState } from "react"
+import { useState, useEffect, useMemo, useActionState, type FormEvent } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -37,7 +37,7 @@ const initialFormData = {
   agreePrivacy: false,
   startDate: { year: "", month: "" },
   endDate: { year: "", month: "" },
-  proof: null,
+  proof: null as File | null,
   reviews: {},
 }
 
@@ -90,7 +90,7 @@ export default function ReviewFormPage() {
       const end = new Date(Number.parseInt(endDate.year), Number.parseInt(endDate.month) - 1)
       if (end < start) {
         alert("종료일이 시작일보다 빠를 수 없습니다.")
-        return // 변경을 취소하거나, endDate를 리셋할 수 있습니다.
+        return
       }
     }
     setFormData(newFormData)
@@ -157,6 +157,38 @@ export default function ReviewFormPage() {
     window.scrollTo({ top: 0, behavior: "smooth" })
   }
 
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+
+    // 1. 수동으로 FormData 객체 생성
+    const data = new FormData()
+
+    // 2. React state에 저장된 모든 데이터를 FormData에 추가
+    data.append("name", formData.name)
+    data.append("email", formData.email)
+    data.append("phone", formData.phone)
+    data.append("source", formData.source)
+    data.append("education", formData.education)
+    data.append("company", formData.company)
+    data.append("postcode", formData.postcode)
+    data.append("roadAddress", formData.roadAddress)
+    data.append("detailAddress", formData.detailAddress)
+    data.append("workType", formData.workType)
+    data.append("majorJob", formData.majorJob)
+    data.append("subJob", formData.subJob)
+    data.append("startDateYear", formData.startDate.year)
+    data.append("startDateMonth", formData.startDate.month)
+    data.append("endDateYear", formData.endDate.year)
+    data.append("endDateMonth", formData.endDate.month)
+    data.append("reviews", JSON.stringify(formData.reviews))
+    if (formData.proof) {
+      data.append("proof", formData.proof)
+    }
+
+    // 3. 서버 액션 호출
+    formAction(data)
+  }
+
   const renderYears = () => {
     const currentYear = new Date().getFullYear()
     const years = []
@@ -198,7 +230,7 @@ export default function ReviewFormPage() {
             <p className="text-center text-sm text-gray-500 mt-2">{step} / 3</p>
           </div>
 
-          <form action={formAction}>
+          <form onSubmit={handleSubmit}>
             {step === 1 && (
               <div className="space-y-6">
                 <div>
@@ -470,25 +502,6 @@ export default function ReviewFormPage() {
 
             {step === 3 && (
               <div className="space-y-8">
-                {/* Hidden inputs to pass all data on final submission */}
-                <input type="hidden" name="name" value={formData.name} />
-                <input type="hidden" name="email" value={formData.email} />
-                <input type="hidden" name="phone" value={formData.phone} />
-                <input type="hidden" name="source" value={formData.source} />
-                <input type="hidden" name="education" value={formData.education} />
-                <input type="hidden" name="company" value={formData.company} />
-                <input type="hidden" name="postcode" value={formData.postcode} />
-                <input type="hidden" name="roadAddress" value={formData.roadAddress} />
-                <input type="hidden" name="detailAddress" value={formData.detailAddress} />
-                <input type="hidden" name="workType" value={formData.workType} />
-                <input type="hidden" name="majorJob" value={formData.majorJob} />
-                <input type="hidden" name="subJob" value={formData.subJob} />
-                <input type="hidden" name="startDateYear" value={formData.startDate.year} />
-                <input type="hidden" name="startDateMonth" value={formData.startDate.month} />
-                <input type="hidden" name="endDateYear" value={formData.endDate.year} />
-                <input type="hidden" name="endDateMonth" value={formData.endDate.month} />
-                <input type="hidden" name="reviews" value={JSON.stringify(formData.reviews)} />
-
                 {reviewItems.map((item, index) => (
                   <div key={item.id}>
                     <Label className="text-lg font-semibold">
