@@ -1,17 +1,9 @@
 import type { Config } from "tailwindcss"
-const { fontFamily } = require("tailwindcss/defaultTheme")
-const defaultConfig = require("shadcn/ui/tailwind.config")
+import defaultConfig from "shadcn/ui/tailwind.config"
 
 const config = {
   ...defaultConfig,
-  content: [
-    ...defaultConfig.content,
-    "./pages/**/*.{ts,tsx}",
-    "./components/**/*.{ts,tsx}",
-    "./app/**/*.{ts,tsx}",
-    "./src/**/*.{ts,tsx}",
-    "*.{js,ts,jsx,tsx,mdx}",
-  ],
+  content: [...defaultConfig.content, "./pages/**/*.{ts,tsx}", "./src/**/*.{ts,tsx}", "*.{js,ts,jsx,tsx,mdx}"],
   theme: {
     ...defaultConfig.theme,
     container: {
@@ -24,7 +16,7 @@ const config = {
     extend: {
       ...defaultConfig.theme.extend,
       fontFamily: {
-        sans: ["var(--font-sans)", ...fontFamily.sans],
+        sans: ["var(--font-sans)"],
       },
       keyframes: {
         "accordion-down": {
