@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useMemo, type FormEvent } from "react"
+import { useState, useEffect, useMemo, useActionState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -12,6 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { jobData } from "@/lib/job-data"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Terminal } from "lucide-react"
+import { submitReview } from "./actions"
 
 // Daum Postcode API 타입 정의
 declare global {
@@ -56,6 +57,9 @@ export default function ReviewFormPage() {
   const [formData, setFormData] = useState(initialFormData)
   const [isShaking, setIsShaking] = useState(false)
   const [errors, setErrors] = useState<Record<string, boolean>>({})
+
+  const initialState = { success: false, message: "" }
+  const [state, formAction, isPending] = useActionState(submitReview, initialState)
 
   const subJobs = useMemo(() => {
     if (formData.majorJob) {
@@ -153,13 +157,6 @@ export default function ReviewFormPage() {
     window.scrollTo({ top: 0, behavior: "smooth" })
   }
 
-  const handleSubmit = (e: FormEvent) => {
-    e.preventDefault()
-    // TODO: Add validation for step 3
-    console.log("Form Data Submitted:", formData)
-    alert("제출 완료! 참여해주셔서 감사합니다.")
-  }
-
   const renderYears = () => {
     const currentYear = new Date().getFullYear()
     const years = []
@@ -201,7 +198,7 @@ export default function ReviewFormPage() {
             <p className="text-center text-sm text-gray-500 mt-2">{step} / 3</p>
           </div>
 
-          <form onSubmit={handleSubmit}>
+          <form action={formAction}>
             {step === 1 && (
               <div className="space-y-6">
                 <div>
@@ -452,6 +449,7 @@ export default function ReviewFormPage() {
                     <div className="text-gray-500">파일을 선택하거나 여기에 드래그하세요.</div>
                     <Input
                       id="proof"
+                      name="proof"
                       type="file"
                       accept="image/*,application/pdf"
                       className="mt-4"
@@ -472,6 +470,25 @@ export default function ReviewFormPage() {
 
             {step === 3 && (
               <div className="space-y-8">
+                {/* Hidden inputs to pass all data on final submission */}
+                <input type="hidden" name="name" value={formData.name} />
+                <input type="hidden" name="email" value={formData.email} />
+                <input type="hidden" name="phone" value={formData.phone} />
+                <input type="hidden" name="source" value={formData.source} />
+                <input type="hidden" name="education" value={formData.education} />
+                <input type="hidden" name="company" value={formData.company} />
+                <input type="hidden" name="postcode" value={formData.postcode} />
+                <input type="hidden" name="roadAddress" value={formData.roadAddress} />
+                <input type="hidden" name="detailAddress" value={formData.detailAddress} />
+                <input type="hidden" name="workType" value={formData.workType} />
+                <input type="hidden" name="majorJob" value={formData.majorJob} />
+                <input type="hidden" name="subJob" value={formData.subJob} />
+                <input type="hidden" name="startDateYear" value={formData.startDate.year} />
+                <input type="hidden" name="startDateMonth" value={formData.startDate.month} />
+                <input type="hidden" name="endDateYear" value={formData.endDate.year} />
+                <input type="hidden" name="endDateMonth" value={formData.endDate.month} />
+                <input type="hidden" name="reviews" value={JSON.stringify(formData.reviews)} />
+
                 {reviewItems.map((item, index) => (
                   <div key={item.id}>
                     <Label className="text-lg font-semibold">
@@ -547,10 +564,15 @@ export default function ReviewFormPage() {
                   <Button type="button" onClick={handlePrev} variant="outline" className="w-full bg-transparent">
                     이전
                   </Button>
-                  <Button type="submit" className="w-full">
-                    제출하기
+                  <Button type="submit" className="w-full" disabled={isPending}>
+                    {isPending ? "제출 중..." : "제출하기"}
                   </Button>
                 </div>
+                {state.message && (
+                  <p className={`mt-4 text-center text-sm ${state.success ? "text-green-600" : "text-red-500"}`}>
+                    {state.message}
+                  </p>
+                )}
               </div>
             )}
           </form>
