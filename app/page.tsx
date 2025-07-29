@@ -13,272 +13,40 @@ import { Card, CardContent } from "@/components/ui/card"
 
 // Job categories based on JobKorea API classification
 const jobCategories = {
-  서비스업: [
-    "호텔·여행·항공",
-    "스포츠·여가·레저",
-    "음식료·외식·프랜차이즈",
-    "뷰티·미용",
-    "콜센터·아웃소싱·기타",
-    "정비·A/S·카센터",
-    "렌탈·임대·리스",
-    "서치펌·헤드헌팅",
-    "시설관리·빌딩·경비",
-    "웨딩·상조·이벤트",
-  ],
-  금융·은행업: ["은행·금융", "캐피탈·대출", "증권·보험·카드"],
-  건설업: ["부동산·중개·임대", "건축·설비·환경", "건설·시공·토목·조경", "인테리어·자재"],
-  의료·제약업: ["의료(간호·원무·상담)", "의료(병원분류별)", "의료(진료과별)", "제약·보건·바이오", "사회복지·요양"],
-  미디어·광고업: [
-    "방송·케이블·프로덕션",
-    "신문·잡지·언론사",
-    "광고·홍보·전시",
-    "영화·음반·배급",
-    "연예·엔터테인먼트",
-    "출판·인쇄·사진",
-  ],
-  문화·예술·디자인업: ["문화·공연·예술", "디자인·CAD"],
-  IT·정보통신업: [
-    "솔루션·SI·CRM·ERP",
-    "웹에이전시",
-    "쇼핑몰·오픈마켓·소셜커머스",
-    "포털·컨텐츠·커뮤니티",
-    "네트워크·통신서비스",
+  경영·사무: ["기획·전략", "법무·사무·총무", "인사·HR", "회계·세무", "마케팅·광고·MD"],
+  IT·인터넷: ["개발·데이터", "디자인", "물류·무역"],
+  전문직: ["운전·운송·배송", "영업", "고객상담·TM", "금융·보험"],
+  서비스: ["식·음료", "고객서비스·리테일"],
+  생산: ["엔지니어링·설계", "제조·생산"],
+  교육: ["교육"],
+  건설: ["건축·시설"],
+  의료: ["의료·바이오"],
+  미디어: ["미디어·문화·스포츠"],
+  공공·복지: ["공공·복지"],
+  영업·판매·무역: ["기업영업", "개인영업", "매장관리·판매", "온라인·모바일판매", "무역·해외영업", "영업기획·관리·지원"],
+  고객상담·리테일: ["고객상담·CS", "리테일·판매직", "매장관리·운영"],
+  운전·배송·물류: ["운전·운송", "택배·배송·배달", "물류·창고관리"],
+  서비스업: ["외식·식음료", "호텔·여행·항공", "뷰티·미용", "스포츠·레저", "청소·경비·시설관리", "돌봄·케어서비스"],
+  생산·제조: ["제조·생산직", "설비·보전·정비", "품질관리·안전관리"],
+  건설·건축: ["건축·토목·조경", "전기·소방·통신", "건설기계·중장비"],
+  의료·간병·미용: ["의료진", "간병·요양", "미용·에스테틱"],
+  교육·강사: ["학교·학원강사", "교육기획·관리"],
+  디자인·출판·영상: ["디자인", "출판·편집", "영상·사진"],
+  IT·개발·데이터: [
+    "웹개발·퍼블리싱",
+    "앱개발",
+    "시스템·네트워크",
+    "데이터·AI",
     "정보보안",
-    "컴퓨터·하드웨어·장비",
-    "게임·애니메이션",
-    "모바일·APP",
-    "IT컨설팅",
+    "하드웨어·임베디드",
+    "게임개발",
   ],
-  기관·협회: ["공기업·공공기관", "협회·단체", "컨설팅·연구·조사", "회계·세무·법무"],
-  제조·생산·화학업: [
-    "전기·전자·제어",
-    "반도체·디스플레이·광학",
-    "기계·기계설비",
-    "자동차·조선·철강·항공",
-    "금속·재료·자재",
-    "화학·에너지·환경",
-    "섬유·의류·패션",
-    "생활화학·화장품",
-    "생활용품·소비재·기타",
-    "목재·제지·가구",
-    "식품가공",
-    "농축산·어업·임업",
-  ],
-  판매·유통업: ["물류·운송·배송", "무역·상사", "백화점·유통·도소매"],
-  교육업: ["학교(초·중·고·대학·특수)", "유아·유치원·어린이집", "학원·어학원·교육원", "학습지·방문교육"],
-  기획·전략: ["경영·비즈니스기획", "웹기획", "마케팅기획", "PL·PM·PO", "컨설턴트", "CEO·COO·CTO"],
-  법무·사무·총무: [
-    "경영지원",
-    "사무담당자",
-    "총무",
-    "사무보조",
-    "법무담당자",
-    "비서",
-    "변호사",
-    "법무사",
-    "변리사",
-    "노무사",
-  ],
-  인사·HR: ["인사담당자", "HRD·HRM", "노무관리자", "잡매니저", "헤드헌터", "직업상담사"],
-  회계·세무: ["회계담당자", "경리", "세무담당자", "재무담당자", "감사", "IR·공시", "회계사", "세무사", "관세사"],
-  마케팅·광고·MD: [
-    "AE(광고기획자)",
-    "브랜드마케터",
-    "퍼포먼스마케터",
-    "CRM마케터",
-    "온라인마케터",
-    "콘텐츠마케터",
-    "홍보",
-    "설문·리서치",
-    "MD",
-    "카피라이터",
-    "크리에이티브디렉터",
-    "채널관리자",
-    "그로스해커",
-  ],
-  개발·데이터: [
-    "백엔드개발자",
-    "프론트엔드개발자",
-    "웹개발자",
-    "앱개발자",
-    "시스템엔지니어",
-    "네트워크엔지니어",
-    "DBA",
-    "데이터엔지니어",
-    "데이터사이언티스트",
-    "보안엔지니어",
-    "소프트웨어개발자",
-    "게임개발자",
-    "하드웨어개발자",
-    "머신러닝엔지니어",
-    "블록체인개발자",
-    "클라우드엔지니어",
-    "웹퍼블리셔",
-    "IT컨설팅",
-    "QA",
-  ],
-  디자인: [
-    "그래픽디자이너",
-    "3D디자이너",
-    "제품디자이너",
-    "산업디자이너",
-    "광고디자이너",
-    "시각디자이너",
-    "영상디자이너",
-    "웹디자이너",
-    "UI·UX디자이너",
-    "패션디자이너",
-    "편집디자이너",
-    "실내디자이너",
-    "공간디자이너",
-    "캐릭터디자이너",
-    "환경디자이너",
-    "아트디렉터",
-    "일러스트레이터",
-  ],
-  물류·무역: ["물류관리자", "구매관리자", "자재관리자", "유통관리자", "무역사무원"],
-  운전·운송·배송: [
-    "납품·배송기사",
-    "배달기사",
-    "수행·운전기사",
-    "화물·중장비기사",
-    "버스기사",
-    "택시기사",
-    "조종·기관사",
-  ],
-  영업: [
-    "제품영업",
-    "서비스영업",
-    "해외영업",
-    "광고영업",
-    "금융영업",
-    "법인영업",
-    "IT·기술영업",
-    "영업관리",
-    "영업지원",
-  ],
-  고객상담·TM: ["인바운드상담원", "아웃바운드상담원", "고객센터관리자"],
-  금융·보험: ["금융사무", "보험설계사", "손해사정사", "심사", "은행원·텔러", "계리사", "펀드매니저", "애널리스트"],
-  식·음료: [
-    "요리사",
-    "조리사",
-    "제과제빵사",
-    "바리스타",
-    "셰프·주방장",
-    "카페·레스토랑매니저",
-    "홀서버",
-    "주방보조",
-    "소믈리에·바텐더",
-    "영양사",
-    "식품연구원",
-    "푸드스타일리스트",
-  ],
-  고객서비스·리테일: [
-    "설치·수리기사",
-    "정비기사",
-    "호텔종사자",
-    "여행에이전트",
-    "매장관리자",
-    "뷰티·미용사",
-    "애견미용·훈련",
-    "안내데스크·리셉셔니스트",
-    "경호·경비",
-    "운영보조·매니저",
-    "이벤트·웨딩플래너",
-    "주차·주유원",
-    "스타일리스트",
-    "장례지도사",
-    "가사도우미",
-    "승무원",
-    "플로리스트",
-  ],
-  엔지니어링·설계: [
-    "전기·전자엔지니어",
-    "기계엔지니어",
-    "설계엔지니어",
-    "설비엔지니어",
-    "반도체엔지니어",
-    "화학엔지니어",
-    "공정엔지니어",
-    "하드웨어엔지니어",
-    "통신엔지니어",
-    "RF엔지니어",
-    "필드엔지니어",
-    "R&D·연구원",
-  ],
-  제조·생산: ["생산직종사자", "생산·공정관리자", "품질관리자", "포장·가공담당자", "공장관리자", "용접사"],
-  교육: [
-    "유치원·보육교사",
-    "학교·특수학교교사",
-    "대학교수·강사",
-    "학원강사",
-    "외국어강사",
-    "기술·전문강사",
-    "학습지·방문교사",
-    "학원상담·운영",
-    "교직원·조교",
-    "교재개발·교수설계",
-  ],
-  건축·시설: [
-    "건축가",
-    "건축기사",
-    "시공기사",
-    "전기기사",
-    "토목기사",
-    "시설관리자",
-    "현장관리자",
-    "안전관리자",
-    "공무",
-    "소방설비",
-    "현장보조",
-    "감리원",
-    "도시·조경설계",
-    "환경기사",
-    "비파괴검사원",
-    "공인중개사",
-    "감정평가사",
-    "분양매니저",
-  ],
-  의료·바이오: [
-    "의사",
-    "한의사",
-    "간호사",
-    "간호조무사",
-    "약사·한약사",
-    "의료기사",
-    "수의사",
-    "수의테크니션",
-    "병원코디네이터",
-    "원무행정",
-    "기타의료종사자",
-    "의료·약무보조",
-    "바이오·제약연구원",
-    "임상연구원",
-  ],
-  미디어·문화·스포츠: [
-    "PD·감독",
-    "포토그래퍼",
-    "영상편집자",
-    "사운드엔지니어",
-    "스태프",
-    "출판·편집",
-    "배급·제작자",
-    "콘텐츠에디터",
-    "크리에이터",
-    "기자",
-    "작가",
-    "아나운서",
-    "리포터·성우",
-    "MC·쇼호스트",
-    "모델",
-    "연예인·매니저",
-    "인플루언서",
-    "통번역사",
-    "큐레이터",
-    "음반기획",
-    "스포츠강사",
-  ],
-  공공·복지: ["사회복지사", "요양보호사", "환경미화원", "보건관리자", "사서", "자원봉사자", "방역·방재기사"],
+  기획·마케팅: ["상품기획·MD", "마케팅·PR", "광고·카피라이터", "브랜드·컨텐츠마케팅"],
+  인사·총무·법무: ["인사·HR", "총무·사무", "법무·특허·노무", "회계·세무·재무"],
+  금융·보험: ["은행·금융", "증권·투자", "보험"],
+  공공·복지: ["공무원", "사회복지", "국방·보안"],
+  농림어업: ["농업·축산업", "임업·광업", "어업·수산업"],
+  기타: ["단순노무직", "기타"],
 }
 
 const reviewItems = [
@@ -394,21 +162,25 @@ export default function JobReviewForm() {
   const progressWidth = (currentPage / 3) * 100
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 py-4 sm:py-8 lg:py-12 px-3 sm:px-4">
       <div className="max-w-2xl mx-auto">
-        <Card className="shadow-lg">
-          <CardContent className="p-8">
-            <h1 className="text-2xl font-semibold text-center mb-4">근무 후기 이벤트 참여</h1>
+        <Card className="shadow-xl border-0 overflow-hidden">
+          <CardContent className="p-4 sm:p-6 lg:p-8">
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-center mb-4 sm:mb-6 text-gray-800 leading-tight">
+              근무 후기 이벤트 참여
+            </h1>
 
             {/* Progress Bar */}
-            <div className="w-full bg-gray-200 rounded-full h-2 mb-4">
+            <div className="w-full bg-gray-200 rounded-full h-2 sm:h-3 mb-3 sm:mb-4 overflow-hidden">
               <div
-                className="bg-blue-600 h-2 rounded-full transition-all duration-500"
+                className="bg-gradient-to-r from-blue-500 to-blue-600 h-full rounded-full transition-all duration-700 ease-out"
                 style={{ width: `${progressWidth}%` }}
               />
             </div>
 
-            <div className="text-center text-gray-600 mb-8">{currentPage} / 3</div>
+            <div className="text-center text-sm sm:text-base text-gray-600 mb-6 sm:mb-8 font-medium">
+              {currentPage} / 3
+            </div>
 
             {/* Page 1: Basic Information */}
             {currentPage === 1 && (
@@ -417,48 +189,59 @@ export default function JobReviewForm() {
                   e.preventDefault()
                   nextPage()
                 }}
-                className="space-y-6"
+                className="space-y-4 sm:space-y-6"
               >
-                <div>
-                  <Label htmlFor="name">이름</Label>
+                <div className="space-y-1.5">
+                  <Label htmlFor="name" className="text-sm sm:text-base font-medium text-gray-700">
+                    이름
+                  </Label>
                   <Input
                     id="name"
                     type="text"
                     value={formData.name}
                     onChange={(e) => updateFormData("name", e.target.value)}
                     required
+                    className="h-11 sm:h-12 text-base border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-lg transition-colors"
                   />
                 </div>
 
-                <div>
-                  <Label htmlFor="email">이메일</Label>
+                <div className="space-y-1.5">
+                  <Label htmlFor="email" className="text-sm sm:text-base font-medium text-gray-700">
+                    이메일
+                  </Label>
                   <Input
                     id="email"
                     type="email"
                     value={formData.email}
                     onChange={(e) => updateFormData("email", e.target.value)}
                     required
+                    className="h-11 sm:h-12 text-base border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-lg transition-colors"
                   />
                 </div>
 
-                <div>
-                  <Label htmlFor="phone">전화번호</Label>
+                <div className="space-y-1.5">
+                  <Label htmlFor="phone" className="text-sm sm:text-base font-medium text-gray-700">
+                    전화번호
+                  </Label>
                   <Input
                     id="phone"
                     type="tel"
                     value={formData.phone}
                     onChange={(e) => updateFormData("phone", e.target.value)}
                     required
+                    className="h-11 sm:h-12 text-base border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-lg transition-colors"
                   />
                 </div>
 
-                <div>
-                  <Label>어떤 경로로 후기 이벤트를 접하게 되었나요?</Label>
+                <div className="space-y-1.5">
+                  <Label className="text-sm sm:text-base font-medium text-gray-700">
+                    어떤 경로로 후기 이벤트를 접하게 되었나요?
+                  </Label>
                   <Select value={formData.source} onValueChange={(value) => updateFormData("source", value)}>
-                    <SelectTrigger>
+                    <SelectTrigger className="h-11 sm:h-12 text-base border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-lg">
                       <SelectValue placeholder="선택해주세요" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="rounded-lg border-gray-200 shadow-lg">
                       <SelectItem value="디맨드 홈페이지">디맨드 홈페이지</SelectItem>
                       <SelectItem value="디맨드 인스타그램">디맨드 인스타그램</SelectItem>
                       <SelectItem value="디맨드 스레드">디맨드 스레드</SelectItem>
@@ -470,13 +253,13 @@ export default function JobReviewForm() {
                   </Select>
                 </div>
 
-                <div>
-                  <Label>최종학력</Label>
+                <div className="space-y-1.5">
+                  <Label className="text-sm sm:text-base font-medium text-gray-700">최종학력</Label>
                   <Select value={formData.education} onValueChange={(value) => updateFormData("education", value)}>
-                    <SelectTrigger>
+                    <SelectTrigger className="h-11 sm:h-12 text-base border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-lg">
                       <SelectValue placeholder="선택해주세요" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="rounded-lg border-gray-200 shadow-lg">
                       <SelectItem value="고졸">고졸</SelectItem>
                       <SelectItem value="초대졸">초대졸</SelectItem>
                       <SelectItem value="대졸">대졸</SelectItem>
@@ -484,62 +267,82 @@ export default function JobReviewForm() {
                   </Select>
                 </div>
 
-                <div>
-                  <Label htmlFor="company">회사명(근무지명)</Label>
+                <div className="space-y-1.5">
+                  <Label htmlFor="company" className="text-sm sm:text-base font-medium text-gray-700">
+                    회사명(근무지명)
+                  </Label>
                   <Input
                     id="company"
                     type="text"
                     value={formData.company}
                     onChange={(e) => updateFormData("company", e.target.value)}
                     required
+                    className="h-11 sm:h-12 text-base border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-lg transition-colors"
                   />
                   <p className="text-sm text-gray-600 mt-1">가능한 줄임 없이 풀어서 써주세요 (하닉 → SK하이닉스)</p>
                 </div>
 
-                <div>
-                  <Label>사업장 주소</Label>
-                  <div className="flex gap-2 mb-2">
-                    <Input placeholder="우편번호" value={formData.postcode} readOnly required />
-                    <Button type="button" variant="outline">
+                <div className="space-y-1.5">
+                  <Label className="text-sm sm:text-base font-medium text-gray-700">사업장 주소</Label>
+                  <div className="flex flex-col sm:flex-row gap-2 mb-3">
+                    <Input
+                      placeholder="우편번호"
+                      value={formData.postcode}
+                      readOnly
+                      required
+                      className="h-11 sm:h-12 text-base border-gray-300 rounded-lg flex-1"
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="h-11 sm:h-12 px-4 sm:px-6 whitespace-nowrap border-gray-300 hover:bg-gray-50 rounded-lg font-medium bg-transparent"
+                    >
                       주소 찾기
                     </Button>
                   </div>
-                  <Input placeholder="도로명 주소" value={formData.roadAddress} readOnly required className="mb-2" />
+                  <Input
+                    placeholder="도로명 주소"
+                    value={formData.roadAddress}
+                    readOnly
+                    required
+                    className="mb-2 h-11 sm:h-12 text-base border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-lg transition-colors"
+                  />
                   <Input
                     placeholder="상세주소 입력"
                     value={formData.detailAddress}
                     onChange={(e) => updateFormData("detailAddress", e.target.value)}
                     required
+                    className="h-11 sm:h-12 text-base border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-lg transition-colors"
                   />
                 </div>
 
-                <div>
-                  <Label>근무 형태</Label>
+                <div className="space-y-1.5">
+                  <Label className="text-sm sm:text-base font-medium text-gray-700">근무 형태</Label>
                   <Select value={formData.workType} onValueChange={(value) => updateFormData("workType", value)}>
-                    <SelectTrigger>
+                    <SelectTrigger className="h-11 sm:h-12 text-base border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-lg">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="rounded-lg border-gray-200 shadow-lg">
                       <SelectItem value="현직장">현직장</SelectItem>
                       <SelectItem value="전직장">전직장</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
 
-                <div>
-                  <Label>근무 기간</Label>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label className="text-sm text-gray-600">시작</Label>
+                <div className="space-y-1.5">
+                  <Label className="text-sm sm:text-base font-medium text-gray-700">근무 기간</Label>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+                    <div className="space-y-2">
+                      <Label className="text-sm font-medium text-gray-600">시작</Label>
                       <div className="flex gap-2">
                         <Select
                           value={formData.workStartYear}
                           onValueChange={(value) => updateFormData("workStartYear", value)}
                         >
-                          <SelectTrigger>
+                          <SelectTrigger className="h-11 text-base border-gray-300 rounded-lg">
                             <SelectValue placeholder="년도" />
                           </SelectTrigger>
-                          <SelectContent>
+                          <SelectContent className="rounded-lg border-gray-200 shadow-lg">
                             {Array.from({ length: 31 }, (_, i) => 2025 - i).map((year) => (
                               <SelectItem key={year} value={year.toString()}>
                                 {year}년
@@ -551,10 +354,10 @@ export default function JobReviewForm() {
                           value={formData.workStartMonth}
                           onValueChange={(value) => updateFormData("workStartMonth", value)}
                         >
-                          <SelectTrigger>
+                          <SelectTrigger className="h-11 text-base border-gray-300 rounded-lg">
                             <SelectValue placeholder="월" />
                           </SelectTrigger>
-                          <SelectContent>
+                          <SelectContent className="rounded-lg border-gray-200 shadow-lg">
                             {Array.from({ length: 12 }, (_, i) => i + 1).map((month) => (
                               <SelectItem key={month} value={month.toString()}>
                                 {month}월
@@ -564,17 +367,17 @@ export default function JobReviewForm() {
                         </Select>
                       </div>
                     </div>
-                    <div>
-                      <Label className="text-sm text-gray-600">종료 (현직장인 경우 현재)</Label>
+                    <div className="space-y-2">
+                      <Label className="text-sm font-medium text-gray-600">종료 (현직장인 경우 현재)</Label>
                       <div className="flex gap-2">
                         <Select
                           value={formData.workEndYear}
                           onValueChange={(value) => updateFormData("workEndYear", value)}
                         >
-                          <SelectTrigger>
+                          <SelectTrigger className="h-11 text-base border-gray-300 rounded-lg">
                             <SelectValue placeholder="년도" />
                           </SelectTrigger>
-                          <SelectContent>
+                          <SelectContent className="rounded-lg border-gray-200 shadow-lg">
                             {Array.from({ length: 30 }, (_, i) => 2024 - i).map((year) => (
                               <SelectItem key={year} value={year.toString()}>
                                 {year}년
@@ -586,10 +389,10 @@ export default function JobReviewForm() {
                           value={formData.workEndMonth}
                           onValueChange={(value) => updateFormData("workEndMonth", value)}
                         >
-                          <SelectTrigger>
+                          <SelectTrigger className="h-11 text-base border-gray-300 rounded-lg">
                             <SelectValue placeholder="월" />
                           </SelectTrigger>
-                          <SelectContent>
+                          <SelectContent className="rounded-lg border-gray-200 shadow-lg">
                             {Array.from({ length: 12 }, (_, i) => i + 1).map((month) => (
                               <SelectItem key={month} value={month.toString()}>
                                 {month}월
@@ -602,8 +405,8 @@ export default function JobReviewForm() {
                   </div>
                 </div>
 
-                <div>
-                  <Label>직무 (대분류)</Label>
+                <div className="space-y-1.5">
+                  <Label className="text-sm sm:text-base font-medium text-gray-700">직무 (대분류)</Label>
                   <Select
                     value={formData.majorCategory}
                     onValueChange={(value) => {
@@ -611,10 +414,10 @@ export default function JobReviewForm() {
                       updateFormData("minorCategory", "")
                     }}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="h-11 sm:h-12 text-base border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-lg">
                       <SelectValue placeholder="대분류 선택" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="rounded-lg border-gray-200 shadow-lg">
                       {Object.keys(jobCategories).map((category) => (
                         <SelectItem key={category} value={category}>
                           {category}
@@ -625,16 +428,16 @@ export default function JobReviewForm() {
                 </div>
 
                 {formData.majorCategory && (
-                  <div>
-                    <Label>직무 (소분류)</Label>
+                  <div className="space-y-1.5">
+                    <Label className="text-sm sm:text-base font-medium text-gray-700">직무 (소분류)</Label>
                     <Select
                       value={formData.minorCategory}
                       onValueChange={(value) => updateFormData("minorCategory", value)}
                     >
-                      <SelectTrigger>
+                      <SelectTrigger className="h-11 sm:h-12 text-base border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-lg">
                         <SelectValue placeholder="소분류 선택" />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent className="rounded-lg border-gray-200 shadow-lg">
                         {jobCategories[formData.majorCategory].map((subcategory) => (
                           <SelectItem key={subcategory} value={subcategory}>
                             {subcategory}
@@ -655,7 +458,10 @@ export default function JobReviewForm() {
                   </Label>
                 </div>
 
-                <Button type="submit" className="w-full">
+                <Button
+                  type="submit"
+                  className="w-full h-12 sm:h-14 text-base sm:text-lg font-semibold bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 rounded-lg shadow-lg hover:shadow-xl transition-all duration-200"
+                >
                   다음 (1/3)
                 </Button>
               </form>
@@ -679,17 +485,17 @@ export default function JobReviewForm() {
                     nextPage()
                   }}
                 >
-                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center mb-6">
+                  <div className="border-2 border-dashed border-gray-300 rounded-xl p-6 sm:p-8 text-center mb-6 bg-gray-50/50 hover:bg-gray-50 transition-colors">
                     <input
                       type="file"
                       accept="image/*,application/pdf"
                       onChange={(e) => updateFormData("proofFile", e.target.files?.[0] || null)}
-                      className="block mx-auto"
+                      className="block mx-auto mb-3 text-sm file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
                     />
-                    <p className="text-sm text-gray-600 mt-2">
+                    <p className="text-sm text-gray-600 leading-relaxed">
                       예: 사원증, 사내 시스템 화면 등 / 이미지 또는 PDF 파일
                       <br />
-                      15일 이내 자동 삭제됩니다
+                      <span className="text-xs text-gray-500">15일 이내 자동 삭제됩니다</span>
                     </p>
                   </div>
 
@@ -713,11 +519,14 @@ export default function JobReviewForm() {
 
                 <form onSubmit={handleSubmit} className="space-y-8">
                   {reviewItems.map((item) => (
-                    <div key={item.id} className="bg-gray-50 p-6 rounded-lg">
-                      <h3 className="font-semibold text-lg mb-1">
+                    <div
+                      key={item.id}
+                      className="bg-white border border-gray-200 p-4 sm:p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow"
+                    >
+                      <h3 className="font-bold text-lg sm:text-xl mb-1 text-gray-800">
                         {item.id}. {item.title}
                       </h3>
-                      {item.subtitle && <p className="text-sm text-gray-600 mb-4">{item.subtitle}</p>}
+                      {item.subtitle && <p className="text-sm text-gray-600 mb-4 leading-relaxed">{item.subtitle}</p>}
 
                       {item.type === "rating" && (
                         <div className="mb-4">
@@ -726,10 +535,10 @@ export default function JobReviewForm() {
                             value={formData.reviews[item.id]?.rating || ""}
                             onValueChange={(value) => updateReviewData(item.id, "rating", value)}
                           >
-                            <SelectTrigger className="w-full">
+                            <SelectTrigger className="w-full h-11 sm:h-12 text-base border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-lg">
                               <SelectValue placeholder="평점을 선택해주세요" />
                             </SelectTrigger>
-                            <SelectContent>
+                            <SelectContent className="rounded-lg border-gray-200 shadow-lg">
                               <SelectItem value="5">★★★★★ (5점)</SelectItem>
                               <SelectItem value="4">★★★★☆ (4점)</SelectItem>
                               <SelectItem value="3">★★★☆☆ (3점)</SelectItem>
@@ -747,10 +556,10 @@ export default function JobReviewForm() {
                             value={formData.reviews[item.id]?.difficulty || ""}
                             onValueChange={(value) => updateReviewData(item.id, "difficulty", value)}
                           >
-                            <SelectTrigger className="w-full">
+                            <SelectTrigger className="w-full h-11 sm:h-12 text-base border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-lg">
                               <SelectValue placeholder="난이도를 선택해주세요" />
                             </SelectTrigger>
-                            <SelectContent>
+                            <SelectContent className="rounded-lg border-gray-200 shadow-lg">
                               <SelectItem value="매우 어려움">매우 어려움</SelectItem>
                               <SelectItem value="어려움">어려움</SelectItem>
                               <SelectItem value="보통">보통</SelectItem>
@@ -769,7 +578,7 @@ export default function JobReviewForm() {
                           value={formData.reviews[item.id]?.review || ""}
                           onChange={(e) => updateReviewData(item.id, "review", e.target.value)}
                           required
-                          className="resize-vertical"
+                          className="resize-none border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-lg text-base leading-relaxed"
                         />
                         <p className="text-xs text-gray-500 mt-1">
                           {(formData.reviews[item.id]?.review || "").length}/50자 (최소 50자)
@@ -778,11 +587,19 @@ export default function JobReviewForm() {
                     </div>
                   ))}
 
-                  <div className="flex gap-4">
-                    <Button type="button" variant="outline" onClick={prevPage} className="flex-1 bg-transparent">
+                  <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={prevPage}
+                      className="flex-1 h-12 sm:h-14 text-base font-semibold border-gray-300 hover:bg-gray-50 rounded-lg order-2 sm:order-1 bg-transparent"
+                    >
                       이전
                     </Button>
-                    <Button type="submit" className="flex-1">
+                    <Button
+                      type="submit"
+                      className="flex-1 h-12 sm:h-14 text-base font-semibold bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 order-1 sm:order-2"
+                    >
                       제출하기
                     </Button>
                   </div>
