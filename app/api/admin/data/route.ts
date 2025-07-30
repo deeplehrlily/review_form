@@ -5,29 +5,31 @@ export async function GET() {
   try {
     const kv = getKv()
 
-    // 모든 리뷰 키 가져오기
+    // KV에서 모든 리뷰 키 가져오기
     const keys = await kv.keys("review:*")
 
     // 각 키에 대한 데이터 가져오기
-    const data = await Promise.all(
-      keys.map(async (key) => {
-        const value = await kv.get(key)
-        return value
-      }),
-    )
+    const reviews = []
+    for (const key of keys) {
+      const data = await kv.get(key)
+      if (data) {
+        reviews.push({
+          id: key,
+          ...data,
+        })
+      }
+    }
 
-    // 제출일시 기준 내림차순 정렬
-    const sortedData = data
-      .filter((item) => item) // null 값 제거
-      .sort((a: any, b: any) => new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime())
+    // 제출일시 기준으로 최신순 정렬
+    reviews.sort((a, b) => new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime())
 
     return NextResponse.json({
       success: true,
-      data: sortedData,
-      count: sortedData.length,
+      data: reviews,
+      total: reviews.length,
     })
   } catch (error) {
-    console.error("데이터 조회 실패:", error)
-    return NextResponse.json({ success: false, message: "데이터 조회 실패" }, { status: 500 })
+    console.error("관리자 데이터 조회 실패:", error)
+    return NextResponse.json({ success: false, message: "데이터 조회 중 오류가 발생했습니다." }, { status: 500 })
   }
 }
