@@ -15,17 +15,17 @@ export function getKv() {
 
   // 인스턴스가 없을 때만 새로 생성합니다.
   // 이 코드는 서버 액션 내부에서 호출되므로, 환경 변수가 보장됩니다.
-  const url = process.env.review_form_KV_REST_API_URL
-  const token = process.env.review_form_KV_REST_API_TOKEN
+  const url = process.env.KV_REST_API_URL
+  const token = process.env.KV_REST_API_TOKEN
 
   if (!url || !token) {
     const errorMessage =
-      "❌ 치명적 오류: 'review_form_KV_REST_API_URL' 또는 'review_form_KV_REST_API_TOKEN' 환경 변수를 찾을 수 없습니다. Vercel 프로젝트 설정을 다시 확인해주세요."
+      "❌ 치명적 오류: 'KV_REST_API_URL' 또는 'KV_REST_API_TOKEN' 환경 변수를 찾을 수 없습니다. Vercel 프로젝트에 Upstash KV 통합이 올바르게 설정되었는지 확인해주세요."
     console.error(errorMessage)
     throw new Error(errorMessage)
   }
 
-  console.log("✅ KV 환경 변수 확인 완료. Upstash Redis 클라이언트를 생성합니다.")
+  console.log("✅ Upstash Redis 클라이언트를 생성합니다.")
 
   // @upstash/redis 라이브러리로 클라이언트를 생성합니다.
   kvClient = new Redis({
