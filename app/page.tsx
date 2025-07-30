@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useMemo, useActionState, type FormEvent } from "react"
+import { useState, useEffect, useMemo, type FormEvent } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -58,8 +58,9 @@ export default function ReviewFormPage() {
   const [isShaking, setIsShaking] = useState(false)
   const [errors, setErrors] = useState<Record<string, boolean>>({})
 
-  const initialState = { success: false, message: "" }
-  const [state, formAction, isPending] = useActionState(submitReview, initialState)
+  // 폼 제출 상태를 관리하기 위한 state (useActionState 대체)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submissionResult, setSubmissionResult] = useState<{ success: boolean; message: string } | null>(null)
 
   const subJobs = useMemo(() => {
     if (formData.majorJob) {
@@ -157,36 +158,56 @@ export default function ReviewFormPage() {
     window.scrollTo({ top: 0, behavior: "smooth" })
   }
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
+  // 폼 제출을 처리하는 새로운 함수
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    console.log("CCTV 1: '제출하기' 버튼 클릭됨, handleSubmit 함수 시작!")
+    event.preventDefault() // 브라우저의 기본 제출 동작 방지
 
-    // 1. 수동으로 FormData 객체 생성
-    const data = new FormData()
+    setIsSubmitting(true)
+    setSubmissionResult(null)
 
-    // 2. React state에 저장된 모든 데이터를 FormData에 추가
-    data.append("name", formData.name)
-    data.append("email", formData.email)
-    data.append("phone", formData.phone)
-    data.append("source", formData.source)
-    data.append("education", formData.education)
-    data.append("company", formData.company)
-    data.append("postcode", formData.postcode)
-    data.append("roadAddress", formData.roadAddress)
-    data.append("detailAddress", formData.detailAddress)
-    data.append("workType", formData.workType)
-    data.append("majorJob", formData.majorJob)
-    data.append("subJob", formData.subJob)
-    data.append("startDateYear", formData.startDate.year)
-    data.append("startDateMonth", formData.startDate.month)
-    data.append("endDateYear", formData.endDate.year)
-    data.append("endDateMonth", formData.endDate.month)
-    data.append("reviews", JSON.stringify(formData.reviews))
-    if (formData.proof) {
-      data.append("proof", formData.proof)
+    try {
+      console.log("CCTV 2: FormData 객체 생성 시작.")
+      const data = new FormData()
+
+      console.log("CCTV 3: state에 저장된 모든 데이터를 FormData에 담는 중...")
+      data.append("name", formData.name)
+      data.append("email", formData.email)
+      data.append("phone", formData.phone)
+      data.append("source", formData.source)
+      data.append("education", formData.education)
+      data.append("company", formData.company)
+      data.append("postcode", formData.postcode)
+      data.append("roadAddress", formData.roadAddress)
+      data.append("detailAddress", formData.detailAddress)
+      data.append("workType", formData.workType)
+      data.append("majorJob", formData.majorJob)
+      data.append("subJob", formData.subJob)
+      data.append("startDateYear", formData.startDate.year)
+      data.append("startDateMonth", formData.startDate.month)
+      data.append("endDateYear", formData.endDate.year)
+      data.append("endDateMonth", formData.endDate.month)
+      data.append("reviews", JSON.stringify(formData.reviews))
+      if (formData.proof) {
+        data.append("proof", formData.proof)
+        console.log("CCTV 3.5: 파일 첨부 확인됨:", formData.proof.name)
+      }
+
+      console.log("CCTV 4: 모든 데이터 준비 완료! 이제 서버로 요청을 보냅니다...")
+      // 서버 액션을 직접 호출
+      const result = await submitReview(null, data)
+      console.log("CCTV 5: 서버로부터 응답 받음!", result)
+
+      setSubmissionResult(result)
+    } catch (error) {
+      console.error("CCTV 🚨: 클라이언트 측에서 심각한 오류 발생!", error)
+      setSubmissionResult({
+        success: false,
+        message: "폼 제출 중 클라이언트 오류가 발생했습니다. 콘솔을 확인해주세요.",
+      })
+    } finally {
+      setIsSubmitting(false)
     }
-
-    // 3. 서버 액션 호출
-    formAction(data)
   }
 
   const renderYears = () => {
@@ -233,6 +254,7 @@ export default function ReviewFormPage() {
           <form onSubmit={handleSubmit}>
             {step === 1 && (
               <div className="space-y-6">
+                {/* Step 1 form fields... (이 부분은 변경 없음) */}
                 <div>
                   <Label htmlFor="name">이름</Label>
                   <Input
@@ -467,6 +489,7 @@ export default function ReviewFormPage() {
 
             {step === 2 && (
               <div className="space-y-6">
+                {/* Step 2 form fields... (이 부분은 변경 없음) */}
                 <Alert>
                   <Terminal className="h-4 w-4" />
                   <AlertTitle>증빙 자료 안내</AlertTitle>
@@ -502,6 +525,7 @@ export default function ReviewFormPage() {
 
             {step === 3 && (
               <div className="space-y-8">
+                {/* Step 3 form fields... (이 부분은 변경 없음) */}
                 {reviewItems.map((item, index) => (
                   <div key={item.id}>
                     <Label className="text-lg font-semibold">
@@ -577,13 +601,17 @@ export default function ReviewFormPage() {
                   <Button type="button" onClick={handlePrev} variant="outline" className="w-full bg-transparent">
                     이전
                   </Button>
-                  <Button type="submit" className="w-full" disabled={isPending}>
-                    {isPending ? "제출 중..." : "제출하기"}
+                  <Button type="submit" className="w-full" disabled={isSubmitting}>
+                    {isSubmitting ? "제출 중..." : "제출하기"}
                   </Button>
                 </div>
-                {state.message && (
-                  <p className={`mt-4 text-center text-sm ${state.success ? "text-green-600" : "text-red-500"}`}>
-                    {state.message}
+                {submissionResult && (
+                  <p
+                    className={`mt-4 text-center text-sm ${
+                      submissionResult.success ? "text-green-600" : "text-red-500"
+                    }`}
+                  >
+                    {submissionResult.message}
                   </p>
                 )}
               </div>
