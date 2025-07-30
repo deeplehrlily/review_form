@@ -256,6 +256,13 @@ export default function ReviewFormPage() {
         <CardHeader className="text-center">
           <CardTitle className="text-2xl sm:text-3xl font-bold">디맨드 근무 후기 이벤트</CardTitle>
           <p className="text-gray-600 mt-2">근무 후기를 남기고 특별한 혜택을 받아보세요</p>
+
+          {/* 관리자 페이지 링크 추가 */}
+          <div className="mt-4">
+            <a href="/admin" className="text-xs text-gray-400 hover:text-gray-600 underline">
+              관리자 페이지
+            </a>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="w-full max-w-xl mx-auto mb-6">
