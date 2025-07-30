@@ -12,7 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { jobData } from "@/lib/job-data"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Terminal } from "lucide-react"
-import { submitReview } from "./actions"
+import { submitReview } from "./actions" // 우리가 만든 서버 액션을 가져옵니다.
 
 // Daum Postcode API 타입 정의
 declare global {
@@ -53,13 +53,11 @@ const reviewItems = [
 ]
 
 export default function ReviewFormPage() {
-  console.log("✅ 최신 코드 적용 완료! 이제 제출 테스트를 진행해주세요.")
   const [step, setStep] = useState(1)
   const [formData, setFormData] = useState(initialFormData)
   const [isShaking, setIsShaking] = useState(false)
   const [errors, setErrors] = useState<Record<string, boolean>>({})
 
-  // 폼 제출 상태를 관리하기 위한 state (useActionState 대체)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submissionResult, setSubmissionResult] = useState<{ success: boolean; message: string } | null>(null)
 
@@ -159,48 +157,30 @@ export default function ReviewFormPage() {
     window.scrollTo({ top: 0, behavior: "smooth" })
   }
 
-  // 폼 제출을 처리하는 새로운 함수
   const handleSubmit = async () => {
-    console.log("CCTV 1: '제출하기' 버튼 클릭됨, handleSubmit 함수 시작!")
-
     setIsSubmitting(true)
     setSubmissionResult(null)
 
     try {
-      console.log("CCTV 2: FormData 객체 생성 시작.")
       const data = new FormData()
+      Object.entries(formData).forEach(([key, value]) => {
+        if (key === "startDate" || key === "endDate") {
+          data.append(`${key}Year`, value.year)
+          data.append(`${key}Month`, value.month)
+        } else if (key === "reviews") {
+          data.append(key, JSON.stringify(value))
+        } else if (key === "proof" && value) {
+          // 파일은 이 버전에서 제외
+        } else if (value !== null && value !== undefined) {
+          data.append(key, String(value))
+        }
+      })
 
-      console.log("CCTV 3: state에 저장된 모든 데이터를 FormData에 담는 중...")
-      data.append("name", formData.name)
-      data.append("email", formData.email)
-      data.append("phone", formData.phone)
-      data.append("source", formData.source)
-      data.append("education", formData.education)
-      data.append("company", formData.company)
-      data.append("postcode", formData.postcode)
-      data.append("roadAddress", formData.roadAddress)
-      data.append("detailAddress", formData.detailAddress)
-      data.append("workType", formData.workType)
-      data.append("majorJob", formData.majorJob)
-      data.append("subJob", formData.subJob)
-      data.append("startDateYear", formData.startDate.year)
-      data.append("startDateMonth", formData.startDate.month)
-      data.append("endDateYear", formData.endDate.year)
-      data.append("endDateMonth", formData.endDate.month)
-      data.append("reviews", JSON.stringify(formData.reviews))
-      if (formData.proof) {
-        data.append("proof", formData.proof)
-        console.log("CCTV 3.5: 파일 첨부 확인됨:", formData.proof.name)
-      }
-
-      console.log("CCTV 4: 모든 데이터 준비 완료! 이제 서버로 요청을 보냅니다...")
-      // 서버 액션을 직접 호출
+      // 서버 액션을 직접 호출합니다.
       const result = await submitReview(null, data)
-      console.log("CCTV 5: 서버로부터 응답 받음!", result)
-
       setSubmissionResult(result)
     } catch (error) {
-      console.error("CCTV 🚨: 클라이언트 측에서 심각한 오류 발생!", error)
+      console.error("클라이언트 측에서 폼 제출 오류 발생:", error)
       setSubmissionResult({
         success: false,
         message: "폼 제출 중 클라이언트 오류가 발생했습니다. 콘솔을 확인해주세요.",
@@ -239,7 +219,7 @@ export default function ReviewFormPage() {
     <div className="bg-gray-50 font-sans min-h-screen p-4 sm:p-8">
       <Card className={`max-w-3xl mx-auto transition-transform duration-300 ${isShaking ? "animate-shake" : ""}`}>
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl sm:text-3xl font-bold">새로운 버전 테스트</CardTitle>
+          <CardTitle className="text-2xl sm:text-3xl font-bold">디맨드 근무 후기 이벤트</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="w-full max-w-xl mx-auto mb-6">
@@ -250,7 +230,7 @@ export default function ReviewFormPage() {
           <form>
             {step === 1 && (
               <div className="space-y-6">
-                {/* Step 1 form fields... (이 부분은 변경 없음) */}
+                {/* Step 1의 내용은 변경되지 않았으므로 생략합니다. */}
                 <div>
                   <Label htmlFor="name">이름</Label>
                   <Input
@@ -485,14 +465,11 @@ export default function ReviewFormPage() {
 
             {step === 2 && (
               <div className="space-y-6">
-                {/* Step 2 form fields... (이 부분은 변경 없음) */}
                 <Alert>
                   <Terminal className="h-4 w-4" />
-                  <AlertTitle>증빙 자료 안내</AlertTitle>
+                  <AlertTitle>증빙 자료 안내 (선택 사항)</AlertTitle>
                   <AlertDescription>
-                    증빙 자료를 첨부해주세요. 증빙이 인증되면 이벤트 보상 제공 대상에 자동으로 포함됩니다. 하지만, 증빙
-                    자료가 첨부되지 않았더라도 근무했다는 사실이 리뷰를 통해 충분히 인정되면 이벤트 보상 제공 대상에
-                    포함될 수 있습니다. (예: 사원증, 사내 시스템 화면 등 / 이미지 또는 PDF 파일)
+                    이 단계는 선택 사항입니다. 증빙 자료 없이도 후기 제출이 가능합니다.
                   </AlertDescription>
                 </Alert>
                 <div className="p-8 border-2 border-dashed rounded-lg text-center">
@@ -521,7 +498,7 @@ export default function ReviewFormPage() {
 
             {step === 3 && (
               <div className="space-y-8">
-                {/* Step 3 form fields... (이 부분은 변경 없음) */}
+                {/* Step 3의 내용은 변경되지 않았으므로 생략합니다. */}
                 {reviewItems.map((item, index) => (
                   <div key={item.id}>
                     <Label className="text-lg font-semibold">
