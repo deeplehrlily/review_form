@@ -199,16 +199,30 @@ export default function ReviewFormPage() {
 
     setIsSubmitting(true)
 
-    // 시뮬레이션: 2초 후 성공
-    setTimeout(() => {
-      console.log("📝 제출된 데이터:", formData)
-      alert("성공적으로 제출되었습니다! (콘솔에서 데이터 확인 가능)")
+    try {
+      const response = await fetch("/api/submit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...formData,
+          submittedAt: new Date().toISOString(),
+        }),
+      })
 
-      // 폼 초기화
-      setFormData(initialFormData)
-      setStep(1)
+      const result = await response.json()
+
+      if (result.success) {
+        alert("성공적으로 제출되었습니다!")
+        setFormData(initialFormData)
+        setStep(1)
+      } else {
+        alert("제출 실패: " + result.message)
+      }
+    } catch (error) {
+      alert("제출 중 오류가 발생했습니다.")
+    } finally {
       setIsSubmitting(false)
-    }, 2000)
+    }
   }
 
   const renderYears = () => {
