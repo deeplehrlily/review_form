@@ -10,13 +10,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Progress } from "@/components/ui/progress"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { jobData } from "@/lib/job-data"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { Terminal } from "lucide-react"
 
-// 구글 스프레드시트 웹앱 URL (3단계에서 복사한 URL로 교체하세요)
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwMHWOC4fpBnRNDxZndtlu060-pyeGIESQcbegCFlKSPl9ctbUKoTEstk7d4LvZM57r/exec"
-
-// Daum Postcode API 타입 정의
 declare global {
   interface Window {
     daum: any
@@ -158,8 +152,6 @@ export default function ReviewFormPage() {
   }
 
   const updateReviewData = (itemId: string, field: string, value: string) => {
-    console.log(`🔄 리뷰 데이터 업데이트: ${itemId}.${field} = "${value}"`)
-
     setFormData((prev) => {
       const newReviews = {
         ...prev.reviews,
@@ -168,7 +160,6 @@ export default function ReviewFormPage() {
           [field]: value,
         },
       }
-
       return {
         ...prev,
         reviews: newReviews,
@@ -177,34 +168,31 @@ export default function ReviewFormPage() {
   }
 
   const handleSubmit = async () => {
-    console.log("🚀 구글 스프레드시트로 제출 시작")
-    console.log("📊 제출할 데이터:", formData)
-
     setIsSubmitting(true)
     setSubmissionResult(null)
 
     try {
-      // 구글 스프레드시트로 데이터 전송
-      const response = await fetch(GOOGLE_SCRIPT_URL, {
+      const response = await fetch("/api/submit-sheets", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(formData),
-        mode: "no-cors", // CORS 문제 해결
       })
 
-      // no-cors 모드에서는 응답을 읽을 수 없으므로 성공으로 간주
-      console.log("✅ 구글 스프레드시트 전송 완료")
-      setSubmissionResult({
-        success: true,
-        message: "소중한 후기를 남겨주셔서 감사합니다! 성공적으로 제출되었습니다.",
-      })
+      const result = await response.json()
+      setSubmissionResult(result)
+
+      if (result.success) {
+        // 성공시 폼 초기화
+        setFormData(initialFormData)
+        setStep(1)
+      }
     } catch (error) {
-      console.error("❌ 제출 오류:", error)
+      console.error("제출 오류:", error)
       setSubmissionResult({
         success: false,
-        message: "제출 중 오류가 발생했습니다. 다시 시도해주세요.",
+        message: "제출 중 오류가 발생했습니다.",
       })
     } finally {
       setIsSubmitting(false)
@@ -481,13 +469,9 @@ export default function ReviewFormPage() {
 
           {step === 2 && (
             <div className="space-y-6">
-              <Alert>
-                <Terminal className="h-4 w-4" />
-                <AlertTitle>증빙 자료 안내</AlertTitle>
-                <AlertDescription>
-                  구글 스프레드시트 연동에서는 파일 업로드를 지원하지 않습니다. 필요시 이메일로 별도 전송해주세요.
-                </AlertDescription>
-              </Alert>
+              <div className="text-center p-4 bg-blue-50 rounded-lg">
+                <p className="text-sm text-blue-700">증빙 자료는 구글 시트에 별도 업로드해주세요.</p>
+              </div>
               <div className="flex gap-4">
                 <Button type="button" onClick={handlePrev} variant="outline" className="w-full bg-transparent">
                   이전
@@ -568,15 +552,15 @@ export default function ReviewFormPage() {
                   이전
                 </Button>
                 <Button type="button" onClick={handleSubmit} className="w-full" disabled={isSubmitting}>
-                  {isSubmitting ? "제출 중..." : "제출하기"}
+                  {isSubmitting ? "제출 중..." : "구글 시트에 제출"}
                 </Button>
               </div>
               {submissionResult && (
-                <p
-                  className={`mt-4 text-center text-sm ${submissionResult.success ? "text-green-600" : "text-red-500"}`}
+                <div
+                  className={`mt-4 p-4 rounded-lg text-center ${submissionResult.success ? "bg-green-50 text-green-700" : "bg-red-50 text-red-700"}`}
                 >
                   {submissionResult.message}
-                </p>
+                </div>
               )}
             </div>
           )}
