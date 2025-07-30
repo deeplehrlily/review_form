@@ -6,7 +6,22 @@ export async function POST(request: NextRequest) {
     const kv = getKv()
     const formData = await request.json()
 
-    console.log("📝 API 라우트에서 받은 데이터:", formData)
+    console.log("📝 API 라우트에서 받은 데이터:")
+    console.log("- 기본 정보:", {
+      name: formData.name,
+      email: formData.email,
+      company: formData.company,
+    })
+
+    console.log("- 리뷰 데이터 상세:")
+    Object.entries(formData.reviews || {}).forEach(([key, value]: [string, any]) => {
+      console.log(`  ${key}:`, {
+        rating: value.rating,
+        difficulty: value.difficulty,
+        textLength: value.text?.length || 0,
+        textPreview: value.text?.substring(0, 50) + "...",
+      })
+    })
 
     // 고유 ID 생성
     const reviewId = crypto.randomUUID()
