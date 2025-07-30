@@ -6,6 +6,7 @@ import { revalidatePath } from "next/cache"
 const kv = createClient({
   url: process.env.review_form_KV_URL,
   token: process.env.review_form_KV_TOKEN,
+})
 
 // 이 함수는 서버에서만 실행되므로 안전합니다.
 export async function submitReview(prevState: any, formData: FormData) {
