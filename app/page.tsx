@@ -53,7 +53,6 @@ export default function ReviewFormPage() {
   const [isShaking, setIsShaking] = useState(false)
   const [errors, setErrors] = useState<Record<string, boolean>>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [submissionResult, setSubmissionResult] = useState<{ success: boolean; message: string } | null>(null)
 
   const subJobs = useMemo(() => {
     if (formData.majorJob) {
@@ -134,6 +133,29 @@ export default function ReviewFormPage() {
     return Object.keys(newErrors).length === 0
   }
 
+  const validateStep3 = () => {
+    const newErrors: Record<string, boolean> = {}
+
+    reviewItems.forEach((item) => {
+      const reviewData = formData.reviews[item.id]
+
+      if (item.type === "rating" && !reviewData?.rating) {
+        newErrors[`${item.id}_rating`] = true
+      }
+
+      if (item.type === "difficulty" && !reviewData?.difficulty) {
+        newErrors[`${item.id}_difficulty`] = true
+      }
+
+      if (!reviewData?.text || reviewData.text.length < 50) {
+        newErrors[`${item.id}_text`] = true
+      }
+    })
+
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
+
   const handleNext = () => {
     if (step === 1) {
       if (!validateStep1()) {
@@ -168,35 +190,25 @@ export default function ReviewFormPage() {
   }
 
   const handleSubmit = async () => {
-    setIsSubmitting(true)
-    setSubmissionResult(null)
-
-    try {
-      const response = await fetch("/api/submit-sheets", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      })
-
-      const result = await response.json()
-      setSubmissionResult(result)
-
-      if (result.success) {
-        // 성공시 폼 초기화
-        setFormData(initialFormData)
-        setStep(1)
-      }
-    } catch (error) {
-      console.error("제출 오류:", error)
-      setSubmissionResult({
-        success: false,
-        message: "제출 중 오류가 발생했습니다.",
-      })
-    } finally {
-      setIsSubmitting(false)
+    if (!validateStep3()) {
+      setIsShaking(true)
+      setTimeout(() => setIsShaking(false), 400)
+      alert("모든 필수 항목을 입력해주세요.")
+      return
     }
+
+    setIsSubmitting(true)
+
+    // 시뮬레이션: 2초 후 성공
+    setTimeout(() => {
+      console.log("📝 제출된 데이터:", formData)
+      alert("성공적으로 제출되었습니다! (콘솔에서 데이터 확인 가능)")
+
+      // 폼 초기화
+      setFormData(initialFormData)
+      setStep(1)
+      setIsSubmitting(false)
+    }, 2000)
   }
 
   const renderYears = () => {
@@ -229,6 +241,7 @@ export default function ReviewFormPage() {
       <Card className={`max-w-3xl mx-auto transition-transform duration-300 ${isShaking ? "animate-shake" : ""}`}>
         <CardHeader className="text-center">
           <CardTitle className="text-2xl sm:text-3xl font-bold">디맨드 근무 후기 이벤트</CardTitle>
+          <p className="text-gray-600 mt-2">근무 후기를 남기고 특별한 혜택을 받아보세요</p>
         </CardHeader>
         <CardContent>
           <div className="w-full max-w-xl mx-auto mb-6">
@@ -239,44 +252,46 @@ export default function ReviewFormPage() {
           {step === 1 && (
             <div className="space-y-6">
               <div>
-                <Label htmlFor="name">이름</Label>
+                <Label htmlFor="name">이름 *</Label>
                 <Input
                   id="name"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  required
                   className={errors.name ? "border-red-500" : ""}
+                  placeholder="홍길동"
                 />
+                {errors.name && <p className="text-red-500 text-xs mt-1">이름을 입력해주세요</p>}
               </div>
+
               <div>
-                <Label htmlFor="email">이메일</Label>
+                <Label htmlFor="email">이메일 *</Label>
                 <Input
                   id="email"
                   type="email"
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  required
                   className={errors.email ? "border-red-500" : ""}
+                  placeholder="example@email.com"
                 />
+                {errors.email && <p className="text-red-500 text-xs mt-1">이메일을 입력해주세요</p>}
               </div>
+
               <div>
-                <Label htmlFor="phone">전화번호</Label>
+                <Label htmlFor="phone">전화번호 *</Label>
                 <Input
                   id="phone"
                   type="tel"
                   value={formData.phone}
                   onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                  required
                   className={errors.phone ? "border-red-500" : ""}
+                  placeholder="010-1234-5678"
                 />
+                {errors.phone && <p className="text-red-500 text-xs mt-1">전화번호를 입력해주세요</p>}
               </div>
+
               <div>
-                <Label>어떤 경로로 후기 이벤트를 접하게 되었나요?</Label>
-                <Select
-                  onValueChange={(value) => setFormData({ ...formData, source: value })}
-                  value={formData.source}
-                  required
-                >
+                <Label>어떤 경로로 후기 이벤트를 접하게 되었나요? *</Label>
+                <Select onValueChange={(value) => setFormData({ ...formData, source: value })} value={formData.source}>
                   <SelectTrigger className={errors.source ? "border-red-500" : ""}>
                     <SelectValue placeholder="선택해주세요" />
                   </SelectTrigger>
@@ -290,13 +305,14 @@ export default function ReviewFormPage() {
                     <SelectItem value="etc">기타</SelectItem>
                   </SelectContent>
                 </Select>
+                {errors.source && <p className="text-red-500 text-xs mt-1">경로를 선택해주세요</p>}
               </div>
+
               <div>
-                <Label>최종학력</Label>
+                <Label>최종학력 *</Label>
                 <Select
                   onValueChange={(value) => setFormData({ ...formData, education: value })}
                   value={formData.education}
-                  required
                 >
                   <SelectTrigger className={errors.education ? "border-red-500" : ""}>
                     <SelectValue placeholder="선택해주세요" />
@@ -307,93 +323,107 @@ export default function ReviewFormPage() {
                     <SelectItem value="university">대졸</SelectItem>
                   </SelectContent>
                 </Select>
+                {errors.education && <p className="text-red-500 text-xs mt-1">학력을 선택해주세요</p>}
               </div>
+
               <div>
-                <Label htmlFor="company">회사명 (근무지명)</Label>
+                <Label htmlFor="company">회사명 (근무지명) *</Label>
                 <p className="text-xs text-gray-500 mb-2">가능한 줄임 없이 풀어서 써주세요 (예: 하닉 → SK하이닉스)</p>
                 <Input
                   id="company"
                   value={formData.company}
                   onChange={(e) => setFormData({ ...formData, company: e.target.value })}
-                  required
                   className={errors.company ? "border-red-500" : ""}
+                  placeholder="SK하이닉스"
                 />
+                {errors.company && <p className="text-red-500 text-xs mt-1">회사명을 입력해주세요</p>}
               </div>
+
               <div>
-                <Label>사업장 주소</Label>
+                <Label>사업장 주소 *</Label>
                 <div className="flex gap-2 mb-2">
                   <Input
                     id="postcode"
                     placeholder="우편번호"
                     value={formData.postcode}
                     readOnly
-                    required
                     className={errors.postcode ? "border-red-500" : ""}
                   />
-                  <Button type="button" onClick={handleOpenPostcode}>
+                  <Button type="button" onClick={handleOpenPostcode} variant="outline">
                     주소 찾기
                   </Button>
                 </div>
-                <Input placeholder="도로명 주소" value={formData.roadAddress} readOnly required className="mb-2" />
+                <Input placeholder="도로명 주소" value={formData.roadAddress} readOnly className="mb-2" />
                 <Input
                   id="detailAddress"
                   placeholder="상세주소 입력"
                   value={formData.detailAddress}
                   onChange={(e) => setFormData({ ...formData, detailAddress: e.target.value })}
-                  required
                   className={errors.detailAddress ? "border-red-500" : ""}
                 />
+                {(errors.postcode || errors.detailAddress) && (
+                  <p className="text-red-500 text-xs mt-1">주소를 입력해주세요</p>
+                )}
               </div>
+
               <div>
-                <Label>근무 기간</Label>
-                <div
-                  className={`grid grid-cols-2 gap-2 items-center p-2 rounded-md ${errors.workPeriod ? "border border-red-500" : ""}`}
-                >
-                  <div className="flex gap-2">
-                    <Select
-                      onValueChange={(v) => handleDateChange("startDate", "year", v)}
-                      value={formData.startDate.year}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="시작 연도" />
-                      </SelectTrigger>
-                      <SelectContent>{renderYears()}</SelectContent>
-                    </Select>
-                    <Select
-                      onValueChange={(v) => handleDateChange("startDate", "month", v)}
-                      value={formData.startDate.month}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="월" />
-                      </SelectTrigger>
-                      <SelectContent>{renderMonths()}</SelectContent>
-                    </Select>
+                <Label>근무 기간 *</Label>
+                <div className="grid grid-cols-2 gap-4 mt-2">
+                  <div>
+                    <Label className="text-sm text-gray-600">시작일</Label>
+                    <div className="flex gap-2">
+                      <Select
+                        onValueChange={(v) => handleDateChange("startDate", "year", v)}
+                        value={formData.startDate.year}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="연도" />
+                        </SelectTrigger>
+                        <SelectContent>{renderYears()}</SelectContent>
+                      </Select>
+                      <Select
+                        onValueChange={(v) => handleDateChange("startDate", "month", v)}
+                        value={formData.startDate.month}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="월" />
+                        </SelectTrigger>
+                        <SelectContent>{renderMonths()}</SelectContent>
+                      </Select>
+                    </div>
                   </div>
-                  <div className="flex gap-2">
-                    <Select onValueChange={(v) => handleDateChange("endDate", "year", v)} value={formData.endDate.year}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="종료 연도" />
-                      </SelectTrigger>
-                      <SelectContent>{renderYears()}</SelectContent>
-                    </Select>
-                    <Select
-                      onValueChange={(v) => handleDateChange("endDate", "month", v)}
-                      value={formData.endDate.month}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="월" />
-                      </SelectTrigger>
-                      <SelectContent>{renderMonths()}</SelectContent>
-                    </Select>
+                  <div>
+                    <Label className="text-sm text-gray-600">종료일</Label>
+                    <div className="flex gap-2">
+                      <Select
+                        onValueChange={(v) => handleDateChange("endDate", "year", v)}
+                        value={formData.endDate.year}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="연도" />
+                        </SelectTrigger>
+                        <SelectContent>{renderYears()}</SelectContent>
+                      </Select>
+                      <Select
+                        onValueChange={(v) => handleDateChange("endDate", "month", v)}
+                        value={formData.endDate.month}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="월" />
+                        </SelectTrigger>
+                        <SelectContent>{renderMonths()}</SelectContent>
+                      </Select>
+                    </div>
                   </div>
                 </div>
+                {errors.workPeriod && <p className="text-red-500 text-xs mt-1">근무 기간을 입력해주세요</p>}
               </div>
+
               <div>
-                <Label>근무 형태</Label>
+                <Label>근무 형태 *</Label>
                 <Select
                   onValueChange={(value) => setFormData({ ...formData, workType: value })}
                   value={formData.workType}
-                  required
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -404,12 +434,12 @@ export default function ReviewFormPage() {
                   </SelectContent>
                 </Select>
               </div>
+
               <div>
-                <Label>직무 (대분류)</Label>
+                <Label>직무 (대분류) *</Label>
                 <Select
                   onValueChange={(value) => setFormData({ ...formData, majorJob: value, subJob: "" })}
                   value={formData.majorJob}
-                  required
                 >
                   <SelectTrigger className={errors.majorJob ? "border-red-500" : ""}>
                     <SelectValue placeholder="대분류 선택" />
@@ -422,14 +452,15 @@ export default function ReviewFormPage() {
                     ))}
                   </SelectContent>
                 </Select>
+                {errors.majorJob && <p className="text-red-500 text-xs mt-1">직무 대분류를 선택해주세요</p>}
               </div>
+
               {subJobs.length > 0 && (
                 <div>
-                  <Label>직무 (소분류)</Label>
+                  <Label>직무 (소분류) *</Label>
                   <Select
                     onValueChange={(value) => setFormData({ ...formData, subJob: value })}
                     value={formData.subJob}
-                    required
                   >
                     <SelectTrigger className={errors.subJob ? "border-red-500" : ""}>
                       <SelectValue placeholder="소분류 선택" />
@@ -442,8 +473,10 @@ export default function ReviewFormPage() {
                       ))}
                     </SelectContent>
                   </Select>
+                  {errors.subJob && <p className="text-red-500 text-xs mt-1">직무 소분류를 선택해주세요</p>}
                 </div>
               )}
+
               <div className="flex items-start space-x-2">
                 <Checkbox
                   id="agreePrivacy"
@@ -456,28 +489,41 @@ export default function ReviewFormPage() {
                     htmlFor="agreePrivacy"
                     className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                   >
-                    개인정보 수집 및 활용에 동의합니다.
+                    개인정보 수집 및 활용에 동의합니다. *
                   </label>
                   <p className="text-xs text-gray-500 mt-1">개인정보는 수집만 하고 외부에 노출되지 않습니다.</p>
+                  {errors.agreePrivacy && <p className="text-red-500 text-xs mt-1">개인정보 동의가 필요합니다</p>}
                 </div>
               </div>
+
               <Button type="button" onClick={handleNext} className="w-full">
-                다음 (1/3)
+                다음 단계로 (1/3)
               </Button>
             </div>
           )}
 
           {step === 2 && (
             <div className="space-y-6">
-              <div className="text-center p-4 bg-blue-50 rounded-lg">
-                <p className="text-sm text-blue-700">증빙 자료는 구글 시트에 별도 업로드해주세요.</p>
+              <div className="text-center p-6 bg-blue-50 rounded-lg">
+                <h3 className="text-lg font-semibold mb-2">증빙 자료 안내</h3>
+                <p className="text-sm text-blue-700 mb-4">근무 사실을 증명할 수 있는 자료를 준비해주세요.</p>
+                <div className="text-left text-sm text-gray-600 space-y-1">
+                  <p>• 재직증명서</p>
+                  <p>• 급여명세서</p>
+                  <p>• 사원증 사진</p>
+                  <p>• 기타 근무 증빙 자료</p>
+                </div>
+                <p className="text-xs text-gray-500 mt-4">
+                  * 증빙 자료는 다음 단계에서 업로드하거나 별도로 제출 가능합니다.
+                </p>
               </div>
+
               <div className="flex gap-4">
                 <Button type="button" onClick={handlePrev} variant="outline" className="w-full bg-transparent">
                   이전
                 </Button>
                 <Button type="button" onClick={handleNext} className="w-full">
-                  다음 (2/3)
+                  다음 단계로 (2/3)
                 </Button>
               </div>
             </div>
@@ -485,83 +531,93 @@ export default function ReviewFormPage() {
 
           {step === 3 && (
             <div className="space-y-8">
+              <div className="text-center mb-6">
+                <h3 className="text-xl font-semibold">근무 후기 작성</h3>
+                <p className="text-gray-600 text-sm mt-2">솔직하고 구체적인 후기를 작성해주세요</p>
+              </div>
+
               {reviewItems.map((item, index) => (
-                <div key={item.id}>
+                <div key={item.id} className="border rounded-lg p-4">
                   <Label className="text-lg font-semibold">
                     {index + 1}. {item.title}
                   </Label>
+
                   {item.type === "rating" && (
-                    <div className="mt-2">
+                    <div className="mt-3">
+                      <Label className="text-sm font-medium">별점 평가 *</Label>
                       <Select
-                        required
                         onValueChange={(value) => updateReviewData(item.id, "rating", value)}
                         value={formData.reviews[item.id]?.rating || ""}
                       >
-                        <SelectTrigger>
+                        <SelectTrigger className={errors[`${item.id}_rating`] ? "border-red-500" : ""}>
                           <SelectValue placeholder="별점 선택 (1~5점)" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="5">★★★★★ (5점)</SelectItem>
-                          <SelectItem value="4">★★★★☆ (4점)</SelectItem>
-                          <SelectItem value="3">★★★☆☆ (3점)</SelectItem>
-                          <SelectItem value="2">★★☆☆☆ (2점)</SelectItem>
-                          <SelectItem value="1">★☆☆☆☆ (1점)</SelectItem>
+                          <SelectItem value="5">★★★★★ (5점) - 매우 좋음</SelectItem>
+                          <SelectItem value="4">★★★★☆ (4점) - 좋음</SelectItem>
+                          <SelectItem value="3">★★★☆☆ (3점) - 보통</SelectItem>
+                          <SelectItem value="2">★★☆☆☆ (2점) - 나쁨</SelectItem>
+                          <SelectItem value="1">★☆☆☆☆ (1점) - 매우 나쁨</SelectItem>
                         </SelectContent>
                       </Select>
+                      {errors[`${item.id}_rating`] && <p className="text-red-500 text-xs mt-1">별점을 선택해주세요</p>}
                     </div>
                   )}
+
                   {item.type === "difficulty" && (
-                    <div className="mt-2">
-                      <Label className="text-sm font-medium">난이도 평가</Label>
+                    <div className="mt-3">
+                      <Label className="text-sm font-medium">난이도 평가 *</Label>
                       <Select
-                        required
                         onValueChange={(value) => updateReviewData(item.id, "difficulty", value)}
                         value={formData.reviews[item.id]?.difficulty || ""}
                       >
-                        <SelectTrigger>
+                        <SelectTrigger className={errors[`${item.id}_difficulty`] ? "border-red-500" : ""}>
                           <SelectValue placeholder="난이도 선택" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="1">1 (쉬움)</SelectItem>
-                          <SelectItem value="2">2</SelectItem>
-                          <SelectItem value="3">3</SelectItem>
-                          <SelectItem value="4">4 (어려움)</SelectItem>
+                          <SelectItem value="1">1 (매우 쉬움)</SelectItem>
+                          <SelectItem value="2">2 (쉬움)</SelectItem>
+                          <SelectItem value="3">3 (어려움)</SelectItem>
+                          <SelectItem value="4">4 (매우 어려움)</SelectItem>
                         </SelectContent>
                       </Select>
+                      {errors[`${item.id}_difficulty`] && (
+                        <p className="text-red-500 text-xs mt-1">난이도를 선택해주세요</p>
+                      )}
                     </div>
                   )}
+
                   <div className="mt-4">
                     <Label className="text-sm font-medium">상세 리뷰 *</Label>
                     <Textarea
-                      required
-                      minLength={50}
                       rows={5}
                       placeholder="최소 50자 이상 구체적인 경험을 바탕으로 작성해주세요."
-                      className="mt-1"
+                      className={`mt-1 ${errors[`${item.id}_text`] ? "border-red-500" : ""}`}
                       value={formData.reviews[item.id]?.text || ""}
                       onChange={(e) => updateReviewData(item.id, "text", e.target.value)}
                     />
-                    <div className="text-xs text-gray-500 mt-1">
-                      현재 글자 수: {formData.reviews[item.id]?.text?.length || 0}자
+                    <div className="flex justify-between text-xs mt-1">
+                      <span
+                        className={`${(formData.reviews[item.id]?.text?.length || 0) < 50 ? "text-red-500" : "text-gray-500"}`}
+                      >
+                        현재 글자 수: {formData.reviews[item.id]?.text?.length || 0}자 (최소 50자)
+                      </span>
                     </div>
+                    {errors[`${item.id}_text`] && (
+                      <p className="text-red-500 text-xs mt-1">최소 50자 이상 작성해주세요</p>
+                    )}
                   </div>
                 </div>
               ))}
+
               <div className="flex gap-4">
                 <Button type="button" onClick={handlePrev} variant="outline" className="w-full bg-transparent">
                   이전
                 </Button>
                 <Button type="button" onClick={handleSubmit} className="w-full" disabled={isSubmitting}>
-                  {isSubmitting ? "제출 중..." : "구글 시트에 제출"}
+                  {isSubmitting ? "제출 중..." : "후기 제출하기"}
                 </Button>
               </div>
-              {submissionResult && (
-                <div
-                  className={`mt-4 p-4 rounded-lg text-center ${submissionResult.success ? "bg-green-50 text-green-700" : "bg-red-50 text-red-700"}`}
-                >
-                  {submissionResult.message}
-                </div>
-              )}
             </div>
           )}
         </CardContent>
