@@ -1,26 +1,10 @@
 "use server"
 
-import { createClient } from "@vercel/kv"
+import { kv } from "@/lib/kv"
 import { revalidatePath } from "next/cache"
-
-const kv = createClient({
-  url: process.env.review_form_KV_URL,
-  token: process.env.review_form_KV_TOKEN,
-})
 
 // 이 함수는 서버에서만 실행되므로 안전합니다.
 export async function submitReview(prevState: any, formData: FormData) {
-  // ✨ 추가된 코드: 환경 변수가 있는지 먼저 확인합니다.
-  if (!process.env.review_form_KV_URL || !process.env.review_form_KV_TOKEN) {
-    const errorMessage =
-      "Vercel KV 환경 변수(review_form_KV_URL, review_form_KV_TOKEN)가 설정되지 않았습니다. Vercel 대시보드에서 Storage 설정을 확인해주세요."
-    console.error(`❌ ${errorMessage}`)
-    return {
-      success: false,
-      message: `서버 설정 오류: 데이터베이스 연결 정보가 없습니다. (${new Date().toISOString()})`,
-    }
-  }
-
   try {
     // 1. 폼에서 사용자가 입력한 데이터를 가져옵니다.
     const rawFormData = {
