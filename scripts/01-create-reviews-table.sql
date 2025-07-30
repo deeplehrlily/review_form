@@ -19,16 +19,3 @@ CREATE TABLE IF NOT EXISTS reviews (
     proof_url text,
     reviews_data jsonb
 );
-
--- Supabase Storage에 'proofs' 버킷 생성 안내
--- 이 스크립트는 버킷을 직접 생성하지 않습니다.
--- Supabase 대시보드의 Storage 섹션에서 'proofs'라는 이름의 공개(public) 버킷을 생성해주세요.
--- 공개 버킷 정책 예시:
--- {
---   "name": "public_proofs",
---   "id": "public_proofs",
---   "owner": "",
---   "public": true,
---   "file_size_limit": null,
---   "allowed_mime_types": null
--- }
