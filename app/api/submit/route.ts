@@ -6,6 +6,8 @@ export async function POST(request: NextRequest) {
     const data = await request.json()
     const kv = getKv()
 
+    console.log("🚀 받은 데이터:", JSON.stringify(data, null, 2))
+
     // 완전한 데이터 구조로 저장 - 모든 필드 포함
     const completeData = {
       // 개인 정보
@@ -48,12 +50,12 @@ export async function POST(request: NextRequest) {
     const id = crypto.randomUUID()
     await kv.set(`review:${id}`, completeData)
 
-    // 저장된 데이터 확인을 위한 로그
-    console.log("저장된 데이터:", JSON.stringify(completeData, null, 2))
+    console.log("💾 저장된 데이터:", JSON.stringify(completeData, null, 2))
+    console.log("✅ 저장 완료! ID:", id)
 
     return NextResponse.json({ success: true, id })
   } catch (error) {
-    console.error("저장 실패:", error)
+    console.error("❌ 저장 실패:", error)
     return NextResponse.json({ success: false, message: "저장 실패" }, { status: 500 })
   }
 }
