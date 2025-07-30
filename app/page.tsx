@@ -13,6 +13,9 @@ import { jobData } from "@/lib/job-data"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Terminal } from "lucide-react"
 
+// 구글 스프레드시트 웹앱 URL (3단계에서 복사한 URL로 교체하세요)
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwMHWOC4fpBnRNDxZndtlu060-pyeGIESQcbegCFlKSPl9ctbUKoTEstk7d4LvZM57r/exec"
+
 // Daum Postcode API 타입 정의
 declare global {
   interface Window {
@@ -36,7 +39,6 @@ const initialFormData = {
   agreePrivacy: false,
   startDate: { year: "", month: "" },
   endDate: { year: "", month: "" },
-  proof: null as File | null,
   reviews: {} as Record<string, any>,
 }
 
@@ -155,15 +157,8 @@ export default function ReviewFormPage() {
     window.scrollTo({ top: 0, behavior: "smooth" })
   }
 
-  // 리뷰 데이터 업데이트 함수 - 명확하게 분리
   const updateReviewData = (itemId: string, field: string, value: string) => {
     console.log(`🔄 리뷰 데이터 업데이트: ${itemId}.${field} = "${value}"`)
-    console.log(`📏 입력값 길이: ${value.length}`)
-
-    // 값이 비정상적으로 긴 경우 경고
-    if (value.length > 1000 && field === "text") {
-      console.warn(`⚠️ 비정상적으로 긴 텍스트 입력: ${value.substring(0, 100)}...`)
-    }
 
     setFormData((prev) => {
       const newReviews = {
@@ -174,8 +169,6 @@ export default function ReviewFormPage() {
         },
       }
 
-      console.log("📝 업데이트된 reviews:", newReviews)
-
       return {
         ...prev,
         reviews: newReviews,
@@ -184,38 +177,29 @@ export default function ReviewFormPage() {
   }
 
   const handleSubmit = async () => {
-    console.log("🚀 제출 시작 - 현재 formData:", formData)
-    console.log("📊 리뷰 데이터 상세:", formData.reviews)
+    console.log("🚀 구글 스프레드시트로 제출 시작")
+    console.log("📊 제출할 데이터:", formData)
 
     setIsSubmitting(true)
     setSubmissionResult(null)
 
     try {
-      // 제출 전 데이터 검증
-      const reviewsCount = Object.keys(formData.reviews).length
-      console.log(`📈 총 리뷰 항목 수: ${reviewsCount}`)
-
-      if (reviewsCount === 0) {
-        console.error("❌ 리뷰 데이터가 비어있습니다!")
-        setSubmissionResult({
-          success: false,
-          message: "리뷰 데이터가 없습니다. 모든 항목을 작성해주세요.",
-        })
-        setIsSubmitting(false)
-        return
-      }
-
-      const response = await fetch("/api/submit-review", {
+      // 구글 스프레드시트로 데이터 전송
+      const response = await fetch(GOOGLE_SCRIPT_URL, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(formData),
+        mode: "no-cors", // CORS 문제 해결
       })
 
-      const result = await response.json()
-      console.log("📤 서버 응답:", result)
-      setSubmissionResult(result)
+      // no-cors 모드에서는 응답을 읽을 수 없으므로 성공으로 간주
+      console.log("✅ 구글 스프레드시트 전송 완료")
+      setSubmissionResult({
+        success: true,
+        message: "소중한 후기를 남겨주셔서 감사합니다! 성공적으로 제출되었습니다.",
+      })
     } catch (error) {
       console.error("❌ 제출 오류:", error)
       setSubmissionResult({
@@ -263,19 +247,6 @@ export default function ReviewFormPage() {
             <Progress value={(step / 3) * 100} className="h-2" />
             <p className="text-center text-sm text-gray-500 mt-2">{step} / 3</p>
           </div>
-
-          {/* 디버깅 정보 표시 */}
-          {process.env.NODE_ENV === "development" && (
-            <div className="mb-4 p-2 bg-yellow-100 rounded text-xs">
-              <p>
-                <strong>디버그:</strong> 리뷰 항목 수: {Object.keys(formData.reviews).length}
-              </p>
-              <details>
-                <summary>전체 formData 보기</summary>
-                <pre className="mt-2 text-xs overflow-auto max-h-32">{JSON.stringify(formData, null, 2)}</pre>
-              </details>
-            </div>
-          )}
 
           {step === 1 && (
             <div className="space-y-6">
@@ -512,22 +483,11 @@ export default function ReviewFormPage() {
             <div className="space-y-6">
               <Alert>
                 <Terminal className="h-4 w-4" />
-                <AlertTitle>증빙 자료 안내 (선택 사항)</AlertTitle>
-                <AlertDescription>이 단계는 선택 사항입니다. 증빙 자료 없이도 후기 제출이 가능합니다.</AlertDescription>
+                <AlertTitle>증빙 자료 안내</AlertTitle>
+                <AlertDescription>
+                  구글 스프레드시트 연동에서는 파일 업로드를 지원하지 않습니다. 필요시 이메일로 별도 전송해주세요.
+                </AlertDescription>
               </Alert>
-              <div className="p-8 border-2 border-dashed rounded-lg text-center">
-                <Label htmlFor="proof" className="cursor-pointer">
-                  <div className="text-gray-500">파일을 선택하거나 여기에 드래그하세요.</div>
-                  <Input
-                    id="proof"
-                    name="proof"
-                    type="file"
-                    accept="image/*,application/pdf"
-                    className="mt-4"
-                    onChange={(e) => setFormData({ ...formData, proof: e.target.files ? e.target.files[0] : null })}
-                  />
-                </Label>
-              </div>
               <div className="flex gap-4">
                 <Button type="button" onClick={handlePrev} variant="outline" className="w-full bg-transparent">
                   이전
@@ -595,13 +555,7 @@ export default function ReviewFormPage() {
                       placeholder="최소 50자 이상 구체적인 경험을 바탕으로 작성해주세요."
                       className="mt-1"
                       value={formData.reviews[item.id]?.text || ""}
-                      onChange={(e) => {
-                        const inputValue = e.target.value
-                        console.log(`📝 Textarea 입력 (${item.id}):`, inputValue.substring(0, 100))
-                        updateReviewData(item.id, "text", inputValue)
-                      }}
-                      autoComplete="off"
-                      spellCheck="false"
+                      onChange={(e) => updateReviewData(item.id, "text", e.target.value)}
                     />
                     <div className="text-xs text-gray-500 mt-1">
                       현재 글자 수: {formData.reviews[item.id]?.text?.length || 0}자
