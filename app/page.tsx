@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useMemo, type FormEvent } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -53,6 +53,7 @@ const reviewItems = [
 ]
 
 export default function ReviewFormPage() {
+  console.log("✅ 최신 코드 적용 완료! 이제 제출 테스트를 진행해주세요.")
   const [step, setStep] = useState(1)
   const [formData, setFormData] = useState(initialFormData)
   const [isShaking, setIsShaking] = useState(false)
@@ -159,9 +160,8 @@ export default function ReviewFormPage() {
   }
 
   // 폼 제출을 처리하는 새로운 함수
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async () => {
     console.log("CCTV 1: '제출하기' 버튼 클릭됨, handleSubmit 함수 시작!")
-    event.preventDefault() // 브라우저의 기본 제출 동작 방지
 
     setIsSubmitting(true)
     setSubmissionResult(null)
@@ -239,11 +239,7 @@ export default function ReviewFormPage() {
     <div className="bg-gray-50 font-sans min-h-screen p-4 sm:p-8">
       <Card className={`max-w-3xl mx-auto transition-transform duration-300 ${isShaking ? "animate-shake" : ""}`}>
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl sm:text-3xl font-bold">
-            {step === 1 && "근무 후기 이벤트 참여"}
-            {step === 2 && "현직자 인증"}
-            {step === 3 && "현직자 상세 리뷰"}
-          </CardTitle>
+          <CardTitle className="text-2xl sm:text-3xl font-bold">새로운 버전 테스트</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="w-full max-w-xl mx-auto mb-6">
@@ -251,7 +247,7 @@ export default function ReviewFormPage() {
             <p className="text-center text-sm text-gray-500 mt-2">{step} / 3</p>
           </div>
 
-          <form onSubmit={handleSubmit}>
+          <form>
             {step === 1 && (
               <div className="space-y-6">
                 {/* Step 1 form fields... (이 부분은 변경 없음) */}
@@ -601,7 +597,7 @@ export default function ReviewFormPage() {
                   <Button type="button" onClick={handlePrev} variant="outline" className="w-full bg-transparent">
                     이전
                   </Button>
-                  <Button type="submit" className="w-full" disabled={isSubmitting}>
+                  <Button type="button" onClick={handleSubmit} className="w-full" disabled={isSubmitting}>
                     {isSubmitting ? "제출 중..." : "제출하기"}
                   </Button>
                 </div>
