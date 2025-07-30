@@ -171,6 +171,7 @@ export default function ReviewFormPage() {
           data.append(key, JSON.stringify(value))
         } else if (key === "proof" && value) {
           // 파일은 이 버전에서 제외
+          data.append(key, value)
         } else if (value !== null && value !== undefined) {
           data.append(key, String(value))
         }
