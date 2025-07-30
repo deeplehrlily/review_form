@@ -1,12 +1,19 @@
 "use server"
 
-import { createSupabaseServerClient } from "@/lib/supabase/server"
-import { v4 as uuidv4 } from "uuid"
+import Airtable from "airtable"
+import { jobData } from "@/lib/job-data"
 
 export async function submitReview(prevState: any, formData: FormData) {
-  console.log("✅ [Server Action] submitReview 시작됨")
+  console.log("✅ [Airtable Action] submitReview 시작됨")
 
-  const supabase = createSupabaseServerClient()
+  // 3단계에서 설정한 Vercel 환경 변수를 여기서 사용합니다.
+  if (!process.env.AIRTABLE_PAT || !process.env.AIRTABLE_BASE_ID || !process.env.AIRTABLE_TABLE_NAME) {
+    console.error("❌ [Airtable Action] Airtable 환경 변수가 설정되지 않았습니다.")
+    return { success: false, message: "서버 설정 오류가 발생했습니다." }
+  }
+
+  const base = new Airtable({ apiKey: process.env.AIRTABLE_PAT }).base(process.env.AIRTABLE_BASE_ID)
+  const tableName = process.env.AIRTABLE_TABLE_NAME
 
   const rawFormData = {
     name: formData.get("name") as string,
@@ -19,48 +26,26 @@ export async function submitReview(prevState: any, formData: FormData) {
     roadAddress: formData.get("roadAddress") as string,
     detailAddress: formData.get("detailAddress") as string,
     workType: formData.get("workType") as string,
-    majorJob: formData.get("majorJob") as string,
-    subJob: formData.get("subJob") as string,
+    majorJobCode: formData.get("majorJob") as string,
+    subJobCode: formData.get("subJob") as string,
     startDateYear: formData.get("startDateYear") as string,
     startDateMonth: formData.get("startDateMonth") as string,
     endDateYear: formData.get("endDateYear") as string,
     endDateMonth: formData.get("endDateMonth") as string,
     reviews: JSON.parse(formData.get("reviews") as string),
-    proof: formData.get("proof") as File,
+    // 파일 업로드는 Airtable Enterprise 플랜이 필요하므로, 여기서는 제외합니다.
+    // proof: formData.get("proof") as File,
   }
-  console.log("📄 [Server Action] 폼 데이터 파싱 완료:", {
-    name: rawFormData.name,
-    email: rawFormData.email,
-    hasProofFile: rawFormData.proof && rawFormData.proof.size > 0,
-  })
+  console.log("📄 [Airtable Action] 폼 데이터 파싱 완료:", { name: rawFormData.name, email: rawFormData.email })
 
-  let proofUrl = null
+  // 직무 코드를 이름으로 변환
+  const majorJobName = jobData.majorCategories[rawFormData.majorJobCode] || "알 수 없음"
+  const subJobName =
+    jobData.subCategories[rawFormData.majorJobCode]?.find((job) => job.code === rawFormData.subJobCode)?.name ||
+    "알 수 없음"
 
-  // 1. 증빙 자료 파일 업로드 (파일이 있는 경우)
-  if (rawFormData.proof && rawFormData.proof.size > 0) {
-    console.log("⏳ [Server Action] 파일 업로드 시도 중...")
-    const file = rawFormData.proof
-    const filePath = `proofs/${uuidv4()}-${file.name}`
-
-    const { error: uploadError } = await supabase.storage.from("proofs").upload(filePath, file)
-
-    if (uploadError) {
-      console.error("❌ [Server Action] 파일 업로드 실패:", uploadError)
-      return { success: false, message: `파일 업로드 실패: ${uploadError.message}` }
-    }
-
-    const { data } = supabase.storage.from("proofs").getPublicUrl(filePath)
-    proofUrl = data.publicUrl
-    console.log("✅ [Server Action] 파일 업로드 성공! URL:", proofUrl)
-  } else {
-    console.log("ℹ️ [Server Action] 첨부된 파일 없음.")
-  }
-
-  // 2. 데이터베이스에 저장할 데이터 준비
-  const startDate = `${rawFormData.startDateYear}-${String(rawFormData.startDateMonth).padStart(2, "0")}-01`
-  const endDate = `${rawFormData.endDateYear}-${String(rawFormData.endDateMonth).padStart(2, "0")}-01`
-
-  const dataToInsert = {
+  // Airtable에 저장할 데이터 필드 준비
+  const fieldsToInsert = {
     name: rawFormData.name,
     email: rawFormData.email,
     phone: rawFormData.phone,
@@ -71,24 +56,21 @@ export async function submitReview(prevState: any, formData: FormData) {
     road_address: rawFormData.roadAddress,
     detail_address: rawFormData.detailAddress,
     work_type: rawFormData.workType,
-    major_job_code: rawFormData.majorJob,
-    sub_job_code: rawFormData.subJob,
-    start_date: startDate,
-    end_date: endDate,
-    reviews_data: rawFormData.reviews,
-    proof_url: proofUrl,
+    major_job_name: majorJobName,
+    sub_job_name: subJobName,
+    start_date: `${rawFormData.startDateYear}-${String(rawFormData.startDateMonth).padStart(2, "0")}-01`,
+    end_date: `${rawFormData.endDateYear}-${String(rawFormData.endDateMonth).padStart(2, "0")}-01`,
+    reviews_data: JSON.stringify(rawFormData.reviews, null, 2), // JSON을 문자열로 저장
   }
-  console.log("💾 [Server Action] DB에 삽입할 데이터 준비 완료:", dataToInsert)
+  console.log("💾 [Airtable Action] DB에 삽입할 데이터 준비 완료:", fieldsToInsert)
 
-  // 3. 데이터베이스에 데이터 삽입
-  console.log("⏳ [Server Action] DB에 데이터 삽입 시도 중...")
-  const { error: insertError } = await supabase.from("reviews").insert([dataToInsert])
-
-  if (insertError) {
-    console.error("❌ [Server Action] DB 삽입 실패:", insertError)
-    return { success: false, message: `데이터 제출 실패: ${insertError.message}` }
+  try {
+    console.log(`⏳ [Airtable Action] '${tableName}' 테이블에 데이터 삽입 시도 중...`)
+    await base(tableName).create([{ fields: fieldsToInsert }])
+    console.log("🎉 [Airtable Action] DB 삽입 성공! 작업 완료.")
+    return { success: true, message: "소중한 후기를 남겨주셔서 감사합니다! 성공적으로 제출되었습니다." }
+  } catch (error) {
+    console.error("❌ [Airtable Action] DB 삽입 실패:", error)
+    return { success: false, message: `데이터 제출 실패: ${error.message}` }
   }
-
-  console.log("🎉 [Server Action] DB 삽입 성공! 작업 완료.")
-  return { success: true, message: "소중한 후기를 남겨주셔서 감사합니다! 성공적으로 제출되었습니다." }
 }
