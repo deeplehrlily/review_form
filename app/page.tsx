@@ -200,13 +200,43 @@ export default function ReviewFormPage() {
     setIsSubmitting(true)
 
     try {
+      // 완전한 데이터 구조로 전송
+      const completeFormData = {
+        // 개인 정보
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        education: formData.education,
+        source: formData.source,
+
+        // 회사 정보
+        company: formData.company,
+        postcode: formData.postcode,
+        roadAddress: formData.roadAddress,
+        detailAddress: formData.detailAddress,
+        workType: formData.workType,
+        majorJob: formData.majorJob,
+        subJob: formData.subJob,
+
+        // 근무 기간
+        startDate: formData.startDate,
+        endDate: formData.endDate,
+
+        // 리뷰 내용
+        reviews: formData.reviews,
+
+        // 메타 정보
+        submittedAt: new Date().toISOString(),
+        agreePrivacy: formData.agreePrivacy,
+        proofUrl: "", // 향후 추가 예정
+      }
+
+      console.log("제출할 데이터:", JSON.stringify(completeFormData, null, 2))
+
       const response = await fetch("/api/submit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...formData,
-          submittedAt: new Date().toISOString(),
-        }),
+        body: JSON.stringify(completeFormData),
       })
 
       const result = await response.json()
@@ -219,6 +249,7 @@ export default function ReviewFormPage() {
         alert("제출 실패: " + result.message)
       }
     } catch (error) {
+      console.error("제출 오류:", error)
       alert("제출 중 오류가 발생했습니다.")
     } finally {
       setIsSubmitting(false)
@@ -256,13 +287,6 @@ export default function ReviewFormPage() {
         <CardHeader className="text-center">
           <CardTitle className="text-2xl sm:text-3xl font-bold">디맨드 근무 후기 이벤트</CardTitle>
           <p className="text-gray-600 mt-2">근무 후기를 남기고 특별한 혜택을 받아보세요</p>
-
-          {/* 관리자 페이지 링크 추가 */}
-          <div className="mt-4">
-            <a href="/admin" className="text-xs text-gray-400 hover:text-gray-600 underline">
-              관리자 페이지
-            </a>
-          </div>
         </CardHeader>
         <CardContent>
           <div className="w-full max-w-xl mx-auto mb-6">
