@@ -157,7 +157,13 @@ export default function ReviewFormPage() {
 
   // 리뷰 데이터 업데이트 함수 - 명확하게 분리
   const updateReviewData = (itemId: string, field: string, value: string) => {
-    console.log(`🔄 리뷰 데이터 업데이트: ${itemId}.${field} = ${value}`)
+    console.log(`🔄 리뷰 데이터 업데이트: ${itemId}.${field} = "${value}"`)
+    console.log(`📏 입력값 길이: ${value.length}`)
+
+    // 값이 비정상적으로 긴 경우 경고
+    if (value.length > 1000 && field === "text") {
+      console.warn(`⚠️ 비정상적으로 긴 텍스트 입력: ${value.substring(0, 100)}...`)
+    }
 
     setFormData((prev) => {
       const newReviews = {
@@ -589,8 +595,17 @@ export default function ReviewFormPage() {
                       placeholder="최소 50자 이상 구체적인 경험을 바탕으로 작성해주세요."
                       className="mt-1"
                       value={formData.reviews[item.id]?.text || ""}
-                      onChange={(e) => updateReviewData(item.id, "text", e.target.value)}
+                      onChange={(e) => {
+                        const inputValue = e.target.value
+                        console.log(`📝 Textarea 입력 (${item.id}):`, inputValue.substring(0, 100))
+                        updateReviewData(item.id, "text", inputValue)
+                      }}
+                      autoComplete="off"
+                      spellCheck="false"
                     />
+                    <div className="text-xs text-gray-500 mt-1">
+                      현재 글자 수: {formData.reviews[item.id]?.text?.length || 0}자
+                    </div>
                   </div>
                 </div>
               ))}
