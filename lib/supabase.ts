@@ -5,28 +5,12 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
-// 파일 업로드 함수
-export async function uploadFile(file: File, fileName: string) {
-  const { data, error } = await supabase.storage.from("proof-documents").upload(fileName, file, {
-    cacheControl: "3600",
-    upsert: false,
-  })
+// 클라이언트 사이드용 싱글톤 패턴
+let supabaseClient: ReturnType<typeof createClient> | null = null
 
-  if (error) {
-    throw error
+export const getSupabaseClient = () => {
+  if (!supabaseClient) {
+    supabaseClient = createClient(supabaseUrl, supabaseAnonKey)
   }
-
-  // 공개 URL 가져오기
-  const { data: urlData } = supabase.storage.from("proof-documents").getPublicUrl(fileName)
-
-  return urlData.publicUrl
-}
-
-// 파일 삭제 함수
-export async function deleteFile(fileName: string) {
-  const { error } = await supabase.storage.from("proof-documents").remove([fileName])
-
-  if (error) {
-    throw error
-  }
+  return supabaseClient
 }
