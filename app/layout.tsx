@@ -2,14 +2,13 @@ import type React from "react"
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import "./globals.css"
-import { ThemeProvider } from "@/components/theme-provider"
-import { Toaster } from "@/components/ui/sonner"
+import Script from "next/script"
 
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "HTML 템플릿 후기 시스템",
-  description: "구매하신 HTML 템플릿에 대한 후기를 남겨주세요",
+  title: "디맨드 근무 후기 이벤트",
+  description: "디맨드 근무 후기 이벤트 참여 페이지",
     generator: 'v0.dev'
 }
 
@@ -19,12 +18,10 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="ko" suppressHydrationWarning>
+    <html lang="ko">
       <body className={inter.className}>
-        <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
-          {children}
-          <Toaster />
-        </ThemeProvider>
+        {children}
+        <Script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js" strategy="lazyOnload" />
       </body>
     </html>
   )
