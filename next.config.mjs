@@ -2,8 +2,6 @@
 const nextConfig = {
   output: 'export',
   trailingSlash: true,
-  skipTrailingSlashRedirect: true,
-  distDir: 'out',
   eslint: {
     ignoreDuringBuilds: true,
   },
@@ -13,13 +11,9 @@ const nextConfig = {
   images: {
     unoptimized: true
   },
+  // Netlify Forms를 위한 설정
   async rewrites() {
-    return [
-      {
-        source: '/api/:path*',
-        destination: '/.netlify/functions/:path*'
-      }
-    ]
+    return []
   }
 }
 
