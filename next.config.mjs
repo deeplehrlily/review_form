@@ -10,10 +10,6 @@ const nextConfig = {
   },
   images: {
     unoptimized: true
-  },
-  // Netlify Forms를 위한 설정
-  async rewrites() {
-    return []
   }
 }
 
