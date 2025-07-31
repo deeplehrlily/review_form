@@ -498,6 +498,7 @@ export default function DemandReviewForm() {
   const [errors, setErrors] = useState<string[]>([])
   const [shake, setShake] = useState(false)
   const [textCounts, setTextCounts] = useState<{ [key: string]: number }>({})
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const progress = (currentPage / 3) * 100
 
@@ -609,8 +610,8 @@ export default function DemandReviewForm() {
     }))
   }
 
-  // 폼 제출
-  const handleSubmit = () => {
+  // Netlify Forms 제출
+  const handleSubmit = async () => {
     const validationErrors = validateCurrentPage()
     if (validationErrors.length > 0) {
       setErrors(validationErrors)
@@ -618,7 +619,101 @@ export default function DemandReviewForm() {
       setTimeout(() => setShake(false), 400)
       return
     }
-    alert("제출 완료!")
+
+    setIsSubmitting(true)
+
+    try {
+      // FormData 생성
+      const formDataToSubmit = new FormData()
+
+      // 기본 정보
+      formDataToSubmit.append("form-name", "demand-review-form")
+      formDataToSubmit.append("name", formData.name)
+      formDataToSubmit.append("email", formData.email)
+      formDataToSubmit.append("phone", formData.phone)
+      formDataToSubmit.append("source", formData.source)
+      formDataToSubmit.append("education", formData.education)
+      formDataToSubmit.append("company", formData.company)
+      formDataToSubmit.append("postcode", formData.postcode)
+      formDataToSubmit.append("roadAddress", formData.roadAddress)
+      formDataToSubmit.append("detailAddress", formData.detailAddress)
+
+      // 직무 정보
+      const selectedCategory = jobCategories.find((cat) => cat.id === formData.jobCategory)
+      const selectedSubCategory = jobSubCategories[formData.jobCategory]?.find(
+        (sub) => sub.id === formData.jobSubCategory,
+      )
+      formDataToSubmit.append("jobCategory", selectedCategory?.name || "")
+      formDataToSubmit.append("jobSubCategory", selectedSubCategory?.name || "")
+
+      // 근무 기간
+      formDataToSubmit.append("workStartYear", formData.workStartYear)
+      formDataToSubmit.append("workStartMonth", formData.workStartMonth)
+      formDataToSubmit.append("workEndYear", formData.workEndYear)
+      formDataToSubmit.append("workEndMonth", formData.workEndMonth)
+      formDataToSubmit.append("isCurrentJob", formData.isCurrentJob ? "예" : "아니오")
+
+      // 증빙 파일
+      if (formData.proofFile) {
+        formDataToSubmit.append("proofFile", formData.proofFile)
+      }
+
+      // 리뷰 데이터
+      reviewItems.forEach((item) => {
+        const review = formData.reviews[item.title]
+        if (review) {
+          if (item.type === "rating") {
+            formDataToSubmit.append(`${item.title}_rating`, review.rating || "")
+          }
+          if (item.type === "difficulty") {
+            formDataToSubmit.append(`${item.title}_difficulty`, review.difficulty || "")
+          }
+          formDataToSubmit.append(`${item.title}_text`, review.text || "")
+        }
+      })
+
+      // Netlify Forms로 제출
+      const response = await fetch("/", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams(formDataToSubmit as any).toString(),
+      })
+
+      if (response.ok) {
+        alert("제출이 완료되었습니다! 감사합니다.")
+        // 폼 초기화
+        setFormData({
+          name: "",
+          email: "",
+          phone: "",
+          source: "",
+          education: "",
+          company: "",
+          postcode: "",
+          roadAddress: "",
+          detailAddress: "",
+          jobCategory: "",
+          jobSubCategory: "",
+          workStartYear: "",
+          workStartMonth: "",
+          workEndYear: "",
+          workEndMonth: "",
+          isCurrentJob: true,
+          proofFile: null,
+          reviews: {},
+          agreePrivacy: false,
+        })
+        setCurrentPage(1)
+        setTextCounts({})
+      } else {
+        throw new Error("제출에 실패했습니다.")
+      }
+    } catch (error) {
+      console.error("Form submission error:", error)
+      alert("제출 중 오류가 발생했습니다. 다시 시도해주세요.")
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   // Daum Postcode API 로드
@@ -634,6 +729,34 @@ export default function DemandReviewForm() {
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4">
       <div className="max-w-2xl mx-auto">
+        {/* Netlify Forms를 위한 숨겨진 폼 */}
+        <form name="demand-review-form" netlify="true" netlify-honeypot="bot-field" hidden>
+          <input type="text" name="name" />
+          <input type="email" name="email" />
+          <input type="tel" name="phone" />
+          <input type="text" name="source" />
+          <input type="text" name="education" />
+          <input type="text" name="company" />
+          <input type="text" name="postcode" />
+          <input type="text" name="roadAddress" />
+          <input type="text" name="detailAddress" />
+          <input type="text" name="jobCategory" />
+          <input type="text" name="jobSubCategory" />
+          <input type="text" name="workStartYear" />
+          <input type="text" name="workStartMonth" />
+          <input type="text" name="workEndYear" />
+          <input type="text" name="workEndMonth" />
+          <input type="text" name="isCurrentJob" />
+          <input type="file" name="proofFile" />
+          {reviewItems.map((item) => (
+            <div key={item.title}>
+              {item.type === "rating" && <input type="text" name={`${item.title}_rating`} />}
+              {item.type === "difficulty" && <input type="text" name={`${item.title}_difficulty`} />}
+              <textarea name={`${item.title}_text`}></textarea>
+            </div>
+          ))}
+        </form>
+
         <Card className={`${shake ? "animate-pulse" : ""}`}>
           <CardHeader className="text-center">
             <CardTitle className="text-2xl font-bold text-gray-900">근무 후기 이벤트 참여</CardTitle>
@@ -1057,8 +1180,8 @@ export default function DemandReviewForm() {
                   <Button onClick={prevPage} variant="outline" className="flex-1 bg-transparent">
                     이전
                   </Button>
-                  <Button onClick={handleSubmit} className="flex-1">
-                    제출하기
+                  <Button onClick={handleSubmit} className="flex-1" disabled={isSubmitting}>
+                    {isSubmitting ? "제출 중..." : "제출하기"}
                   </Button>
                 </div>
               </div>
