@@ -582,13 +582,17 @@
             document.getElementById('currentStep').textContent = currentPage;
         }
 
-        // 폼 제출 시 최종 검증
+        // 폼 제출 시 최종 검증 (기존 코드 교체)
         document.querySelector('form').addEventListener('submit', function(e) {
             const errors = validatePage(3);
             if (errors.length > 0) {
                 e.preventDefault();
                 showErrors(errors);
+                return false;
             }
+    
+            // Netlify Forms가 자동으로 처리하도록 기본 제출 허용
+            // fetch나 AJAX 코드 없음
         });
     </script>
 </body>
