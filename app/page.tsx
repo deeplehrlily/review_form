@@ -506,6 +506,8 @@ export default function DemandReviewEvent() {
   const [reviews, setReviews] = useState<Record<string, { rating?: string; text: string }>>({})
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [shake, setShake] = useState(false)
+  const [testResult, setTestResult] = useState<string>("")
+  const [isTestSubmitting, setIsTestSubmitting] = useState(false)
 
   const validateWorkPeriod = () => {
     if (
@@ -602,6 +604,48 @@ export default function DemandReviewEvent() {
 
     setCurrentPage(page)
     window.scrollTo({ top: 0, behavior: "smooth" })
+  }
+
+  const quickTest = async () => {
+    setIsTestSubmitting(true)
+    setTestResult("")
+
+    try {
+      console.log("=== 빠른 테스트 시작 ===")
+
+      const formData = new FormData()
+      formData.append("form-name", "demand-review-form")
+      formData.append("name", "홍길동")
+      formData.append("email", "test@example.com")
+      formData.append("company", "테스트 회사")
+      formData.append("submitted-at", new Date().toLocaleString("ko-KR"))
+
+      console.log("FormData 내용:")
+      for (const [key, value] of formData.entries()) {
+        console.log(`${key}: ${value}`)
+      }
+
+      const response = await fetch("/", {
+        method: "POST",
+        body: formData,
+      })
+
+      console.log("응답 상태:", response.status)
+      console.log("응답 헤더:", [...response.headers.entries()])
+
+      if (response.ok) {
+        setTestResult("✅ 테스트 성공! Netlify 대시보드를 확인해보세요.")
+      } else {
+        const responseText = await response.text()
+        console.error("응답 내용:", responseText)
+        setTestResult(`❌ 테스트 실패: ${response.status} ${response.statusText}`)
+      }
+    } catch (error) {
+      console.error("에러:", error)
+      setTestResult(`❌ 에러: ${error.message}`)
+    } finally {
+      setIsTestSubmitting(false)
+    }
   }
 
   const submitToNetlify = async () => {
@@ -784,6 +828,28 @@ export default function DemandReviewEvent() {
         <textarea name="이 곳에서 일하게 될 사람들에게 한마디-review"></textarea>
         <input type="text" name="submitted-at" />
       </form>
+
+      {/* 테스트 섹션 */}
+      <Card className="mb-8 bg-yellow-50 border-yellow-200">
+        <CardContent className="p-6">
+          <h2 className="text-lg font-bold mb-4 text-yellow-800">🧪 빠른 테스트</h2>
+          <p className="text-sm text-yellow-700 mb-4">
+            Netlify Forms가 제대로 작동하는지 테스트해보세요. F12를 눌러 콘솔을 확인하세요.
+          </p>
+          <Button onClick={quickTest} disabled={isTestSubmitting} className="w-full bg-green-600 hover:bg-green-700">
+            {isTestSubmitting ? "테스트 중..." : "빠른 테스트 실행"}
+          </Button>
+          {testResult && (
+            <Alert
+              className={`mt-4 ${testResult.includes("✅") ? "border-green-200 bg-green-50" : "border-red-200 bg-red-50"}`}
+            >
+              <AlertDescription className={testResult.includes("✅") ? "text-green-800" : "text-red-800"}>
+                {testResult}
+              </AlertDescription>
+            </Alert>
+          )}
+        </CardContent>
+      </Card>
 
       <div className="max-w-2xl mx-auto">
         {/* Page 1 */}
