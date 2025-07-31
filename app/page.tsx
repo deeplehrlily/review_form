@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Card, CardContent } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { AlertTriangle, Upload } from "lucide-react"
+import { AlertTriangle, Upload, CheckCircle } from "lucide-react"
 
 // 잡코리아 대분류 데이터
 const jobCategories = [
@@ -480,6 +480,8 @@ const validatePhone = (phone: string) => {
 
 export default function DemandReviewEvent() {
   const [currentPage, setCurrentPage] = useState(1)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isSubmitted, setIsSubmitted] = useState(false)
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -602,6 +604,74 @@ export default function DemandReviewEvent() {
     window.scrollTo({ top: 0, behavior: "smooth" })
   }
 
+  const submitToNetlify = async () => {
+    setIsSubmitting(true)
+
+    try {
+      // 폼 데이터 준비
+      const formDataToSubmit = new FormData()
+
+      // 기본 정보
+      formDataToSubmit.append("form-name", "demand-review-form")
+      formDataToSubmit.append("name", formData.name)
+      formDataToSubmit.append("email", formData.email)
+      formDataToSubmit.append("phone", formData.phone)
+      formDataToSubmit.append("source", formData.source)
+      formDataToSubmit.append("education", formData.education)
+      formDataToSubmit.append("company", formData.company)
+      formDataToSubmit.append("address", `${formData.postcode} ${formData.roadAddress} ${formData.detailAddress}`)
+
+      // 직무 정보
+      const jobCategoryName = jobCategories.find((cat) => cat.id === formData.jobCategory)?.name || ""
+      const jobSubCategoryName =
+        jobSubCategories[formData.jobCategory]?.find((sub) => sub.id === formData.jobSubCategory)?.name || ""
+      formDataToSubmit.append("job-category", jobCategoryName)
+      formDataToSubmit.append("job-subcategory", jobSubCategoryName)
+
+      // 근무 기간
+      const workPeriod = formData.isCurrentJob
+        ? `${formData.workStartYear}년 ${formData.workStartMonth}월 ~ 현재`
+        : `${formData.workStartYear}년 ${formData.workStartMonth}월 ~ ${formData.workEndYear}년 ${formData.workEndMonth}월`
+      formDataToSubmit.append("work-period", workPeriod)
+
+      // 증빙 파일
+      if (formData.proofFile) {
+        formDataToSubmit.append("proof-file", formData.proofFile)
+      }
+
+      // 리뷰 데이터
+      reviewItems.forEach((item) => {
+        const review = reviews[item.title]
+        if (review) {
+          if (review.rating) {
+            formDataToSubmit.append(`${item.title}-rating`, review.rating)
+          }
+          formDataToSubmit.append(`${item.title}-review`, review.text)
+        }
+      })
+
+      // 제출 시간
+      formDataToSubmit.append("submitted-at", new Date().toLocaleString("ko-KR"))
+
+      // Netlify Forms로 제출
+      const response = await fetch("/", {
+        method: "POST",
+        body: formDataToSubmit,
+      })
+
+      if (response.ok) {
+        setIsSubmitted(true)
+      } else {
+        throw new Error("제출에 실패했습니다.")
+      }
+    } catch (error) {
+      console.error("Form submission error:", error)
+      alert("제출 중 오류가 발생했습니다. 다시 시도해주세요.")
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
   const handleSubmit = () => {
     // 리뷰 유효성 검사
     const incompleteReviews = reviewItems.filter((item) => {
@@ -632,7 +702,7 @@ export default function DemandReviewEvent() {
     }
 
     setErrors({})
-    alert("제출 완료!")
+    submitToNetlify()
   }
 
   const progressWidth = (currentPage / 3) * 100
@@ -658,8 +728,63 @@ export default function DemandReviewEvent() {
     }
   }
 
+  // 제출 완료 페이지
+  if (isSubmitted) {
+    return (
+      <div className="min-h-screen bg-gray-50 py-12 px-4">
+        <div className="max-w-2xl mx-auto">
+          <Card>
+            <CardContent className="p-8 text-center">
+              <CheckCircle className="mx-auto h-16 w-16 text-green-500 mb-4" />
+              <h1 className="text-2xl font-semibold mb-4">제출이 완료되었습니다!</h1>
+              <p className="text-gray-600 mb-6">
+                소중한 후기를 작성해주셔서 감사합니다.
+                <br />
+                검토 후 이벤트 보상에 대해 안내드리겠습니다.
+              </p>
+              <Button onClick={() => window.location.reload()} variant="outline">
+                새로운 후기 작성하기
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4">
+      {/* Netlify Forms를 위한 숨겨진 폼 */}
+      <form name="demand-review-form" netlify="true" netlify-honeypot="bot-field" hidden>
+        <input type="text" name="name" />
+        <input type="email" name="email" />
+        <input type="tel" name="phone" />
+        <input type="text" name="source" />
+        <input type="text" name="education" />
+        <input type="text" name="company" />
+        <input type="text" name="address" />
+        <input type="text" name="job-category" />
+        <input type="text" name="job-subcategory" />
+        <input type="text" name="work-period" />
+        <input type="file" name="proof-file" />
+        <input type="text" name="근무환경/시설-rating" />
+        <textarea name="근무환경/시설-review"></textarea>
+        <input type="text" name="근무강도/스트레스-rating" />
+        <textarea name="근무강도/스트레스-review"></textarea>
+        <input type="text" name="급여/복지-rating" />
+        <textarea name="급여/복지-review"></textarea>
+        <input type="text" name="안정성/전망-rating" />
+        <textarea name="안정성/전망-review"></textarea>
+        <input type="text" name="사람들-rating" />
+        <textarea name="사람들-review"></textarea>
+        <input type="text" name="취업준비-rating" />
+        <textarea name="취업준비-review"></textarea>
+        <input type="text" name="면접준비-rating" />
+        <textarea name="면접준비-review"></textarea>
+        <textarea name="이 곳에서 일하게 될 사람들에게 한마디-review"></textarea>
+        <input type="text" name="submitted-at" />
+      </form>
+
       <div className="max-w-2xl mx-auto">
         {/* Page 1 */}
         {currentPage === 1 && (
@@ -979,13 +1104,14 @@ export default function DemandReviewEvent() {
                   </div>
                 </div>
 
+                {errors.validation && (
+                  <Alert variant="destructive" className="mb-4">
+                    <AlertTriangle className="h-4 w-4" />
+                    <AlertDescription className="whitespace-pre-line">{errors.validation}</AlertDescription>
+                  </Alert>
+                )}
+
                 <div className="flex gap-4">
-                  {errors.validation && (
-                    <Alert variant="destructive" className="mb-4 w-full">
-                      <AlertTriangle className="h-4 w-4" />
-                      <AlertDescription className="whitespace-pre-line">{errors.validation}</AlertDescription>
-                    </Alert>
-                  )}
                   <Button variant="outline" onClick={() => setCurrentPage(1)} className="flex-1">
                     이전
                   </Button>
@@ -1106,18 +1232,19 @@ export default function DemandReviewEvent() {
                   </div>
                 ))}
 
+                {errors.validation && (
+                  <Alert variant="destructive" className="mb-4">
+                    <AlertTriangle className="h-4 w-4" />
+                    <AlertDescription className="whitespace-pre-line">{errors.validation}</AlertDescription>
+                  </Alert>
+                )}
+
                 <div className="flex gap-4">
-                  {errors.validation && (
-                    <Alert variant="destructive" className="mb-4 w-full">
-                      <AlertTriangle className="h-4 w-4" />
-                      <AlertDescription className="whitespace-pre-line">{errors.validation}</AlertDescription>
-                    </Alert>
-                  )}
                   <Button variant="outline" onClick={() => setCurrentPage(2)} className="flex-1">
                     이전
                   </Button>
-                  <Button onClick={handleSubmit} className="flex-1">
-                    제출하기
+                  <Button onClick={handleSubmit} className="flex-1" disabled={isSubmitting}>
+                    {isSubmitting ? "제출 중..." : "제출하기"}
                   </Button>
                 </div>
               </div>
