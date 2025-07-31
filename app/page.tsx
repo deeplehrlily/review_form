@@ -1,5 +1,7 @@
 "use client"
 
+import type React from "react"
+
 import { useState, useEffect, useMemo } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -10,6 +12,8 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Progress } from "@/components/ui/progress"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { jobData } from "@/lib/job-data"
+import { uploadFile } from "@/lib/supabase"
+import { Upload, X, FileText, ImageIcon, File } from "lucide-react"
 
 declare global {
   interface Window {
@@ -34,6 +38,8 @@ const initialFormData = {
   startDate: { year: "", month: "" },
   endDate: { year: "", month: "" },
   reviews: {} as Record<string, any>,
+  proofFiles: [] as File[],
+  proofUrls: [] as string[],
 }
 
 const reviewItems = [
@@ -53,6 +59,7 @@ export default function ReviewFormPage() {
   const [isShaking, setIsShaking] = useState(false)
   const [errors, setErrors] = useState<Record<string, boolean>>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isUploading, setIsUploading] = useState(false)
 
   const subJobs = useMemo(() => {
     if (formData.majorJob) {
@@ -101,6 +108,76 @@ export default function ReviewFormPage() {
           document.getElementById("detailAddress")?.focus()
         },
       }).open()
+    }
+  }
+
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files
+    if (!files || files.length === 0) return
+
+    setIsUploading(true)
+    const newFiles: File[] = []
+    const newUrls: string[] = []
+
+    try {
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i]
+
+        // 파일 크기 체크 (10MB 제한)
+        if (file.size > 10 * 1024 * 1024) {
+          alert(`${file.name}은(는) 10MB를 초과합니다.`)
+          continue
+        }
+
+        // 파일 타입 체크
+        const allowedTypes = ["image/jpeg", "image/png", "image/jpg", "application/pdf", "image/heic", "image/heif"]
+        if (!allowedTypes.includes(file.type)) {
+          alert(`${file.name}은(는) 지원하지 않는 파일 형식입니다. (JPG, PNG, PDF만 가능)`)
+          continue
+        }
+
+        // 파일명 생성 (타임스탬프 + 원본명)
+        const timestamp = Date.now()
+        const fileName = `${timestamp}_${file.name}`
+
+        // Supabase Storage에 업로드
+        const publicUrl = await uploadFile(file, fileName)
+
+        newFiles.push(file)
+        newUrls.push(publicUrl)
+      }
+
+      setFormData((prev) => ({
+        ...prev,
+        proofFiles: [...prev.proofFiles, ...newFiles],
+        proofUrls: [...prev.proofUrls, ...newUrls],
+      }))
+
+      // 파일 input 초기화
+      event.target.value = ""
+    } catch (error) {
+      console.error("파일 업로드 오류:", error)
+      alert("파일 업로드 중 오류가 발생했습니다.")
+    } finally {
+      setIsUploading(false)
+    }
+  }
+
+  const removeFile = (index: number) => {
+    setFormData((prev) => ({
+      ...prev,
+      proofFiles: prev.proofFiles.filter((_, i) => i !== index),
+      proofUrls: prev.proofUrls.filter((_, i) => i !== index),
+    }))
+  }
+
+  const getFileIcon = (file: File) => {
+    if (file.type.startsWith("image/")) {
+      return <ImageIcon className="w-4 h-4" />
+    } else if (file.type === "application/pdf") {
+      return <FileText className="w-4 h-4" />
+    } else {
+      return <File className="w-4 h-4" />
     }
   }
 
@@ -225,10 +302,12 @@ export default function ReviewFormPage() {
         // 리뷰 내용
         reviews: formData.reviews,
 
+        // 증빙 자료 URL들
+        proofUrls: formData.proofUrls,
+
         // 메타 정보
         submittedAt: new Date().toISOString(),
         agreePrivacy: formData.agreePrivacy,
-        proofUrl: "", // 향후 추가 예정
       }
 
       console.log("제출할 데이터:", JSON.stringify(completeFormData, null, 2))
@@ -550,18 +629,77 @@ export default function ReviewFormPage() {
           {step === 2 && (
             <div className="space-y-6">
               <div className="text-center p-6 bg-blue-50 rounded-lg">
-                <h3 className="text-lg font-semibold mb-2">증빙 자료 안내</h3>
-                <p className="text-sm text-blue-700 mb-4">근무 사실을 증명할 수 있는 자료를 준비해주세요.</p>
+                <h3 className="text-lg font-semibold mb-2">증빙 자료 첨부</h3>
+                <p className="text-sm text-blue-700 mb-4">
+                  증빙 자료를 첨부해주세요. 증빙이 인증되면 이벤트 보상 제공 대상에 자동으로 포함됩니다. 하지만, 증빙
+                  자료가 첨부되지 않았더라도 근무했다는 사실이 리뷰를 통해 충분히 인정되면 이벤트 보상 제공 대상에
+                  포함될 수 있습니다.
+                </p>
                 <div className="text-left text-sm text-gray-600 space-y-1">
                   <p>• 재직증명서</p>
                   <p>• 급여명세서</p>
                   <p>• 사원증 사진</p>
                   <p>• 기타 근무 증빙 자료</p>
                 </div>
-                <p className="text-xs text-gray-500 mt-4">
-                  * 증빙 자료는 다음 단계에서 업로드하거나 별도로 제출 가능합니다.
-                </p>
               </div>
+
+              {/* 파일 업로드 영역 */}
+              <div className="border-2 border-dashed border-gray-300 rounded-lg p-6">
+                <div className="text-center">
+                  <Upload className="mx-auto h-12 w-12 text-gray-400" />
+                  <div className="mt-4">
+                    <label htmlFor="file-upload" className="cursor-pointer">
+                      <span className="mt-2 block text-sm font-medium text-gray-900">
+                        파일을 드래그하거나 클릭하여 업로드
+                      </span>
+                      <span className="mt-1 block text-xs text-gray-500">JPG, PNG, PDF 파일만 가능 (최대 10MB)</span>
+                    </label>
+                    <input
+                      id="file-upload"
+                      name="file-upload"
+                      type="file"
+                      className="sr-only"
+                      multiple
+                      accept=".jpg,.jpeg,.png,.pdf,.heic,.heif"
+                      onChange={handleFileUpload}
+                      disabled={isUploading}
+                    />
+                  </div>
+                  {isUploading && (
+                    <div className="mt-4">
+                      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto"></div>
+                      <p className="text-sm text-gray-500 mt-2">파일 업로드 중...</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* 업로드된 파일 목록 */}
+              {formData.proofFiles.length > 0 && (
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">업로드된 파일 ({formData.proofFiles.length}개)</Label>
+                  {formData.proofFiles.map((file, index) => (
+                    <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                      <div className="flex items-center space-x-3">
+                        {getFileIcon(file)}
+                        <div>
+                          <p className="text-sm font-medium text-gray-900">{file.name}</p>
+                          <p className="text-xs text-gray-500">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
+                        </div>
+                      </div>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeFile(index)}
+                        className="text-red-500 hover:text-red-700"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
 
               <div className="flex gap-4">
                 <Button type="button" onClick={handlePrev} variant="outline" className="w-full bg-transparent">
