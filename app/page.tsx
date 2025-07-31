@@ -610,7 +610,7 @@ export default function DemandReviewForm() {
     }))
   }
 
-  // Netlify Forms 제출
+  // Netlify Forms 제출 (수정된 방식)
   const handleSubmit = async () => {
     const validationErrors = validateCurrentPage()
     if (validationErrors.length > 0) {
@@ -672,39 +672,15 @@ export default function DemandReviewForm() {
         }
       })
 
-      // Netlify Forms로 제출
-      const response = await fetch("/", {
+      // Netlify Forms로 제출 (수정된 방식)
+      const response = await fetch("/forms/demand-review-form.html", {
         method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: new URLSearchParams(formDataToSubmit as any).toString(),
+        body: formDataToSubmit,
       })
 
       if (response.ok) {
-        alert("제출이 완료되었습니다! 감사합니다.")
-        // 폼 초기화
-        setFormData({
-          name: "",
-          email: "",
-          phone: "",
-          source: "",
-          education: "",
-          company: "",
-          postcode: "",
-          roadAddress: "",
-          detailAddress: "",
-          jobCategory: "",
-          jobSubCategory: "",
-          workStartYear: "",
-          workStartMonth: "",
-          workEndYear: "",
-          workEndMonth: "",
-          isCurrentJob: true,
-          proofFile: null,
-          reviews: {},
-          agreePrivacy: false,
-        })
-        setCurrentPage(1)
-        setTextCounts({})
+        // 성공 시 감사 페이지로 리다이렉트
+        window.location.href = "/thank-you"
       } else {
         throw new Error("제출에 실패했습니다.")
       }
@@ -729,34 +705,6 @@ export default function DemandReviewForm() {
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4">
       <div className="max-w-2xl mx-auto">
-        {/* Netlify Forms를 위한 숨겨진 폼 */}
-        <form name="demand-review-form" netlify="true" netlify-honeypot="bot-field" hidden>
-          <input type="text" name="name" />
-          <input type="email" name="email" />
-          <input type="tel" name="phone" />
-          <input type="text" name="source" />
-          <input type="text" name="education" />
-          <input type="text" name="company" />
-          <input type="text" name="postcode" />
-          <input type="text" name="roadAddress" />
-          <input type="text" name="detailAddress" />
-          <input type="text" name="jobCategory" />
-          <input type="text" name="jobSubCategory" />
-          <input type="text" name="workStartYear" />
-          <input type="text" name="workStartMonth" />
-          <input type="text" name="workEndYear" />
-          <input type="text" name="workEndMonth" />
-          <input type="text" name="isCurrentJob" />
-          <input type="file" name="proofFile" />
-          {reviewItems.map((item) => (
-            <div key={item.title}>
-              {item.type === "rating" && <input type="text" name={`${item.title}_rating`} />}
-              {item.type === "difficulty" && <input type="text" name={`${item.title}_difficulty`} />}
-              <textarea name={`${item.title}_text`}></textarea>
-            </div>
-          ))}
-        </form>
-
         <Card className={`${shake ? "animate-pulse" : ""}`}>
           <CardHeader className="text-center">
             <CardTitle className="text-2xl font-bold text-gray-900">근무 후기 이벤트 참여</CardTitle>
