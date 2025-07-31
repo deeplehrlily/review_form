@@ -239,12 +239,53 @@ export default function WorkReviewForm() {
     window.scrollTo({ top: 0, behavior: "smooth" })
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (validatePage(3)) {
-      // Netlify Forms will handle the submission
       const form = e.target as HTMLFormElement
-      form.submit()
+      const formData = new FormData(form)
+
+      // 모든 폼 데이터를 하나의 문자열로 합치기
+      const allData: { [key: string]: string } = {}
+
+      // 기본 정보
+      allData.name = formData.get("name") as string
+      allData.email = formData.get("email") as string
+      allData.phone = formData.get("phone") as string
+      allData.source = formData.get("source") as string
+      allData.education = formData.get("education") as string
+      allData.company = formData.get("company") as string
+      allData.address = `${formData.get("postcode")} ${formData.get("roadAddress")} ${formData.get("detailAddress")}`
+      allData.majorCategory = formData.get("majorCategory") as string
+      allData.minorCategory = formData.get("minorCategory") as string
+      allData.workPeriod = `${formData.get("workStartYear")}년 ${formData.get("workStartMonth")}월 ~ ${isCurrentJob ? "현재" : `${formData.get("workEndYear")}년 ${formData.get("workEndMonth")}월`}`
+
+      // 리뷰 데이터
+      reviewItems.forEach((item) => {
+        if (!item.isAdvice) {
+          allData[`${item.title}_rating`] = formData.get(`${item.title}-rating`) as string
+        }
+        allData[`${item.title}_detail`] = formData.get(`${item.title}-detail`) as string
+      })
+
+      try {
+        const response = await fetch("/", {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: new URLSearchParams({
+            "form-name": "work-review",
+            ...allData,
+          }).toString(),
+        })
+
+        if (response.ok) {
+          alert("제출이 완료되었습니다!")
+        } else {
+          alert("제출 중 오류가 발생했습니다. 다시 시도해주세요.")
+        }
+      } catch (error) {
+        alert("제출 중 오류가 발생했습니다. 다시 시도해주세요.")
+      }
     }
   }
 
@@ -283,6 +324,26 @@ export default function WorkReviewForm() {
 
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4">
+      {/* Hidden form for Netlify */}
+      <form name="work-review" netlify="true" hidden>
+        <input type="text" name="name" />
+        <input type="email" name="email" />
+        <input type="text" name="phone" />
+        <input type="text" name="source" />
+        <input type="text" name="education" />
+        <input type="text" name="company" />
+        <input type="text" name="address" />
+        <input type="text" name="majorCategory" />
+        <input type="text" name="minorCategory" />
+        <input type="text" name="workPeriod" />
+        {reviewItems.map((item) => (
+          <div key={item.title}>
+            {!item.isAdvice && <input type="text" name={`${item.title}_rating`} />}
+            <textarea name={`${item.title}_detail`}></textarea>
+          </div>
+        ))}
+      </form>
+
       <div className="max-w-2xl mx-auto">
         <Card className="shadow-lg">
           <CardHeader className="text-center">
@@ -297,9 +358,7 @@ export default function WorkReviewForm() {
           </CardHeader>
 
           <CardContent className="space-y-6">
-            <form name="work-review" method="POST" data-netlify="true" onSubmit={handleSubmit}>
-              <input type="hidden" name="form-name" value="work-review" />
-
+            <form onSubmit={handleSubmit}>
               {/* Page 1 - Basic Information */}
               {currentPage === 1 && (
                 <div className="space-y-4">
@@ -368,7 +427,6 @@ export default function WorkReviewForm() {
                       className="w-full p-2 border rounded-md"
                       onChange={(e) => {
                         setSelectedMajorCategory(e.target.value)
-                        // 소분류 초기화
                         const minorSelect = document.querySelector('select[name="minorCategory"]') as HTMLSelectElement
                         if (minorSelect) minorSelect.value = ""
                       }}
