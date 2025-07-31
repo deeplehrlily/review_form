@@ -1,2 +1,5 @@
+[build]
+  publish = "public"
+
 [[forms]]
   name = "work-review"
