@@ -888,7 +888,7 @@ export default function DemandReviewForm() {
                             <SelectValue placeholder="년도" />
                           </SelectTrigger>
                           <SelectContent>
-                            {Array.from({ length: 30 }, (_, i) => 2024 - i).map((year) => (
+                            {Array.from({ length: 31 }, (_, i) => 2025 - i).map((year) => (
                               <SelectItem key={year} value={year.toString()}>
                                 {year}년
                               </SelectItem>
@@ -924,7 +924,7 @@ export default function DemandReviewForm() {
                               <SelectValue placeholder="년도" />
                             </SelectTrigger>
                             <SelectContent>
-                              {Array.from({ length: 30 }, (_, i) => 2024 - i).map((year) => (
+                              {Array.from({ length: 31 }, (_, i) => 2025 - i).map((year) => (
                                 <SelectItem key={year} value={year.toString()}>
                                   {year}년
                                 </SelectItem>
