@@ -411,189 +411,273 @@
     </div>
 
     <script>
-        let currentPage = 1;
-        const totalPages = 3;
+    let currentPage = 1;
+    const totalPages = 3;
 
-        const minorCategories = {
-            "10001": [
-                {id: "1000001", name: "호텔·여행·항공"},
-                {id: "1000002", name: "스포츠·여가·레저"},
-                {id: "1000003", name: "음식료·외식·프랜차이즈"},
-                {id: "1000004", name: "뷰티·미용"}
-            ],
-            "10002": [
-                {id: "1000011", name: "은행·금융"},
-                {id: "1000012", name: "캐피탈·대출"},
-                {id: "1000013", name: "증권·보험·카드"}
-            ],
-            "10007": [
-                {id: "1000038", name: "솔루션·SI·CRM·ERP"},
-                {id: "1000039", name: "웹에이전시"},
-                {id: "1000040", name: "쇼핑몰·오픈마켓·소셜커머스"}
-            ],
-            "10031": [
-                {id: "1000229", name: "백엔드개발자"},
-                {id: "1000230", name: "프론트엔드개발자"},
-                {id: "1000231", name: "웹개발자"},
-                {id: "1000232", name: "앱개발자"}
-            ]
-        };
+    const minorCategories = {
+        "10001": [
+            {id: "1000001", name: "호텔·여행·항공"},
+            {id: "1000002", name: "스포츠·여가·레저"},
+            {id: "1000003", name: "음식료·외식·프랜차이즈"},
+            {id: "1000004", name: "뷰티·미용"}
+        ],
+        "10002": [
+            {id: "1000011", name: "은행·금융"},
+            {id: "1000012", name: "캐피탈·대출"},
+            {id: "1000013", name: "증권·보험·카드"}
+        ],
+        "10007": [
+            {id: "1000038", name: "솔루션·SI·CRM·ERP"},
+            {id: "1000039", name: "웹에이전시"},
+            {id: "1000040", name: "쇼핑몰·오픈마켓·소셜커머스"}
+        ],
+        "10031": [
+            {id: "1000229", name: "백엔드개발자"},
+            {id: "1000230", name: "프론트엔드개발자"},
+            {id: "1000231", name: "웹개발자"},
+            {id: "1000232", name: "앱개발자"}
+        ]
+    };
 
-        function updateMinorCategories() {
-            const majorSelect = document.querySelector('select[name="majorCategory"]');
-            const minorSelect = document.getElementById('minorCategory');
-            const selectedMajor = majorSelect.value;
+    // 페이지 로드 시 저장된 데이터 복원
+    window.addEventListener('load', function() {
+        restoreFormData();
+    });
 
-            minorSelect.innerHTML = '<option value="">소분류를 선택해주세요</option>';
-
-            if (selectedMajor && minorCategories[selectedMajor]) {
-                minorCategories[selectedMajor].forEach(category => {
-                    const option = document.createElement('option');
-                    option.value = category.id;
-                    option.textContent = category.name;
-                    minorSelect.appendChild(option);
-                });
-            }
-        }
-
-        function toggleEndDate() {
-            const checkbox = document.getElementById('currentJob');
-            const endDateSection = document.getElementById('endDateSection');
-            
-            if (checkbox.checked) {
-                endDateSection.classList.add('hidden');
-            } else {
-                endDateSection.classList.remove('hidden');
-            }
-        }
-
-        function execDaumPostcode() {
-            new daum.Postcode({
-                oncomplete: function(data) {
-                    document.querySelector('input[name="postcode"]').value = data.zonecode;
-                    document.querySelector('input[name="roadAddress"]').value = data.roadAddress;
-                }
-            }).open();
-        }
-
-        function updateCharCount(textarea, fieldName) {
-            const count = textarea.value.length;
-            document.getElementById(fieldName + '-count').textContent = count;
-        }
-
-        function validatePage(page) {
-            const errors = [];
-            
-            if (page === 1) {
-                const requiredFields = ['name', 'email', 'phone', 'source', 'education', 'company', 'postcode', 'roadAddress', 'detailAddress', 'majorCategory', 'minorCategory', 'workStartYear', 'workStartMonth'];
-                
-                requiredFields.forEach(field => {
-                    const input = document.querySelector(`[name="${field}"]`);
-                    if (!input.value.trim()) {
-                        errors.push(`${field} 필드를 입력해주세요.`);
-                    }
-                });
-
-                // 이메일 형식 검증
-                const email = document.querySelector('[name="email"]').value;
-                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                if (email && !emailRegex.test(email)) {
-                    errors.push('올바른 이메일 형식을 입력해주세요.');
-                }
-
-                // 전화번호 형식 검증
-                const phone = document.querySelector('[name="phone"]').value;
-                const phoneRegex = /^010-\d{4}-\d{4}$/;
-                if (phone && !phoneRegex.test(phone)) {
-                    errors.push('올바른 전화번호 형식을 입력해주세요. (010-0000-0000)');
-                }
-
-                // 개인정보 동의 확인
-                if (!document.querySelector('[name="privacyConsent"]').checked) {
-                    errors.push('개인정보 수집 및 활용에 동의해주세요.');
-                }
-            }
-
-            if (page === 3) {
-                const reviewFields = ['근무환경시설', '근무강도스트레스', '급여복지', '안정성전망', '사람들', '취업준비', '면접준비', '한마디'];
-                
-                reviewFields.forEach(field => {
-                    if (field !== '한마디') {
-                        const rating = document.querySelector(`[name="${field}-rating"]`);
-                        if (!rating.value) {
-                            errors.push(`${field} 평가를 선택해주세요.`);
-                        }
-                    }
-                    
-                    const detail = document.querySelector(`[name="${field}-detail"]`);
-                    if (!detail.value.trim() || detail.value.length < 50) {
-                        errors.push(`${field} 상세 리뷰를 50자 이상 입력해주세요.`);
-                    }
-                });
-            }
-
-            return errors;
-        }
-
-        function showErrors(errors) {
-            const errorDiv = document.getElementById('errorMessages');
-            const errorList = document.getElementById('errorList');
-            
-            if (errors.length > 0) {
-                errorList.innerHTML = errors.map(error => `<li>${error}</li>`).join('');
-                errorDiv.classList.remove('hidden');
-            } else {
-                errorDiv.classList.add('hidden');
-            }
-        }
-
-        function nextPage() {
-            const errors = validatePage(currentPage);
-            
-            if (errors.length > 0) {
-                showErrors(errors);
+    // 폼 데이터 저장
+    function saveFormData() {
+        const form = document.querySelector('form');
+        const formData = new FormData(form);
+        const data = {};
+        
+        // 모든 input, select, textarea 값 저장
+        const inputs = form.querySelectorAll('input, select, textarea');
+        inputs.forEach(input => {
+            if (input.type === 'checkbox') {
+                data[input.name] = input.checked;
+            } else if (input.type === 'file') {
+                // 파일은 localStorage에 저장할 수 없으므로 스킵
                 return;
+            } else {
+                data[input.name] = input.value;
+            }
+        });
+        
+        localStorage.setItem('workReviewFormData', JSON.stringify(data));
+    }
+
+    // 폼 데이터 복원
+    function restoreFormData() {
+        const savedData = localStorage.getItem('workReviewFormData');
+        if (!savedData) return;
+        
+        try {
+            const data = JSON.parse(savedData);
+            const form = document.querySelector('form');
+            
+            Object.keys(data).forEach(name => {
+                const input = form.querySelector(`[name="${name}"]`);
+                if (!input) return;
+                
+                if (input.type === 'checkbox') {
+                    input.checked = data[name];
+                } else if (input.type !== 'file') {
+                    input.value = data[name];
+                }
+            });
+            
+            // 대분류 선택 시 소분류 업데이트
+            if (data.majorCategory) {
+                updateMinorCategories();
+            }
+            
+            // 현재 재직중 체크박스 상태에 따라 종료일 섹션 표시/숨김
+            toggleEndDate();
+            
+            // 글자 수 카운터 업데이트
+            const textareas = form.querySelectorAll('textarea');
+            textareas.forEach(textarea => {
+                const fieldName = textarea.name.replace('-detail', '');
+                updateCharCount(textarea, fieldName);
+            });
+            
+        } catch (e) {
+            console.error('저장된 데이터 복원 실패:', e);
+        }
+    }
+
+    function updateMinorCategories() {
+        const majorSelect = document.querySelector('select[name="majorCategory"]');
+        const minorSelect = document.getElementById('minorCategory');
+        const selectedMajor = majorSelect.value;
+
+        minorSelect.innerHTML = '<option value="">소분류를 선택해주세요</option>';
+
+        if (selectedMajor && minorCategories[selectedMajor]) {
+            minorCategories[selectedMajor].forEach(category => {
+                const option = document.createElement('option');
+                option.value = category.id;
+                option.textContent = category.name;
+                minorSelect.appendChild(option);
+            });
+        }
+    }
+
+    function toggleEndDate() {
+        const checkbox = document.getElementById('currentJob');
+        const endDateSection = document.getElementById('endDateSection');
+        
+        if (checkbox.checked) {
+            endDateSection.classList.add('hidden');
+        } else {
+            endDateSection.classList.remove('hidden');
+        }
+    }
+
+    function execDaumPostcode() {
+        new daum.Postcode({
+            oncomplete: function(data) {
+                document.querySelector('input[name="postcode"]').value = data.zonecode;
+                document.querySelector('input[name="roadAddress"]').value = data.roadAddress;
+                // 주소 입력 후 데이터 저장
+                saveFormData();
+            }
+        }).open();
+    }
+
+    function updateCharCount(textarea, fieldName) {
+        const count = textarea.value.length;
+        document.getElementById(fieldName + '-count').textContent = count;
+    }
+
+    function validatePage(page) {
+        const errors = [];
+        
+        if (page === 1) {
+            const requiredFields = ['name', 'email', 'phone', 'source', 'education', 'company', 'postcode', 'roadAddress', 'detailAddress', 'majorCategory', 'minorCategory', 'workStartYear', 'workStartMonth'];
+            
+            requiredFields.forEach(field => {
+                const input = document.querySelector(`[name="${field}"]`);
+                if (!input.value.trim()) {
+                    errors.push(`${field} 필드를 입력해주세요.`);
+                }
+            });
+
+            // 이메일 형식 검증
+            const email = document.querySelector('[name="email"]').value;
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (email && !emailRegex.test(email)) {
+                errors.push('올바른 이메일 형식을 입력해주세요.');
             }
 
-            showErrors([]);
+            // 전화번호 형식 검증
+            const phone = document.querySelector('[name="phone"]').value;
+            const phoneRegex = /^010-\d{4}-\d{4}$/;
+            if (phone && !phoneRegex.test(phone)) {
+                errors.push('올바른 전화번호 형식을 입력해주세요. (010-0000-0000)');
+            }
 
-            if (currentPage < totalPages) {
-                document.getElementById(`page${currentPage}`).classList.add('hidden');
-                currentPage++;
-                document.getElementById(`page${currentPage}`).classList.remove('hidden');
-                updateProgress();
-                window.scrollTo(0, 0);
+            // 개인정보 동의 확인
+            if (!document.querySelector('[name="privacyConsent"]').checked) {
+                errors.push('개인정보 수집 및 활용에 동의해주세요.');
             }
         }
 
-        function prevPage() {
-            if (currentPage > 1) {
-                document.getElementById(`page${currentPage}`).classList.add('hidden');
-                currentPage--;
-                document.getElementById(`page${currentPage}`).classList.remove('hidden');
-                updateProgress();
-                window.scrollTo(0, 0);
-            }
+        if (page === 3) {
+            const reviewFields = ['근무환경시설', '근무강도스트레스', '급여복지', '안정성전망', '사람들', '취업준비', '면접준비', '한마디'];
+            
+            reviewFields.forEach(field => {
+                if (field !== '한마디') {
+                    const rating = document.querySelector(`[name="${field}-rating"]`);
+                    if (!rating.value) {
+                        errors.push(`${field} 평가를 선택해주세요.`);
+                    }
+                }
+                
+                const detail = document.querySelector(`[name="${field}-detail"]`);
+                if (!detail.value.trim() || detail.value.length < 50) {
+                    errors.push(`${field} 상세 리뷰를 50자 이상 입력해주세요.`);
+                }
+            });
         }
 
-        function updateProgress() {
-            const progress = (currentPage / totalPages) * 100;
-            document.getElementById('progressBar').style.width = progress + '%';
-            document.getElementById('currentStep').textContent = currentPage;
+        return errors;
+    }
+
+    function showErrors(errors) {
+        const errorDiv = document.getElementById('errorMessages');
+        const errorList = document.getElementById('errorList');
+        
+        if (errors.length > 0) {
+            errorList.innerHTML = errors.map(error => `<li>${error}</li>`).join('');
+            errorDiv.classList.remove('hidden');
+        } else {
+            errorDiv.classList.add('hidden');
+        }
+    }
+
+    function nextPage() {
+        // 현재 페이지 데이터 저장
+        saveFormData();
+        
+        const errors = validatePage(currentPage);
+        
+        if (errors.length > 0) {
+            showErrors(errors);
+            return;
         }
 
-        // 폼 제출 시 최종 검증 (기존 코드 교체)
-        document.querySelector('form').addEventListener('submit', function(e) {
+        showErrors([]);
+
+        if (currentPage < totalPages) {
+            document.getElementById(`page${currentPage}`).classList.add('hidden');
+            currentPage++;
+            document.getElementById(`page${currentPage}`).classList.remove('hidden');
+            updateProgress();
+            window.scrollTo(0, 0);
+        }
+    }
+
+    function prevPage() {
+        // 현재 페이지 데이터 저장
+        saveFormData();
+        
+        if (currentPage > 1) {
+            document.getElementById(`page${currentPage}`).classList.add('hidden');
+            currentPage--;
+            document.getElementById(`page${currentPage}`).classList.remove('hidden');
+            updateProgress();
+            window.scrollTo(0, 0);
+        }
+    }
+
+    function updateProgress() {
+        const progress = (currentPage / totalPages) * 100;
+        document.getElementById('progressBar').style.width = progress + '%';
+        document.getElementById('currentStep').textContent = currentPage;
+    }
+
+    // 입력 필드 변경 시 자동 저장
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.querySelector('form');
+        
+        // 모든 input, select, textarea에 이벤트 리스너 추가
+        form.addEventListener('input', saveFormData);
+        form.addEventListener('change', saveFormData);
+        
+        // 폼 제출 시 최종 검증
+        form.addEventListener('submit', function(e) {
             const errors = validatePage(3);
             if (errors.length > 0) {
                 e.preventDefault();
                 showErrors(errors);
                 return false;
             }
-    
-            // Netlify Forms가 자동으로 처리하도록 기본 제출 허용
-            // fetch나 AJAX 코드 없음
+            
+            // 제출 성공 시 저장된 데이터 삭제
+            localStorage.removeItem('workReviewFormData');
         });
-    </script>
+    });
+</script>
 </body>
 </html>
