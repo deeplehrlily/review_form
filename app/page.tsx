@@ -171,6 +171,7 @@ export default function WorkReviewForm() {
   const [errors, setErrors] = useState<string[]>([])
   const [characterCounts, setCharacterCounts] = useState<{ [key: string]: number }>({})
   const [selectedMajorCategory, setSelectedMajorCategory] = useState("")
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -241,51 +242,38 @@ export default function WorkReviewForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (validatePage(3)) {
+    if (!validatePage(3)) return
+
+    setIsSubmitting(true)
+
+    try {
       const form = e.target as HTMLFormElement
       const formData = new FormData(form)
 
-      // 모든 폼 데이터를 하나의 문자열로 합치기
-      const allData: { [key: string]: string } = {}
-
-      // 기본 정보
-      allData.name = formData.get("name") as string
-      allData.email = formData.get("email") as string
-      allData.phone = formData.get("phone") as string
-      allData.source = formData.get("source") as string
-      allData.education = formData.get("education") as string
-      allData.company = formData.get("company") as string
-      allData.address = `${formData.get("postcode")} ${formData.get("roadAddress")} ${formData.get("detailAddress")}`
-      allData.majorCategory = formData.get("majorCategory") as string
-      allData.minorCategory = formData.get("minorCategory") as string
-      allData.workPeriod = `${formData.get("workStartYear")}년 ${formData.get("workStartMonth")}월 ~ ${isCurrentJob ? "현재" : `${formData.get("workEndYear")}년 ${formData.get("workEndMonth")}월`}`
-
-      // 리뷰 데이터
-      reviewItems.forEach((item) => {
-        if (!item.isAdvice) {
-          allData[`${item.title}_rating`] = formData.get(`${item.title}-rating`) as string
-        }
-        allData[`${item.title}_detail`] = formData.get(`${item.title}-detail`) as string
+      // Formspree로 전송 (여기에 실제 Formspree URL을 넣어야 합니다)
+      const response = await fetch("https://formspree.io/f/YOUR_FORM_ID", {
+        method: "POST",
+        body: formData,
+        headers: {
+          Accept: "application/json",
+        },
       })
 
-      try {
-        const response = await fetch("/", {
-          method: "POST",
-          headers: { "Content-Type": "application/x-www-form-urlencoded" },
-          body: new URLSearchParams({
-            "form-name": "work-review",
-            ...allData,
-          }).toString(),
-        })
-
-        if (response.ok) {
-          alert("제출이 완료되었습니다!")
-        } else {
-          alert("제출 중 오류가 발생했습니다. 다시 시도해주세요.")
-        }
-      } catch (error) {
-        alert("제출 중 오류가 발생했습니다. 다시 시도해주세요.")
+      if (response.ok) {
+        alert("제출이 완료되었습니다! 감사합니다.")
+        // 폼 초기화
+        form.reset()
+        setCurrentPage(1)
+        setCharacterCounts({})
+        setSelectedMajorCategory("")
+        setIsCurrentJob(true)
+      } else {
+        throw new Error("제출 실패")
       }
+    } catch (error) {
+      alert("제출 중 오류가 발생했습니다. 다시 시도해주세요.")
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -324,26 +312,6 @@ export default function WorkReviewForm() {
 
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4">
-      {/* Hidden form for Netlify */}
-      <form name="work-review" netlify="true" hidden>
-        <input type="text" name="name" />
-        <input type="email" name="email" />
-        <input type="text" name="phone" />
-        <input type="text" name="source" />
-        <input type="text" name="education" />
-        <input type="text" name="company" />
-        <input type="text" name="address" />
-        <input type="text" name="majorCategory" />
-        <input type="text" name="minorCategory" />
-        <input type="text" name="workPeriod" />
-        {reviewItems.map((item) => (
-          <div key={item.title}>
-            {!item.isAdvice && <input type="text" name={`${item.title}_rating`} />}
-            <textarea name={`${item.title}_detail`}></textarea>
-          </div>
-        ))}
-      </form>
-
       <div className="max-w-2xl mx-auto">
         <Card className="shadow-lg">
           <CardHeader className="text-center">
@@ -629,8 +597,8 @@ export default function WorkReviewForm() {
                     <Button type="button" onClick={handlePrev} variant="outline" className="flex-1 bg-transparent">
                       이전
                     </Button>
-                    <Button type="submit" className="flex-1">
-                      제출하기
+                    <Button type="submit" disabled={isSubmitting} className="flex-1">
+                      {isSubmitting ? "제출 중..." : "제출하기"}
                     </Button>
                   </div>
                 </div>
