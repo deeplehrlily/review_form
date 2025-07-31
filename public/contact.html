@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>연락처 폼</title>
+</head>
+<body>
+    <!-- Netlify Forms 기본 폼 -->
+    <form name="contact" method="POST" data-netlify="true">
+        <p>
+            <label>이름: <input type="text" name="name" required /></label>
+        </p>
+        <p>
+            <label>이메일: <input type="email" name="email" required /></label>
+        </p>
+        <p>
+            <label>메시지: <textarea name="message" required></textarea></label>
+        </p>
+        <p>
+            <button type="submit">전송</button>
+        </p>
+    </form>
+</body>
+</html>
