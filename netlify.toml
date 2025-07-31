@@ -5,23 +5,26 @@
 [build.environment]
   NODE_VERSION = "18"
 
+# 서버리스 함수 설정
+[functions]
+  directory = "netlify/functions"
+
+# API 라우트를 Netlify Functions로 리다이렉트
 [[redirects]]
   from = "/api/*"
   to = "/.netlify/functions/:splat"
   status = 200
 
+# SPA 라우팅을 위한 설정
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
 
-[functions]
-  directory = "netlify/functions"
-
+# 보안 헤더 설정
 [[headers]]
   for = "/*"
   [headers.values]
     X-Frame-Options = "DENY"
     X-XSS-Protection = "1; mode=block"
     X-Content-Type-Options = "nosniff"
-    Referrer-Policy = "strict-origin-when-cross-origin"
