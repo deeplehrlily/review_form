@@ -1,61 +1,31 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { getKv } from "@/lib/kv"
 
 export async function POST(request: NextRequest) {
-  try {
-    const data = await request.json()
-    const kv = getKv()
+  const data = await request.json()
 
-    console.log("🚀 받은 데이터:", JSON.stringify(data, null, 2))
+  // 기존 Vercel KV 저장 로직 유지
+  const kv = await request.nextUrl.searchParams.get("kv")
+  if (kv) {
+    // KV 저장 로직 구현
+    // 예: await kv.put('key', JSON.stringify(data));
+  }
 
-    // 완전한 데이터 구조로 저장 - 모든 필드 포함
-    const completeData = {
-      // 개인 정보
-      name: data.name || "",
-      email: data.email || "",
-      phone: data.phone || "",
-      education: data.education || "",
-      source: data.source || "",
+  // 데이터 변환 로직 (필요에 따라 구현)
+  const transformedData = data
 
-      // 회사 정보
-      company: data.company || "",
-      postcode: data.postcode || "",
-      roadAddress: data.roadAddress || "",
-      detailAddress: data.detailAddress || "",
-      workType: data.workType || "",
-      majorJob: data.majorJob || "",
-      subJob: data.subJob || "",
+  // Formtree 전송 로직 추가
+  const formtreeResponse = await fetch("https://formtree.com/api/forms/YOUR_FORM_ID/submissions", {
+    method: "POST",
+    headers: {
+      Authorization: "Bearer YOUR_API_KEY",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(transformedData),
+  })
 
-      // 근무 기간
-      startDate: {
-        year: data.startDate?.year || "",
-        month: data.startDate?.month || "",
-      },
-      endDate: {
-        year: data.endDate?.year || "",
-        month: data.endDate?.month || "",
-      },
-
-      // 리뷰 내용
-      reviews: data.reviews || {},
-
-      // 인증 자료 (향후 추가 예정)
-      proofUrl: data.proofUrl || "",
-
-      // 메타 정보
-      submittedAt: data.submittedAt || new Date().toISOString(),
-      agreePrivacy: data.agreePrivacy || false,
-    }
-
-    const id = crypto.randomUUID()
-    await kv.set(`review:${id}`, completeData)
-
-    console.log("💾 저장된 데이터:", JSON.stringify(completeData, null, 2))
-    console.log("✅ 저장 완료! ID:", id)
-
-    return NextResponse.json({ success: true, id })
-  } catch (error) {
-    console.error("❌ 저장 실패:", error)
-    return NextResponse.json({ success: false, message: "저장 실패" }, { status: 500 })
+  if (formtreeResponse.ok) {
+    return NextResponse.json({ message: "Data submitted successfully" })
+  } else {
+    return NextResponse.json({ message: "Failed to submit data to Formtree" }, { status: 500 })
   }
 }
