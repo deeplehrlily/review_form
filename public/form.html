@@ -19,7 +19,16 @@
                     <p class="text-gray-600 mt-2"><span id="currentStep">1</span> / 3</p>
                 </div>
 
-                <form name="work-review" method="POST" data-netlify="true" data-netlify-honeypot="bot-field" enctype="multipart/form-data">
+                <!-- Netlify Forms 설정 -->
+                <form 
+                    name="work-review" 
+                    method="POST" 
+                    action="/success.html"
+                    data-netlify="true" 
+                    data-netlify-honeypot="bot-field" 
+                    enctype="multipart/form-data"
+                >
+                    <!-- 필수 숨김 필드들 -->
                     <input type="hidden" name="form-name" value="work-review" />
                     <p class="hidden">
                         <label>Don't fill this out if you're human: <input name="bot-field" /></label>
@@ -134,7 +143,7 @@
                                     </div>
 
                                     <div class="flex items-center gap-2">
-                                        <input type="checkbox" id="currentJob" name="isCurrentJob" checked onchange="toggleEndDate()">
+                                        <input type="checkbox" id="currentJob" name="isCurrentJob" value="true" checked onchange="toggleEndDate()">
                                         <label for="currentJob" class="text-sm">현재 재직중</label>
                                     </div>
 
@@ -170,7 +179,7 @@
                             </div>
 
                             <div class="flex items-center gap-2">
-                                <input type="checkbox" id="privacy" name="privacyConsent" required>
+                                <input type="checkbox" id="privacy" name="privacyConsent" value="true" required>
                                 <label for="privacy" class="text-sm">개인정보 수집 및 활용에 동의합니다. (개인정보는 수집만 하고 어디에 노출되지 않습니다) *</label>
                             </div>
 
@@ -212,7 +221,7 @@
                                 </div>
                                 <div>
                                     <label class="block text-sm mb-2">평점 평가 *</label>
-                                    <select name="근무환경시설-rating" required class="w-full p-2 border rounded-md">
+                                    <select name="근무환경시설_rating" required class="w-full p-2 border rounded-md">
                                         <option value="">선택해주세요</option>
                                         <option value="5">5 (매우 좋음)</option>
                                         <option value="4">4 (좋음)</option>
@@ -224,7 +233,7 @@
                                 <div>
                                     <label class="block text-sm mb-2">상세 리뷰 *</label>
                                     <p class="text-xs text-gray-500 mb-2">사무실이 쾌적하고 근무 환경이 좋은지, 휴게 공간이나 카페테리아 등의 편의시설이 잘 갖춰져 있는지, 업무에 필요한 장비나 시설이 충분한지 등을 평가해 주세요.</p>
-                                    <textarea name="근무환경시설-detail" required rows="4" class="w-full p-2 border rounded-md resize-none" placeholder="최소 50자 이상 입력해주세요" oninput="updateCharCount(this, '근무환경시설')"></textarea>
+                                    <textarea name="근무환경시설_detail" required rows="4" class="w-full p-2 border rounded-md resize-none" placeholder="최소 50자 이상 입력해주세요" oninput="updateCharCount(this, '근무환경시설')"></textarea>
                                     <p class="text-xs text-gray-500 mt-1"><span id="근무환경시설-count">0</span>/50자 이상</p>
                                 </div>
                             </div>
@@ -237,7 +246,7 @@
                                 </div>
                                 <div>
                                     <label class="block text-sm mb-2">평점 평가 *</label>
-                                    <select name="근무강도스트레스-rating" required class="w-full p-2 border rounded-md">
+                                    <select name="근무강도스트레스_rating" required class="w-full p-2 border rounded-md">
                                         <option value="">선택해주세요</option>
                                         <option value="5">5 (매우 좋음)</option>
                                         <option value="4">4 (좋음)</option>
@@ -249,7 +258,7 @@
                                 <div>
                                     <label class="block text-sm mb-2">상세 리뷰 *</label>
                                     <p class="text-xs text-gray-500 mb-2">업무량이 적절한지, 야근이나 주말 근무는 얼마나 자주 있는지, 업무로 인한 스트레스는 어느 정도인지 등을 평가해 주세요.</p>
-                                    <textarea name="근무강도스트레스-detail" required rows="4" class="w-full p-2 border rounded-md resize-none" placeholder="최소 50자 이상 입력해주세요" oninput="updateCharCount(this, '근무강도스트레스')"></textarea>
+                                    <textarea name="근무강도스트레스_detail" required rows="4" class="w-full p-2 border rounded-md resize-none" placeholder="최소 50자 이상 입력해주세요" oninput="updateCharCount(this, '근무강도스트레스')"></textarea>
                                     <p class="text-xs text-gray-500 mt-1"><span id="근무강도스트레스-count">0</span>/50자 이상</p>
                                 </div>
                             </div>
@@ -262,7 +271,7 @@
                                 </div>
                                 <div>
                                     <label class="block text-sm mb-2">평점 평가 *</label>
-                                    <select name="급여복지-rating" required class="w-full p-2 border rounded-md">
+                                    <select name="급여복지_rating" required class="w-full p-2 border rounded-md">
                                         <option value="">선택해주세요</option>
                                         <option value="5">5 (매우 좋음)</option>
                                         <option value="4">4 (좋음)</option>
@@ -274,7 +283,7 @@
                                 <div>
                                     <label class="block text-sm mb-2">상세 리뷰 *</label>
                                     <p class="text-xs text-gray-500 mb-2">급여가 업계 평균 대비 어느 정도인지, 복지 혜택은 어떤지, 휴가 사용이 자유로운지 등을 평가해 주세요.</p>
-                                    <textarea name="급여복지-detail" required rows="4" class="w-full p-2 border rounded-md resize-none" placeholder="최소 50자 이상 입력해주세요" oninput="updateCharCount(this, '급여복지')"></textarea>
+                                    <textarea name="급여복지_detail" required rows="4" class="w-full p-2 border rounded-md resize-none" placeholder="최소 50자 이상 입력해주세요" oninput="updateCharCount(this, '급여복지')"></textarea>
                                     <p class="text-xs text-gray-500 mt-1"><span id="급여복지-count">0</span>/50자 이상</p>
                                 </div>
                             </div>
@@ -287,7 +296,7 @@
                                 </div>
                                 <div>
                                     <label class="block text-sm mb-2">평점 평가 *</label>
-                                    <select name="안정성전망-rating" required class="w-full p-2 border rounded-md">
+                                    <select name="안정성전망_rating" required class="w-full p-2 border rounded-md">
                                         <option value="">선택해주세요</option>
                                         <option value="5">5 (매우 좋음)</option>
                                         <option value="4">4 (좋음)</option>
@@ -299,7 +308,7 @@
                                 <div>
                                     <label class="block text-sm mb-2">상세 리뷰 *</label>
                                     <p class="text-xs text-gray-500 mb-2">회사가 안정적으로 운영되고 있는지, 앞으로의 성장 가능성은 어떤지 등을 평가해 주세요.</p>
-                                    <textarea name="안정성전망-detail" required rows="4" class="w-full p-2 border rounded-md resize-none" placeholder="최소 50자 이상 입력해주세요" oninput="updateCharCount(this, '안정성전망')"></textarea>
+                                    <textarea name="안정성전망_detail" required rows="4" class="w-full p-2 border rounded-md resize-none" placeholder="최소 50자 이상 입력해주세요" oninput="updateCharCount(this, '안정성전망')"></textarea>
                                     <p class="text-xs text-gray-500 mt-1"><span id="안정성전망-count">0</span>/50자 이상</p>
                                 </div>
                             </div>
@@ -312,7 +321,7 @@
                                 </div>
                                 <div>
                                     <label class="block text-sm mb-2">평점 평가 *</label>
-                                    <select name="사람들-rating" required class="w-full p-2 border rounded-md">
+                                    <select name="사람들_rating" required class="w-full p-2 border rounded-md">
                                         <option value="">선택해주세요</option>
                                         <option value="5">5 (매우 좋음)</option>
                                         <option value="4">4 (좋음)</option>
@@ -324,7 +333,7 @@
                                 <div>
                                     <label class="block text-sm mb-2">상세 리뷰 *</label>
                                     <p class="text-xs text-gray-500 mb-2">동료들과의 관계는 어떤지, 상사나 관리자들은 어떤지, 전반적인 회사 분위기나 문화는 어떤지 등을 평가해 주세요.</p>
-                                    <textarea name="사람들-detail" required rows="4" class="w-full p-2 border rounded-md resize-none" placeholder="최소 50자 이상 입력해주세요" oninput="updateCharCount(this, '사람들')"></textarea>
+                                    <textarea name="사람들_detail" required rows="4" class="w-full p-2 border rounded-md resize-none" placeholder="최소 50자 이상 입력해주세요" oninput="updateCharCount(this, '사람들')"></textarea>
                                     <p class="text-xs text-gray-500 mt-1"><span id="사람들-count">0</span>/50자 이상</p>
                                 </div>
                             </div>
@@ -337,7 +346,7 @@
                                 </div>
                                 <div>
                                     <label class="block text-sm mb-2">난이도 평가 *</label>
-                                    <select name="취업준비-rating" required class="w-full p-2 border rounded-md">
+                                    <select name="취업준비_rating" required class="w-full p-2 border rounded-md">
                                         <option value="">선택해주세요</option>
                                         <option value="1">1 (쉬움)</option>
                                         <option value="2">2</option>
@@ -348,7 +357,7 @@
                                 <div>
                                     <label class="block text-sm mb-2">상세 리뷰 *</label>
                                     <p class="text-xs text-gray-500 mb-2">이 회사에 취업하기 위해 어떤 준비가 필요한지, 어느 정도의 스펙이나 경력이 요구되는지 등을 평가해 주세요.</p>
-                                    <textarea name="취업준비-detail" required rows="4" class="w-full p-2 border rounded-md resize-none" placeholder="최소 50자 이상 입력해주세요" oninput="updateCharCount(this, '취업준비')"></textarea>
+                                    <textarea name="취업준비_detail" required rows="4" class="w-full p-2 border rounded-md resize-none" placeholder="최소 50자 이상 입력해주세요" oninput="updateCharCount(this, '취업준비')"></textarea>
                                     <p class="text-xs text-gray-500 mt-1"><span id="취업준비-count">0</span>/50자 이상</p>
                                 </div>
                             </div>
@@ -361,7 +370,7 @@
                                 </div>
                                 <div>
                                     <label class="block text-sm mb-2">난이도 평가 *</label>
-                                    <select name="면접준비-rating" required class="w-full p-2 border rounded-md">
+                                    <select name="면접준비_rating" required class="w-full p-2 border rounded-md">
                                         <option value="">선택해주세요</option>
                                         <option value="1">1 (쉬움)</option>
                                         <option value="2">2</option>
@@ -372,7 +381,7 @@
                                 <div>
                                     <label class="block text-sm mb-2">상세 리뷰 *</label>
                                     <p class="text-xs text-gray-500 mb-2">면접 과정은 어떻게 진행되는지, 어떤 질문들이 나오는지, 면접 분위기는 어떤지 등을 평가해 주세요.</p>
-                                    <textarea name="면접준비-detail" required rows="4" class="w-full p-2 border rounded-md resize-none" placeholder="최소 50자 이상 입력해주세요" oninput="updateCharCount(this, '면접준비')"></textarea>
+                                    <textarea name="면접준비_detail" required rows="4" class="w-full p-2 border rounded-md resize-none" placeholder="최소 50자 이상 입력해주세요" oninput="updateCharCount(this, '면접준비')"></textarea>
                                     <p class="text-xs text-gray-500 mt-1"><span id="면접준비-count">0</span>/50자 이상</p>
                                 </div>
                             </div>
@@ -385,7 +394,7 @@
                                 <div>
                                     <label class="block text-sm mb-2">상세 리뷰 *</label>
                                     <p class="text-xs text-gray-500 mb-2">앞으로 이 회사에서 일하게 될 사람들에게 조언이나 당부하고 싶은 말씀을 자유롭게 작성해 주세요.</p>
-                                    <textarea name="한마디-detail" required rows="4" class="w-full p-2 border rounded-md resize-none" placeholder="최소 50자 이상 입력해주세요" oninput="updateCharCount(this, '한마디')"></textarea>
+                                    <textarea name="한마디_detail" required rows="4" class="w-full p-2 border rounded-md resize-none" placeholder="최소 50자 이상 입력해주세요" oninput="updateCharCount(this, '한마디')"></textarea>
                                     <p class="text-xs text-gray-500 mt-1"><span id="한마디-count">0</span>/50자 이상</p>
                                 </div>
                             </div>
@@ -441,7 +450,6 @@
 
         // 강화된 데이터 저장 함수
         function saveAllFormData() {
-            console.log('데이터 저장 중...');
             const form = document.querySelector('form');
             const formData = {};
             
@@ -459,21 +467,15 @@
             });
             
             localStorage.setItem('workReviewData', JSON.stringify(formData));
-            console.log('저장된 데이터:', formData);
         }
 
         // 강화된 데이터 복원 함수
         function restoreAllFormData() {
-            console.log('데이터 복원 중...');
             const savedData = localStorage.getItem('workReviewData');
-            if (!savedData) {
-                console.log('저장된 데이터 없음');
-                return;
-            }
+            if (!savedData) return;
             
             try {
                 const data = JSON.parse(savedData);
-                console.log('복원할 데이터:', data);
                 
                 Object.keys(data).forEach(name => {
                     const input = document.querySelector(`[name="${name}"]`);
@@ -504,13 +506,12 @@
                 // 글자 수 카운터 업데이트
                 const textareas = document.querySelectorAll('textarea');
                 textareas.forEach(textarea => {
-                    if (textarea.name.includes('-detail')) {
-                        const fieldName = textarea.name.replace('-detail', '');
+                    if (textarea.name.includes('_detail')) {
+                        const fieldName = textarea.name.replace('_detail', '');
                         updateCharCount(textarea, fieldName);
                     }
                 });
                 
-                console.log('데이터 복원 완료');
             } catch (e) {
                 console.error('데이터 복원 실패:', e);
             }
@@ -532,7 +533,6 @@
                 });
             }
             
-            // 데이터 저장
             saveAllFormData();
         }
 
@@ -546,7 +546,6 @@
                 endDateSection.classList.remove('hidden');
             }
             
-            // 데이터 저장
             saveAllFormData();
         }
 
@@ -555,7 +554,6 @@
                 oncomplete: function(data) {
                     document.querySelector('input[name="postcode"]').value = data.zonecode;
                     document.querySelector('input[name="roadAddress"]').value = data.roadAddress;
-                    // 주소 입력 후 데이터 저장
                     saveAllFormData();
                 }
             }).open();
@@ -568,7 +566,6 @@
                 countElement.textContent = count;
             }
             
-            // 데이터 저장
             saveAllFormData();
         }
 
@@ -610,13 +607,13 @@
                 
                 reviewFields.forEach(field => {
                     if (field !== '한마디') {
-                        const rating = document.querySelector(`[name="${field}-rating"]`);
+                        const rating = document.querySelector(`[name="${field}_rating"]`);
                         if (!rating || !rating.value) {
                             errors.push(`${field} 평가를 선택해주세요.`);
                         }
                     }
                     
-                    const detail = document.querySelector(`[name="${field}-detail"]`);
+                    const detail = document.querySelector(`[name="${field}_detail"]`);
                     if (!detail || !detail.value.trim() || detail.value.length < 50) {
                         errors.push(`${field} 상세 리뷰를 50자 이상 입력해주세요.`);
                     }
@@ -639,7 +636,6 @@
         }
 
         function nextPage() {
-            // 현재 페이지 데이터 저장
             saveAllFormData();
             
             const errors = validatePage(currentPage);
@@ -661,7 +657,6 @@
         }
 
         function prevPage() {
-            // 현재 페이지 데이터 저장
             saveAllFormData();
             
             if (currentPage > 1) {
@@ -681,7 +676,6 @@
 
         // 페이지 로드 시 데이터 복원
         window.addEventListener('load', function() {
-            console.log('페이지 로드됨');
             restoreAllFormData();
         });
 
@@ -689,16 +683,8 @@
         document.addEventListener('DOMContentLoaded', function() {
             const form = document.querySelector('form');
             
-            // 모든 input, select, textarea에 이벤트 리스너 추가
-            form.addEventListener('input', function(e) {
-                console.log('입력 변경:', e.target.name, e.target.value);
-                saveAllFormData();
-            });
-            
-            form.addEventListener('change', function(e) {
-                console.log('선택 변경:', e.target.name, e.target.value);
-                saveAllFormData();
-            });
+            form.addEventListener('input', saveAllFormData);
+            form.addEventListener('change', saveAllFormData);
             
             // 폼 제출 시 저장된 데이터 삭제
             form.addEventListener('submit', function(e) {
@@ -711,10 +697,8 @@
                 
                 // 제출 성공 시 저장된 데이터 삭제
                 localStorage.removeItem('workReviewData');
-                console.log('폼 제출됨, 저장된 데이터 삭제');
             });
             
-            // 초기 데이터 복원
             restoreAllFormData();
         });
     </script>
