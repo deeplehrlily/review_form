@@ -8,6 +8,29 @@
     <script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
 </head>
 <body class="bg-gray-50">
+    <!-- 테스트 섹션 추가 -->
+    <div id="test-section" class="max-w-md mx-auto bg-yellow-50 border-2 border-yellow-200 p-6 rounded-lg shadow mb-8">
+        <h2 class="text-lg font-bold mb-4">🧪 빠른 테스트</h2>
+        
+        <div class="space-y-3">
+            <div>
+                <label class="block text-sm font-medium mb-1">테스트 이름</label>
+                <input type="text" id="test-name" value="홍길동" class="w-full px-3 py-2 border rounded">
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium mb-1">테스트 이메일</label>
+                <input type="email" id="test-email" value="test@example.com" class="w-full px-3 py-2 border rounded">
+            </div>
+            
+            <button onclick="quickTest()" class="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700">
+                빠른 테스트 실행
+            </button>
+        </div>
+        
+        <div id="test-result" class="mt-4 hidden p-3 rounded"></div>
+    </div>
+
     <!-- Netlify Forms를 위한 실제 폼 -->
     <form name="demand-review-form" method="POST" data-netlify="true" enctype="multipart/form-data" class="hidden">
         <input type="text" name="name" />
@@ -850,6 +873,48 @@
                 isSubmitting = false;
                 document.getElementById('submit-btn').textContent = '제출하기';
                 document.getElementById('submit-btn').disabled = false;
+            });
+        }
+
+        // 빠른 테스트 함수 추가
+        function quickTest() {
+            console.log('=== 빠른 테스트 시작 ===');
+            
+            const formData = new FormData();
+            formData.append('form-name', 'demand-review-form');
+            formData.append('name', document.getElementById('test-name').value);
+            formData.append('email', document.getElementById('test-email').value);
+            formData.append('company', '테스트 회사');
+            formData.append('submitted-at', new Date().toLocaleString('ko-KR'));
+            
+            console.log('FormData 내용:');
+            for (let [key, value] of formData.entries()) {
+                console.log(`${key}: ${value}`);
+            }
+            
+            fetch('/', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                console.log('응답 상태:', response.status);
+                const resultDiv = document.getElementById('test-result');
+                
+                if (response.ok) {
+                    resultDiv.textContent = '✅ 테스트 성공! Netlify 대시보드를 확인해보세요.';
+                    resultDiv.className = 'mt-4 p-3 rounded bg-green-100 text-green-800';
+                } else {
+                    resultDiv.textContent = `❌ 테스트 실패: ${response.status}`;
+                    resultDiv.className = 'mt-4 p-3 rounded bg-red-100 text-red-800';
+                }
+                resultDiv.classList.remove('hidden');
+            })
+            .catch(error => {
+                console.error('에러:', error);
+                const resultDiv = document.getElementById('test-result');
+                resultDiv.textContent = `❌ 에러: ${error.message}`;
+                resultDiv.className = 'mt-4 p-3 rounded bg-red-100 text-red-800';
+                resultDiv.classList.remove('hidden');
             });
         }
     </script>
