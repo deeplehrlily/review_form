@@ -466,9 +466,10 @@ const reviewItems = [
     type: "difficulty",
   },
   {
-    title: "이 곳에서 일하게 될 사람들에게 한마디",
-    description: "앞으로 이 회사에서 일하게 될 분들에게 조언이나 당부의 말씀을 남겨주세요.",
+    title: "이 리뷰의 한줄 요약",
+    description: "리뷰에서 제목으로 노출됩니다.",
     type: "text",
+    maxLength: 50,
   },
 ]
 
@@ -572,8 +573,18 @@ export default function DemandReviewForm() {
     if (currentPage === 3) {
       reviewItems.forEach((item) => {
         const review = formData.reviews[item.title]
-        if (!review?.text || review.text.length < 50) {
-          errors.push(`${item.title}: 상세 리뷰를 50자 이상 입력해주세요.`)
+        if (!review?.text) {
+          errors.push(`${item.title}: 내용을 입력해주세요.`)
+        } else if (item.maxLength) {
+          // maxLength가 있는 경우 (한마디)
+          if (review.text.length === 0) {
+            errors.push(`${item.title}: 내용을 입력해주세요.`)
+          }
+        } else {
+          // maxLength가 없는 경우 (50자 이상)
+          if (review.text.length < 50) {
+            errors.push(`${item.title}: 50자 이상 입력해주세요.`)
+          }
         }
         if (item.type === "rating" && !review?.rating) {
           errors.push(`${item.title}: 평가를 선택해주세요.`)
@@ -658,9 +669,11 @@ export default function DemandReviewForm() {
         formDataToSubmit.append("proofFile", formData.proofFile)
       }
 
-      // 리뷰 데이터
-      reviewItems.forEach((item) => {
+      // 리뷰 데이터 - 8번째 항목 "이 리뷰의 한줄 요약" 포함 확인
+      reviewItems.forEach((item, index) => {
         const review = formData.reviews[item.title]
+        console.log(`Processing item ${index + 1}: ${item.title}`, review) // 디버깅용
+
         if (review) {
           if (item.type === "rating") {
             formDataToSubmit.append(`${item.title}_rating`, review.rating || "")
@@ -669,13 +682,26 @@ export default function DemandReviewForm() {
             formDataToSubmit.append(`${item.title}_difficulty`, review.difficulty || "")
           }
           formDataToSubmit.append(`${item.title}_text`, review.text || "")
+
+          // 8번째 항목 특별 확인
+          if (item.title === "이 리뷰의 한줄 요약") {
+            console.log("8번째 항목 확인:", review.text)
+            formDataToSubmit.append("review_summary", review.text || "") // 추가 필드명으로도 저장
+          }
         }
       })
 
-      // Netlify Forms로 제출 (수정된 방식)
-      const response = await fetch("/forms/demand-review-form.html", {
+      // FormData 내용 확인 (디버깅용)
+      console.log("FormData entries:")
+      for (const [key, value] of formDataToSubmit.entries()) {
+        console.log(key, value)
+      }
+
+      // Netlify Forms로 제출 (올바른 엔드포인트)
+      const response = await fetch("/", {
         method: "POST",
-        body: formDataToSubmit,
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams(formDataToSubmit as any).toString(),
       })
 
       if (response.ok) {
@@ -1106,7 +1132,11 @@ export default function DemandReviewForm() {
                         rows={4}
                         value={formData.reviews[item.title]?.text || ""}
                         onChange={(e) => {
-                          const text = e.target.value
+                          let text = e.target.value
+                          // maxLength가 있는 경우 글자수 제한
+                          if (item.maxLength && text.length > item.maxLength) {
+                            text = text.substring(0, item.maxLength)
+                          }
                           setFormData((prev) => ({
                             ...prev,
                             reviews: {
@@ -1116,10 +1146,17 @@ export default function DemandReviewForm() {
                           }))
                           updateTextCount(item.title, text)
                         }}
-                        placeholder="최소 50자 이상 입력해주세요"
+                        placeholder={
+                          item.maxLength
+                            ? `최대 ${item.maxLength}자까지 입력 가능합니다`
+                            : "최소 50자 이상 입력해주세요"
+                        }
                         className="resize-none"
                       />
-                      <p className="text-xs text-gray-500 mt-1">{textCounts[item.title] || 0}/50자 이상</p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        {textCounts[item.title] || 0}
+                        {item.maxLength ? `/${item.maxLength}자` : "/50자 이상"}
+                      </p>
                     </div>
                   </div>
                 ))}
