@@ -41,6 +41,13 @@
             font-size: 0.75rem;
             margin-top: 0.25rem;
             display: none;
+            position: absolute;
+            background: white;
+            border: 1px solid #ef4444;
+            border-radius: 4px;
+            padding: 4px 8px;
+            z-index: 10;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         .error-message.show {
             display: block;
@@ -109,25 +116,25 @@
                 <div id="page-1" class="space-y-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">이름 *</label>
-                        <input type="text" id="name" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base" placeholder="이름을 입력해주세요" onblur="validateField('name')">
+                        <input type="text" id="name" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base" placeholder="이름을 입력해주세요">
                         <div id="name-error" class="error-message"></div>
                     </div>
 
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">이메일 *</label>
-                        <input type="email" id="email" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base" placeholder="admin@domain.com" onblur="validateField('email')">
+                        <input type="email" id="email" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base" placeholder="admin@domain.com">
                         <div id="email-error" class="error-message"></div>
                     </div>
 
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">전화번호 *</label>
-                        <input type="tel" id="phone" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base" placeholder="010-0000-0000" maxlength="13" oninput="formatPhoneNumber(this)" onblur="validateField('phone')">
+                        <input type="tel" id="phone" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base" placeholder="010-0000-0000" maxlength="13" oninput="formatPhoneNumber(this)">
                         <div id="phone-error" class="error-message"></div>
                     </div>
 
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">어떤 경로로 후기 이벤트를 접하게 되었나요? *</label>
-                        <select id="source" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base" onblur="validateField('source')">
+                        <select id="source" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base">
                             <option value="">선택해주세요</option>
                             <option value="디맨드 홈페이지">디맨드 홈페이지</option>
                             <option value="디맨드 인스타그램">디맨드 인스타그램</option>
@@ -142,7 +149,7 @@
 
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">최종학력 *</label>
-                        <select id="education" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base" onblur="validateField('education')">
+                        <select id="education" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base">
                             <option value="">선택해주세요</option>
                             <option value="고졸">고졸</option>
                             <option value="초대졸">초대졸</option>
@@ -154,25 +161,25 @@
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">회사명(근무지명) *</label>
                         <p class="text-xs text-gray-500 mb-2">가능한 줄임 없이 풀어서 써주세요 (하닉 → SK하이닉스)</p>
-                        <input type="text" id="company" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base" placeholder="회사명(근무지명)을 입력해주세요" onblur="validateField('company')">
+                        <input type="text" id="company" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base" placeholder="회사명(근무지명)을 입력해주세요">
                         <div id="company-error" class="error-message"></div>
                     </div>
 
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">사업장 주소 *</label>
                         <div class="flex flex-col sm:flex-row gap-2 mb-2">
-                            <input type="text" id="postcode" class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base" placeholder="우편번호" readonly onblur="validateField('postcode')">
+                            <input type="text" id="postcode" class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base" placeholder="우편번호" readonly>
                             <button type="button" onclick="execDaumPostcode()" class="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 text-sm whitespace-nowrap">주소 찾기</button>
                         </div>
                         <div id="postcode-error" class="error-message"></div>
                         <input type="text" id="roadAddress" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 mb-2 text-sm sm:text-base" placeholder="도로명 주소" readonly>
-                        <input type="text" id="detailAddress" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base" placeholder="상세주소 입력" onblur="validateField('detailAddress')">
+                        <input type="text" id="detailAddress" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base" placeholder="상세주소 입력">
                         <div id="detailAddress-error" class="error-message"></div>
                     </div>
 
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">직무 대분류 *</label>
-                        <select id="jobCategory" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base" onchange="updateJobSubCategories()" onblur="validateField('jobCategory')">
+                        <select id="jobCategory" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base" onchange="updateJobSubCategories()">
                             <option value="">선택해주세요</option>
                             <option value="10001">서비스업</option>
                             <option value="10002">금융·은행업</option>
@@ -212,7 +219,7 @@
 
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">직무 소분류 *</label>
-                        <select id="jobSubCategory" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base" disabled onblur="validateField('jobSubCategory')">
+                        <select id="jobSubCategory" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base" disabled>
                             <option value="">대분류를 먼저 선택해주세요</option>
                         </select>
                         <div id="jobSubCategory-error" class="error-message"></div>
@@ -224,7 +231,7 @@
                             <div>
                                 <p class="text-sm text-gray-600 mb-2">시작일</p>
                                 <div class="flex gap-2">
-                                    <select id="workStartYear" class="flex-1 px-2 sm:px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" onblur="validateField('workStartYear')">
+                                    <select id="workStartYear" class="flex-1 px-2 sm:px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
                                         <option value="">년도</option>
                                         <option value="2025">2025년</option>
                                         <option value="2024">2024년</option>
@@ -259,7 +266,7 @@
                                         <option value="1995">1995년</option>
                                         <option value="1994">1994년</option>
                                     </select>
-                                    <select id="workStartMonth" class="flex-1 px-2 sm:px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" onblur="validateField('workStartMonth')">
+                                    <select id="workStartMonth" class="flex-1 px-2 sm:px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
                                         <option value="">월</option>
                                         <option value="1">1월</option>
                                         <option value="2">2월</option>
@@ -280,7 +287,7 @@
                             <div>
                                 <p class="text-sm text-gray-600 mb-2">종료일</p>
                                 <div id="end-date-selects" class="flex gap-2 mb-2">
-                                    <select id="workEndYear" class="flex-1 px-2 sm:px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" onblur="validateField('workEndYear')">
+                                    <select id="workEndYear" class="flex-1 px-2 sm:px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
                                         <option value="">년도</option>
                                         <option value="2025">2025년</option>
                                         <option value="2024">2024년</option>
@@ -315,7 +322,7 @@
                                         <option value="1995">1995년</option>
                                         <option value="1994">1994년</option>
                                     </select>
-                                    <select id="workEndMonth" class="flex-1 px-2 sm:px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" onblur="validateField('workEndMonth')">
+                                    <select id="workEndMonth" class="flex-1 px-2 sm:px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
                                         <option value="">월</option>
                                         <option value="1">1월</option>
                                         <option value="2">2월</option>
@@ -341,7 +348,7 @@
                     </div>
 
                     <div class="flex items-start space-x-2">
-                        <input type="checkbox" id="agreePrivacy" class="rounded mt-1" onblur="validateField('agreePrivacy')">
+                        <input type="checkbox" id="agreePrivacy" class="rounded mt-1">
                         <label for="agreePrivacy" class="text-sm leading-relaxed">개인정보 수집 및 활용에 동의합니다. (개인정보는 수집만 하고 어디에 노출되지 않습니다) *</label>
                     </div>
                     <div id="agreePrivacy-error" class="error-message"></div>
@@ -365,7 +372,7 @@
                                 증빙자료를 업로드해주세요<br>
                                 (예: 사원증, 사내 시스템 화면 등 / 이미지 또는 PDF 파일, 15일 이내 자동 삭제됩니다)
                             </p>
-                            <input type="file" id="proofFile" accept="image/*,application/pdf" class="w-full max-w-xs mx-auto text-sm" onchange="updateFileName()" onblur="validateField('proofFile')">
+                            <input type="file" id="proofFile" accept="image/*,application/pdf" class="w-full max-w-xs mx-auto text-sm" onchange="updateFileName()">
                             <p id="file-name" class="text-sm text-green-600 mt-2 hidden"></p>
                             <div id="proofFile-error" class="error-message"></div>
                         </div>
@@ -389,7 +396,7 @@
                         </div>
                         <div>
                             <label class="text-xs sm:text-sm">상세 리뷰 *</label>
-                            <textarea id="review-summary" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none text-sm sm:text-base" placeholder="10자 이상 50자 이하로 입력해주세요" maxlength="50" oninput="updateTextCount('summary', this.value)" onblur="validateField('review-summary')"></textarea>
+                            <textarea id="review-summary" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none text-sm sm:text-base" placeholder="10자 이상 50자 이하로 입력해주세요" maxlength="50" oninput="updateTextCount('summary', this.value)"></textarea>
                             <p class="text-xs text-gray-500 mt-1"><span id="count-summary">0</span>/50자 이하</p>
                             <div id="review-summary-error" class="error-message"></div>
                         </div>
@@ -403,7 +410,7 @@
                         </div>
                         <div>
                             <label class="text-xs sm:text-sm">평가</label>
-                            <select id="work-env-rating" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base" onblur="validateField('work-env-rating')">
+                            <select id="work-env-rating" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base">
                                 <option value="">평가를 선택해주세요</option>
                                 <option value="5">5점 (매우 좋음)</option>
                                 <option value="4">4점 (좋음)</option>
@@ -415,7 +422,7 @@
                         </div>
                         <div>
                             <label class="text-xs sm:text-sm">상세 리뷰 *</label>
-                            <textarea id="work-env-text" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none text-sm sm:text-base" placeholder="최소 50자 이상 입력해주세요" oninput="updateTextCount('work-env', this.value)" onblur="validateField('work-env-text')"></textarea>
+                            <textarea id="work-env-text" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none text-sm sm:text-base" placeholder="최소 50자 이상 입력해주세요" oninput="updateTextCount('work-env', this.value)"></textarea>
                             <p class="text-xs text-gray-500 mt-1"><span id="count-work-env">0</span>/50자 이상</p>
                             <div id="work-env-text-error" class="error-message"></div>
                         </div>
@@ -429,7 +436,7 @@
                         </div>
                         <div>
                             <label class="text-xs sm:text-sm">평가</label>
-                            <select id="work-stress-rating" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base" onblur="validateField('work-stress-rating')">
+                            <select id="work-stress-rating" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base">
                                 <option value="">평가를 선택해주세요</option>
                                 <option value="5">5점 (매우 좋음)</option>
                                 <option value="4">4점 (좋음)</option>
@@ -441,7 +448,7 @@
                         </div>
                         <div>
                             <label class="text-xs sm:text-sm">상세 리뷰 *</label>
-                            <textarea id="work-stress-text" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none text-sm sm:text-base" placeholder="최소 50자 이상 입력해주세요" oninput="updateTextCount('work-stress', this.value)" onblur="validateField('work-stress-text')"></textarea>
+                            <textarea id="work-stress-text" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none text-sm sm:text-base" placeholder="최소 50자 이상 입력해주세요" oninput="updateTextCount('work-stress', this.value)"></textarea>
                             <p class="text-xs text-gray-500 mt-1"><span id="count-work-stress">0</span>/50자 이상</p>
                             <div id="work-stress-text-error" class="error-message"></div>
                         </div>
@@ -455,7 +462,7 @@
                         </div>
                         <div>
                             <label class="text-xs sm:text-sm">평가</label>
-                            <select id="salary-rating" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base" onblur="validateField('salary-rating')">
+                            <select id="salary-rating" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base">
                                 <option value="">평가를 선택해주세요</option>
                                 <option value="5">5점 (매우 좋음)</option>
                                 <option value="4">4점 (좋음)</option>
@@ -467,7 +474,7 @@
                         </div>
                         <div>
                             <label class="text-xs sm:text-sm">상세 리뷰 *</label>
-                            <textarea id="salary-text" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none text-sm sm:text-base" placeholder="최소 50자 이상 입력해주세요" oninput="updateTextCount('salary', this.value)" onblur="validateField('salary-text')"></textarea>
+                            <textarea id="salary-text" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none text-sm sm:text-base" placeholder="최소 50자 이상 입력해주세요" oninput="updateTextCount('salary', this.value)"></textarea>
                             <p class="text-xs text-gray-500 mt-1"><span id="count-salary">0</span>/50자 이상</p>
                             <div id="salary-text-error" class="error-message"></div>
                         </div>
@@ -481,7 +488,7 @@
                         </div>
                         <div>
                             <label class="text-xs sm:text-sm">평가</label>
-                            <select id="stability-rating" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base" onblur="validateField('stability-rating')">
+                            <select id="stability-rating" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base">
                                 <option value="">평가를 선택해주세요</option>
                                 <option value="5">5점 (매우 좋음)</option>
                                 <option value="4">4점 (좋음)</option>
@@ -493,7 +500,7 @@
                         </div>
                         <div>
                             <label class="text-xs sm:text-sm">상세 리뷰 *</label>
-                            <textarea id="stability-text" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none text-sm sm:text-base" placeholder="최소 50자 이상 입력해주세요" oninput="updateTextCount('stability', this.value)" onblur="validateField('stability-text')"></textarea>
+                            <textarea id="stability-text" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none text-sm sm:text-base" placeholder="최소 50자 이상 입력해주세요" oninput="updateTextCount('stability', this.value)"></textarea>
                             <p class="text-xs text-gray-500 mt-1"><span id="count-stability">0</span>/50자 이상</p>
                             <div id="stability-text-error" class="error-message"></div>
                         </div>
@@ -507,7 +514,7 @@
                         </div>
                         <div>
                             <label class="text-xs sm:text-sm">평가</label>
-                            <select id="people-rating" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base" onblur="validateField('people-rating')">
+                            <select id="people-rating" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base">
                                 <option value="">평가를 선택해주세요</option>
                                 <option value="5">5점 (매우 좋음)</option>
                                 <option value="4">4점 (좋음)</option>
@@ -519,7 +526,7 @@
                         </div>
                         <div>
                             <label class="text-xs sm:text-sm">상세 리뷰 *</label>
-                            <textarea id="people-text" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none text-sm sm:text-base" placeholder="최소 50자 이상 입력해주세요" oninput="updateTextCount('people', this.value)" onblur="validateField('people-text')"></textarea>
+                            <textarea id="people-text" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none text-sm sm:text-base" placeholder="최소 50자 이상 입력해주세요" oninput="updateTextCount('people', this.value)"></textarea>
                             <p class="text-xs text-gray-500 mt-1"><span id="count-people">0</span>/50자 이상</p>
                             <div id="people-text-error" class="error-message"></div>
                         </div>
@@ -533,7 +540,7 @@
                         </div>
                         <div>
                             <label class="text-xs sm:text-sm">난이도 평가</label>
-                            <select id="job-prep-difficulty" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base" onblur="validateField('job-prep-difficulty')">
+                            <select id="job-prep-difficulty" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base">
                                 <option value="">난이도를 선택해주세요</option>
                                 <option value="1">1 (쉬움)</option>
                                 <option value="2">2</option>
@@ -544,7 +551,7 @@
                         </div>
                         <div>
                             <label class="text-xs sm:text-sm">상세 리뷰 *</label>
-                            <textarea id="job-prep-text" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none text-sm sm:text-base" placeholder="취업 준비 과정에 대해 자유롭게 작성해주세요" oninput="updateTextCount('job-prep', this.value)" onblur="validateField('job-prep-text')"></textarea>
+                            <textarea id="job-prep-text" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none text-sm sm:text-base" placeholder="취업 준비 과정에 대해 자유롭게 작성해주세요" oninput="updateTextCount('job-prep', this.value)"></textarea>
                             <p class="text-xs text-gray-500 mt-1"><span id="count-job-prep">0</span>자</p>
                             <div id="job-prep-text-error" class="error-message"></div>
                         </div>
@@ -566,7 +573,7 @@
                         <div id="interview-content">
                             <div>
                                 <label class="text-xs sm:text-sm">난이도 평가</label>
-                                <select id="interview-difficulty" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base" onblur="validateField('interview-difficulty')">
+                                <select id="interview-difficulty" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base">
                                     <option value="">난이도를 선택해주세요</option>
                                     <option value="1">1 (쉬움)</option>
                                     <option value="2">2</option>
@@ -577,7 +584,7 @@
                             </div>
                             <div>
                                 <label class="text-xs sm:text-sm">상세 리뷰 *</label>
-                                <textarea id="interview-text" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none text-sm sm:text-base" placeholder="면접 과정에 대해 자유롭게 작성해주세요" oninput="updateTextCount('interview', this.value)" onblur="validateField('interview-text')"></textarea>
+                                <textarea id="interview-text" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none text-sm sm:text-base" placeholder="면접 과정에 대해 자유롭게 작성해주세요" oninput="updateTextCount('interview', this.value)"></textarea>
                                 <p class="text-xs text-gray-500 mt-1"><span id="count-interview">0</span>자</p>
                                 <div id="interview-text-error" class="error-message"></div>
                             </div>
@@ -592,7 +599,7 @@
                         </div>
                         <div>
                             <label class="text-xs sm:text-sm">상세 리뷰 *</label>
-                            <textarea id="advice-text" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none text-sm sm:text-base" placeholder="10자 이상 100자 이하로 입력해주세요" maxlength="100" oninput="updateTextCount('advice', this.value)" onblur="validateField('advice-text')"></textarea>
+                            <textarea id="advice-text" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none text-sm sm:text-base" placeholder="10자 이상 100자 이하로 입력해주세요" maxlength="100" oninput="updateTextCount('advice', this.value)"></textarea>
                             <p class="text-xs text-gray-500 mt-1"><span id="count-advice">0</span>/100자 이하</p>
                              <div id="advice-text-error" class="error-message"></div>
                         </div>
@@ -1023,7 +1030,6 @@
                     subCategorySelect.appendChild(option);
                 });
             }
-            validateField('jobSubCategory');
         }
 
         // 현재 재직중 체크박스 토글
@@ -1042,8 +1048,6 @@
             } else {
                 endDateSelects.style.display = 'flex';
             }
-            validateField('workEndYear');
-            validateField('workEndMonth');
         }
 
         // 파일명 업데이트
@@ -1057,7 +1061,6 @@
             } else {
                 fileName.classList.add('hidden');
             }
-            validateField('proofFile');
         }
 
         // 텍스트 카운트 업데이트
@@ -1489,9 +1492,6 @@
             }
             
             input.value = value;
-            
-            // 실시간 유효성 검사 추가
-            validateField('phone');
         }
 
         // 면접준비 섹션 토글 함수 추가
@@ -1514,6 +1514,12 @@
             } else {
                 interviewContent.style.display = 'block';
             }
+        }
+
+        function shakeCard() {
+            const card = document.getElementById('main-card');
+            card.classList.add('animate-pulse');
+            setTimeout(() => card.classList.remove('animate-pulse'), 400);
         }
 
         // 초기화
