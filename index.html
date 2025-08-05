@@ -1043,8 +1043,10 @@
                 endDateSelects.style.display = 'none';
                 workEndYear.value = '';
                 workEndMonth.value = '';
-                document.getElementById('workEndYear-error').classList.remove('show');
-                document.getElementById('workEndMonth-error').classList.remove('show');
+                const workEndYearError = document.getElementById('workEndYear-error');
+                const workEndMonthError = document.getElementById('workEndMonth-error');
+                if (workEndYearError) workEndYearError.classList.remove('show');
+                if (workEndMonthError) workEndMonthError.classList.remove('show');
             } else {
                 endDateSelects.style.display = 'flex';
             }
@@ -1413,12 +1415,16 @@
 
             if (isValid) {
                 field.classList.remove('error-field');
-                errorDiv.classList.remove('show');
-                errorDiv.textContent = '';
+                if (errorDiv) {
+                    errorDiv.classList.remove('show');
+                    errorDiv.textContent = '';
+                }
             } else {
                 field.classList.add('error-field');
-                errorDiv.classList.add('show');
-                errorDiv.textContent = errorMessage;
+                if (errorDiv) {
+                    errorDiv.classList.add('show');
+                    errorDiv.textContent = errorMessage;
+                }
             }
 
             return isValid;
@@ -1524,6 +1530,64 @@
                 submitBtn.textContent = '제출하기';
             }
         }
+
+        // 전화번호 자동 포맷팅 함수
+        function formatPhoneNumber(input) {
+            // 숫자만 추출
+            let value = input.value.replace(/[^\d]/g, '');
+            
+            // 11자리 초과 시 자르기
+            if (value.length > 11) {
+                value = value.slice(0, 11);
+            }
+            
+            // 포맷팅 적용
+            if (value.length >= 7) {
+                // 010-0000-0000 형식
+                value = value.replace(/(\d{3})(\d{4})(\d{4})/, '$1-$2-$3');
+            } else if (value.length >= 3) {
+                // 010-0000 형식
+                value = value.replace(/(\d{3})(\d{0,4})/, '$1-$2');
+            }
+            
+            input.value = value;
+        }
+
+        // 면접준비 섹션 토글 함수
+        function toggleInterviewSection() {
+            const isNA = document.getElementById('interview-na').checked;
+            const interviewContent = document.getElementById('interview-content');
+            const interviewDifficulty = document.getElementById('interview-difficulty');
+            const interviewText = document.getElementById('interview-text');
+            
+            if (isNA) {
+                interviewContent.style.display = 'none';
+                interviewDifficulty.value = '';
+                interviewText.value = '';
+                // 에러 메시지 제거
+                const difficultyError = document.getElementById('interview-difficulty-error');
+                const textError = document.getElementById('interview-text-error');
+                if (difficultyError) difficultyError.classList.remove('show');
+                if (textError) textError.classList.remove('show');
+                interviewDifficulty.classList.remove('error-field');
+                interviewText.classList.remove('error-field');
+                updateTextCount('interview', '');
+            } else {
+                interviewContent.style.display = 'block';
+            }
+        }
+
+        function shakeCard() {
+            const card = document.getElementById('main-card');
+            card.classList.add('animate-pulse');
+            setTimeout(() => card.classList.remove('animate-pulse'), 400);
+        }
+
+        // 초기화
+        document.addEventListener('DOMContentLoaded', function() {
+            // 현재 재직중 체크박스 초기 상태 설정
+            toggleCurrentJob();
+        });
 </script>
 </body>
 </html>
