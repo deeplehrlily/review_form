@@ -466,9 +466,10 @@ const reviewItems = [
     type: "difficulty",
   },
   {
-    title: "이 곳에서 일하게 될 사람들에게 한마디",
-    description: "앞으로 이 회사에서 일하게 될 분들에게 조언이나 당부의 말씀을 남겨주세요.",
+    title: "이 리뷰의 한줄 요약",
+    description: "리뷰에서 제목으로 노출됩니다",
     type: "text",
+    maxLength: 50,
   },
 ]
 
@@ -572,8 +573,17 @@ export default function DemandReviewForm() {
     if (currentPage === 3) {
       reviewItems.forEach((item) => {
         const review = formData.reviews[item.title]
-        if (!review?.text || review.text.length < 50) {
-          errors.push(`${item.title}: 상세 리뷰를 50자 이상 입력해주세요.`)
+        if (item.title === "이 리뷰의 한줄 요약") {
+          if (!review?.text || review.text.length < 10) {
+            errors.push(`${item.title}: 10자 이상 입력해주세요.`)
+          }
+          if (review?.text && review.text.length > 50) {
+            errors.push(`${item.title}: 50자 이하로 입력해주세요.`)
+          }
+        } else {
+          if (!review?.text || review.text.length < 50) {
+            errors.push(`${item.title}: 상세 리뷰를 50자 이상 입력해주세요.`)
+          }
         }
         if (item.type === "rating" && !review?.rating) {
           errors.push(`${item.title}: 평가를 선택해주세요.`)
@@ -1103,10 +1113,13 @@ export default function DemandReviewForm() {
                     <div>
                       <Label className="text-sm">상세 리뷰 *</Label>
                       <Textarea
-                        rows={4}
+                        rows={item.title === "이 리뷰의 한줄 요약" ? 2 : 4}
                         value={formData.reviews[item.title]?.text || ""}
                         onChange={(e) => {
                           const text = e.target.value
+                          if (item.maxLength && text.length > item.maxLength) {
+                            return // 최대 글자수 초과 시 입력 제한
+                          }
                           setFormData((prev) => ({
                             ...prev,
                             reviews: {
@@ -1116,10 +1129,16 @@ export default function DemandReviewForm() {
                           }))
                           updateTextCount(item.title, text)
                         }}
-                        placeholder="최소 50자 이상 입력해주세요"
+                        placeholder={
+                          item.title === "이 리뷰의 한줄 요약"
+                            ? "10자 이상 50자 이하로 입력해주세요"
+                            : "최소 50자 이상 입력해주세요"
+                        }
                         className="resize-none"
                       />
-                      <p className="text-xs text-gray-500 mt-1">{textCounts[item.title] || 0}/50자 이상</p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        {textCounts[item.title] || 0}/{item.maxLength ? `${item.maxLength}자 이하` : "50자 이상"}
+                      </p>
                     </div>
                   </div>
                 ))}
