@@ -679,6 +679,12 @@ export default function DemandReviewForm() {
             formDataToSubmit.append(`${item.title}_difficulty`, review.difficulty || "")
           }
           formDataToSubmit.append(`${item.title}_text`, review.text || "")
+
+          // 8번 항목 추가 필드명으로도 전송
+          if (item.title === "이 리뷰의 한줄 요약") {
+            formDataToSubmit.append("review_summary", review.text || "")
+            formDataToSubmit.append("한줄요약", review.text || "")
+          }
         }
       })
 
