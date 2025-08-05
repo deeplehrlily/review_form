@@ -693,7 +693,7 @@ export default function DemandReviewForm() {
           }
           formDataToSubmit.append(`${item.title}_text`, review.text || "")
 
-          // 8번 항목 추가 필드명으로도 전송
+          // 1번 항목 추가 필드명으로도 전송
           if (item.title === "이 리뷰의 한줄 요약") {
             formDataToSubmit.append("review_summary", review.text || "")
             formDataToSubmit.append("한줄요약", review.text || "")
@@ -701,10 +701,11 @@ export default function DemandReviewForm() {
         }
       })
 
-      // Netlify Forms로 제출 (수정된 방식)
-      const response = await fetch("/forms/demand-review-form.html", {
+      // Netlify Forms로 제출 (올바른 방식)
+      const response = await fetch("/", {
         method: "POST",
-        body: formDataToSubmit,
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams(formDataToSubmit as any).toString(),
       })
 
       if (response.ok) {
