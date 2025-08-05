@@ -1490,11 +1490,15 @@
                     'advice_text': document.getElementById('advice-text').value
                 };
 
+                console.log('제출할 데이터:', formData); // 디버깅용
+
                 // URLSearchParams로 변환
                 const params = new URLSearchParams();
                 for (const [key, value] of Object.entries(formData)) {
                     params.append(key, value);
                 }
+
+                console.log('제출 중...'); // 디버깅용
 
                 // Netlify Forms로 제출
                 const response = await fetch('/', {
@@ -1503,7 +1507,10 @@
                     body: params.toString()
                 });
 
+                console.log('응답 상태:', response.status); // 디버깅용
+
                 if (response.ok) {
+                    console.log('제출 성공!'); // 디버깅용
                     // 성공 시 감사 페이지로 리다이렉트
                     window.location.href = '/thank-you.html';
                 } else {
@@ -1517,62 +1524,6 @@
                 submitBtn.textContent = '제출하기';
             }
         }
-
-        // 전화번호 자동 포맷팅 함수
-        function formatPhoneNumber(input) {
-            // 숫자만 추출
-            let value = input.value.replace(/[^\d]/g, '');
-            
-            // 11자리 초과 시 자르기
-            if (value.length > 11) {
-                value = value.slice(0, 11);
-            }
-            
-            // 포맷팅 적용
-            if (value.length >= 7) {
-                // 010-0000-0000 형식
-                value = value.replace(/(\d{3})(\d{4})(\d{4})/, '$1-$2-$3');
-            } else if (value.length >= 3) {
-                // 010-0000 형식
-                value = value.replace(/(\d{3})(\d{0,4})/, '$1-$2');
-            }
-            
-            input.value = value;
-        }
-
-        // 면접준비 섹션 토글 함수 추가
-        function toggleInterviewSection() {
-            const isNA = document.getElementById('interview-na').checked;
-            const interviewContent = document.getElementById('interview-content');
-            const interviewDifficulty = document.getElementById('interview-difficulty');
-            const interviewText = document.getElementById('interview-text');
-            
-            if (isNA) {
-                interviewContent.style.display = 'none';
-                interviewDifficulty.value = '';
-                interviewText.value = '';
-                // 에러 메시지 제거
-                document.getElementById('interview-difficulty-error').classList.remove('show');
-                document.getElementById('interview-text-error').classList.remove('show');
-                interviewDifficulty.classList.remove('error-field');
-                interviewText.classList.remove('error-field');
-                updateTextCount('interview', '');
-            } else {
-                interviewContent.style.display = 'block';
-            }
-        }
-
-        function shakeCard() {
-            const card = document.getElementById('main-card');
-            card.classList.add('animate-pulse');
-            setTimeout(() => card.classList.remove('animate-pulse'), 400);
-        }
-
-        // 초기화
-        document.addEventListener('DOMContentLoaded', function() {
-            // 현재 재직중 체크박스 초기 상태 설정
-            toggleCurrentJob();
-        });
-    </script>
+</script>
 </body>
 </html>
