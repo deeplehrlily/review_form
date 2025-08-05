@@ -17,14 +17,68 @@
         .progress-bar {
             transition: width 0.3s ease;
         }
+        /* 모바일 최적화 */
+        @media (max-width: 640px) {
+            .mobile-grid {
+                grid-template-columns: 1fr;
+            }
+            .mobile-text-sm {
+                font-size: 0.875rem;
+            }
+            .mobile-p-4 {
+                padding: 1rem;
+            }
+            .mobile-gap-2 {
+                gap: 0.5rem;
+            }
+        }
     </style>
 </head>
-<body class="min-h-screen bg-gray-50 py-12 px-4">
+<body class="min-h-screen bg-gray-50 py-4 sm:py-12 px-2 sm:px-4">
+    <!-- Netlify Forms를 위한 숨겨진 폼 - 통일된 필드명 사용 -->
+    <form name="demand-review-form" netlify netlify-honeypot="bot-field" hidden>
+        <input type="text" name="bot-field" />
+        <input type="text" name="name" />
+        <input type="email" name="email" />
+        <input type="tel" name="phone" />
+        <input type="text" name="source" />
+        <input type="text" name="education" />
+        <input type="text" name="company" />
+        <input type="text" name="postcode" />
+        <input type="text" name="roadAddress" />
+        <input type="text" name="detailAddress" />
+        <input type="text" name="jobCategory" />
+        <input type="text" name="jobSubCategory" />
+        <input type="text" name="workStartYear" />
+        <input type="text" name="workStartMonth" />
+        <input type="text" name="workEndYear" />
+        <input type="text" name="workEndMonth" />
+        <input type="text" name="isCurrentJob" />
+        <input type="file" name="proofFile" />
+        <!-- 통일된 리뷰 필드명 -->
+        <textarea name="review_summary"></textarea>
+        <input type="text" name="work_env_rating" />
+        <textarea name="work_env_text"></textarea>
+        <input type="text" name="work_stress_rating" />
+        <textarea name="work_stress_text"></textarea>
+        <input type="text" name="salary_rating" />
+        <textarea name="salary_text"></textarea>
+        <input type="text" name="stability_rating" />
+        <textarea name="stability_text"></textarea>
+        <input type="text" name="people_rating" />
+        <textarea name="people_text"></textarea>
+        <input type="text" name="job_prep_difficulty" />
+        <textarea name="job_prep_text"></textarea>
+        <input type="text" name="interview_difficulty" />
+        <textarea name="interview_text"></textarea>
+        <textarea name="advice_text"></textarea>
+    </form>
+
     <div class="max-w-2xl mx-auto">
         <div id="main-card" class="bg-white rounded-lg shadow-md">
             <!-- Header -->
-            <div class="text-center p-6 border-b">
-                <h1 class="text-2xl font-bold text-gray-900 mb-4">근무 후기 이벤트 참여</h1>
+            <div class="text-center p-4 sm:p-6 border-b">
+                <h1 class="text-xl sm:text-2xl font-bold text-gray-900 mb-4">근무 후기 이벤트 참여</h1>
                 <div class="mt-4">
                     <div class="w-full bg-gray-200 rounded-full h-2">
                         <div id="progress-bar" class="bg-blue-600 h-2 rounded-full progress-bar" style="width: 33.33%"></div>
@@ -34,9 +88,9 @@
             </div>
 
             <!-- Content -->
-            <div class="p-6 space-y-6">
+            <div class="p-4 sm:p-6 space-y-4 sm:space-y-6">
                 <!-- 에러 메시지 -->
-                <div id="error-container" class="hidden bg-red-50 border border-red-200 rounded-md p-4">
+                <div id="error-container" class="hidden bg-red-50 border border-red-200 rounded-md p-3 sm:p-4">
                     <div class="flex">
                         <div class="flex-shrink-0">
                             <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
@@ -53,22 +107,22 @@
                 <div id="page-1" class="space-y-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">이름 *</label>
-                        <input type="text" id="name" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="이름을 입력해주세요">
+                        <input type="text" id="name" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base" placeholder="이름을 입력해주세요">
                     </div>
 
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">이메일 *</label>
-                        <input type="email" id="email" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="admin@domain.com">
+                        <input type="email" id="email" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base" placeholder="admin@domain.com">
                     </div>
 
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">전화번호 *</label>
-                        <input type="tel" id="phone" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="010-0000-0000">
+                        <input type="tel" id="phone" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base" placeholder="010-0000-0000" maxlength="13" oninput="formatPhoneNumber(this)">
                     </div>
 
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">어떤 경로로 후기 이벤트를 접하게 되었나요? *</label>
-                        <select id="source" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <select id="source" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base">
                             <option value="">선택해주세요</option>
                             <option value="디맨드 홈페이지">디맨드 홈페이지</option>
                             <option value="디맨드 인스타그램">디맨드 인스타그램</option>
@@ -82,7 +136,7 @@
 
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">최종학력 *</label>
-                        <select id="education" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <select id="education" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base">
                             <option value="">선택해주세요</option>
                             <option value="고졸">고졸</option>
                             <option value="초대졸">초대졸</option>
@@ -93,22 +147,22 @@
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">회사명(근무지명) *</label>
                         <p class="text-xs text-gray-500 mb-2">가능한 줄임 없이 풀어서 써주세요 (하닉 → SK하이닉스)</p>
-                        <input type="text" id="company" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="회사명(근무지명)을 입력해주세요">
+                        <input type="text" id="company" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base" placeholder="회사명(근무지명)을 입력해주세요">
                     </div>
 
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">사업장 주소 *</label>
-                        <div class="flex gap-2 mb-2">
-                            <input type="text" id="postcode" class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="우편번호" readonly>
-                            <button type="button" onclick="execDaumPostcode()" class="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50">주소 찾기</button>
+                        <div class="flex flex-col sm:flex-row gap-2 mb-2">
+                            <input type="text" id="postcode" class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base" placeholder="우편번호" readonly>
+                            <button type="button" onclick="execDaumPostcode()" class="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 text-sm whitespace-nowrap">주소 찾기</button>
                         </div>
-                        <input type="text" id="roadAddress" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 mb-2" placeholder="도로명 주소" readonly>
-                        <input type="text" id="detailAddress" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="상세주소 입력">
+                        <input type="text" id="roadAddress" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 mb-2 text-sm sm:text-base" placeholder="도로명 주소" readonly>
+                        <input type="text" id="detailAddress" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base" placeholder="상세주소 입력">
                     </div>
 
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">직무 대분류 *</label>
-                        <select id="jobCategory" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" onchange="updateJobSubCategories()">
+                        <select id="jobCategory" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base" onchange="updateJobSubCategories()">
                             <option value="">선택해주세요</option>
                             <option value="10001">서비스업</option>
                             <option value="10002">금융·은행업</option>
@@ -147,18 +201,18 @@
 
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">직무 소분류 *</label>
-                        <select id="jobSubCategory" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" disabled>
+                        <select id="jobSubCategory" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base" disabled>
                             <option value="">대분류를 먼저 선택해주세요</option>
                         </select>
                     </div>
 
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">근무 기간 *</label>
-                        <div class="grid grid-cols-2 gap-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
                                 <p class="text-sm text-gray-600 mb-2">시작일</p>
                                 <div class="flex gap-2">
-                                    <select id="workStartYear" class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <select id="workStartYear" class="flex-1 px-2 sm:px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
                                         <option value="">년도</option>
                                         <option value="2025">2025년</option>
                                         <option value="2024">2024년</option>
@@ -193,7 +247,7 @@
                                         <option value="1995">1995년</option>
                                         <option value="1994">1994년</option>
                                     </select>
-                                    <select id="workStartMonth" class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <select id="workStartMonth" class="flex-1 px-2 sm:px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
                                         <option value="">월</option>
                                         <option value="1">1월</option>
                                         <option value="2">2월</option>
@@ -213,7 +267,7 @@
                             <div>
                                 <p class="text-sm text-gray-600 mb-2">종료일</p>
                                 <div id="end-date-selects" class="flex gap-2 mb-2">
-                                    <select id="workEndYear" class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <select id="workEndYear" class="flex-1 px-2 sm:px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
                                         <option value="">년도</option>
                                         <option value="2025">2025년</option>
                                         <option value="2024">2024년</option>
@@ -248,7 +302,7 @@
                                         <option value="1995">1995년</option>
                                         <option value="1994">1994년</option>
                                     </select>
-                                    <select id="workEndMonth" class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <select id="workEndMonth" class="flex-1 px-2 sm:px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
                                         <option value="">월</option>
                                         <option value="1">1월</option>
                                         <option value="2">2월</option>
@@ -272,67 +326,67 @@
                         </div>
                     </div>
 
-                    <div class="flex items-center space-x-2">
-                        <input type="checkbox" id="agreePrivacy" class="rounded">
-                        <label for="agreePrivacy" class="text-sm">개인정보 수집 및 활용에 동의합니다. (개인정보는 수집만 하고 어디에 노출되지 않습니다) *</label>
+                    <div class="flex items-start space-x-2">
+                        <input type="checkbox" id="agreePrivacy" class="rounded mt-1">
+                        <label for="agreePrivacy" class="text-sm leading-relaxed">개인정보 수집 및 활용에 동의합니다. (개인정보는 수집만 하고 어디에 노출되지 않습니다) *</label>
                     </div>
 
-                    <button onclick="nextPage()" class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700">다음 (1/3)</button>
+                    <button onclick="nextPage()" class="w-full bg-blue-600 text-white py-3 px-4 rounded-md hover:bg-blue-700 text-sm sm:text-base font-medium">다음 (1/3)</button>
                 </div>
 
                 <!-- 2페이지: 현직자 인증 -->
                 <div id="page-2" class="space-y-4 hidden">
                     <div>
                         <h3 class="text-lg font-semibold mb-4">현직자 인증</h3>
-                        <p class="text-gray-600 mb-4">
+                        <p class="text-gray-600 mb-4 text-sm sm:text-base leading-relaxed">
                             증빙 자료를 첨부해주세요. 증빙이 인증되면 이벤트 보상 제공 대상에 자동으로 포함됩니다. 하지만, 증빙 자료가 첨부되지 않았더라도 근무했다는 사실이 리뷰를 통해 충분히 인정되면 이벤트 보상 제공 대상에 포함될 수 있습니다.
                         </p>
 
-                        <div class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
-                            <svg class="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 sm:p-8 text-center">
+                            <svg class="mx-auto h-10 sm:h-12 w-10 sm:w-12 text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                             </svg>
-                            <p class="text-gray-600 mb-4">
+                            <p class="text-gray-600 mb-4 text-sm sm:text-base">
                                 증빙자료를 업로드해주세요<br>
                                 (예: 사원증, 사내 시스템 화면 등 / 이미지 또는 PDF 파일, 15일 이내 자동 삭제됩니다)
                             </p>
-                            <input type="file" id="proofFile" accept="image/*,application/pdf" class="max-w-xs mx-auto" onchange="updateFileName()">
+                            <input type="file" id="proofFile" accept="image/*,application/pdf" class="w-full max-w-xs mx-auto text-sm" onchange="updateFileName()">
                             <p id="file-name" class="text-sm text-green-600 mt-2 hidden"></p>
                         </div>
                     </div>
 
-                    <div class="flex gap-4">
-                        <button onclick="prevPage()" class="flex-1 bg-transparent border border-gray-300 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-50">이전</button>
-                        <button onclick="nextPage()" class="flex-1 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700">다음 (2/3)</button>
+                    <div class="flex flex-col sm:flex-row gap-3 sm:gap-4">
+                        <button onclick="prevPage()" class="flex-1 bg-transparent border border-gray-300 text-gray-700 py-3 px-4 rounded-md hover:bg-gray-50 text-sm sm:text-base font-medium">이전</button>
+                        <button onclick="nextPage()" class="flex-1 bg-blue-600 text-white py-3 px-4 rounded-md hover:bg-blue-700 text-sm sm:text-base font-medium">다음 (2/3)</button>
                     </div>
                 </div>
 
                 <!-- 3페이지: 상세 리뷰 -->
-                <div id="page-3" class="space-y-6 hidden">
+                <div id="page-3" class="space-y-4 sm:space-y-6 hidden">
                     <h3 class="text-lg font-semibold">현직자 상세 리뷰</h3>
 
                     <!-- 1. 이 리뷰의 한줄 요약 -->
-                    <div class="space-y-3 p-4 border rounded-lg">
+                    <div class="space-y-3 p-3 sm:p-4 border rounded-lg">
                         <div>
-                            <h4 class="font-medium">1. 이 리뷰의 한줄 요약 *</h4>
-                            <p class="text-sm text-gray-600 mt-1">리뷰에서 제목으로 노출됩니다</p>
+                            <h4 class="font-medium text-sm sm:text-base">1. 이 리뷰의 한줄 요약 *</h4>
+                            <p class="text-xs sm:text-sm text-gray-600 mt-1">리뷰에서 제목으로 노출됩니다</p>
                         </div>
                         <div>
-                            <label class="text-sm">상세 리뷰 *</label>
-                            <textarea id="review-summary" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none" placeholder="10자 이상 50자 이하로 입력해주세요" maxlength="50" oninput="updateTextCount('summary', this.value)"></textarea>
+                            <label class="text-xs sm:text-sm">상세 리뷰 *</label>
+                            <textarea id="review-summary" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none text-sm sm:text-base" placeholder="10자 이상 50자 이하로 입력해주세요" maxlength="50" oninput="updateTextCount('summary', this.value)"></textarea>
                             <p class="text-xs text-gray-500 mt-1"><span id="count-summary">0</span>/50자 이하</p>
                         </div>
                     </div>
 
                     <!-- 2. 근무환경/시설 -->
-                    <div class="space-y-3 p-4 border rounded-lg">
+                    <div class="space-y-3 p-3 sm:p-4 border rounded-lg">
                         <div>
-                            <h4 class="font-medium">2. 근무환경/시설 *</h4>
-                            <p class="text-sm text-gray-600 mt-1">사무실 환경, 장비, 편의시설 등에 대해 평가해주세요.</p>
+                            <h4 class="font-medium text-sm sm:text-base">2. 근무환경/시설 *</h4>
+                            <p class="text-xs sm:text-sm text-gray-600 mt-1">사무실 환경, 장비, 편의시설 등에 대해 평가해주세요.</p>
                         </div>
                         <div>
-                            <label class="text-sm">평가</label>
-                            <select id="work-env-rating" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <label class="text-xs sm:text-sm">평가</label>
+                            <select id="work-env-rating" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base">
                                 <option value="">평가를 선택해주세요</option>
                                 <option value="5">5점 (매우 좋음)</option>
                                 <option value="4">4점 (좋음)</option>
@@ -342,21 +396,21 @@
                             </select>
                         </div>
                         <div>
-                            <label class="text-sm">상세 리뷰 *</label>
-                            <textarea id="work-env-text" rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none" placeholder="최소 50자 이상 입력해주세요" oninput="updateTextCount('work-env', this.value)"></textarea>
+                            <label class="text-xs sm:text-sm">상세 리뷰 *</label>
+                            <textarea id="work-env-text" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none text-sm sm:text-base" placeholder="최소 50자 이상 입력해주세요" oninput="updateTextCount('work-env', this.value)"></textarea>
                             <p class="text-xs text-gray-500 mt-1"><span id="count-work-env">0</span>/50자 이상</p>
                         </div>
                     </div>
 
                     <!-- 3. 근무강도/스트레스 -->
-                    <div class="space-y-3 p-4 border rounded-lg">
+                    <div class="space-y-3 p-3 sm:p-4 border rounded-lg">
                         <div>
-                            <h4 class="font-medium">3. 근무강도/스트레스 *</h4>
-                            <p class="text-sm text-gray-600 mt-1">업무량, 야근 빈도, 스트레스 정도 등을 평가해주세요.</p>
+                            <h4 class="font-medium text-sm sm:text-base">3. 근무강도/스트레스 *</h4>
+                            <p class="text-xs sm:text-sm text-gray-600 mt-1">업무량, 야근 빈도, 스트레스 정도 등을 평가해주세요.</p>
                         </div>
                         <div>
-                            <label class="text-sm">평가</label>
-                            <select id="work-stress-rating" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <label class="text-xs sm:text-sm">평가</label>
+                            <select id="work-stress-rating" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base">
                                 <option value="">평가를 선택해주세요</option>
                                 <option value="5">5점 (매우 좋음)</option>
                                 <option value="4">4점 (좋음)</option>
@@ -366,21 +420,21 @@
                             </select>
                         </div>
                         <div>
-                            <label class="text-sm">상세 리뷰 *</label>
-                            <textarea id="work-stress-text" rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none" placeholder="최소 50자 이상 입력해주세요" oninput="updateTextCount('work-stress', this.value)"></textarea>
+                            <label class="text-xs sm:text-sm">상세 리뷰 *</label>
+                            <textarea id="work-stress-text" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none text-sm sm:text-base" placeholder="최소 50자 이상 입력해주세요" oninput="updateTextCount('work-stress', this.value)"></textarea>
                             <p class="text-xs text-gray-500 mt-1"><span id="count-work-stress">0</span>/50자 이상</p>
                         </div>
                     </div>
 
                     <!-- 4. 급여/복지 -->
-                    <div class="space-y-3 p-4 border rounded-lg">
+                    <div class="space-y-3 p-3 sm:p-4 border rounded-lg">
                         <div>
-                            <h4 class="font-medium">4. 급여/복지 *</h4>
-                            <p class="text-sm text-gray-600 mt-1">급여 수준, 복리후생, 인센티브 등에 대해 평가해주세요.</p>
+                            <h4 class="font-medium text-sm sm:text-base">4. 급여/복지 *</h4>
+                            <p class="text-xs sm:text-sm text-gray-600 mt-1">급여 수준, 복리후생, 인센티브 등에 대해 평가해주세요.</p>
                         </div>
                         <div>
-                            <label class="text-sm">평가</label>
-                            <select id="salary-rating" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <label class="text-xs sm:text-sm">평가</label>
+                            <select id="salary-rating" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base">
                                 <option value="">평가를 선택해주세요</option>
                                 <option value="5">5점 (매우 좋음)</option>
                                 <option value="4">4점 (좋음)</option>
@@ -390,21 +444,21 @@
                             </select>
                         </div>
                         <div>
-                            <label class="text-sm">상세 리뷰 *</label>
-                            <textarea id="salary-text" rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none" placeholder="최소 50자 이상 입력해주세요" oninput="updateTextCount('salary', this.value)"></textarea>
+                            <label class="text-xs sm:text-sm">상세 리뷰 *</label>
+                            <textarea id="salary-text" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none text-sm sm:text-base" placeholder="최소 50자 이상 입력해주세요" oninput="updateTextCount('salary', this.value)"></textarea>
                             <p class="text-xs text-gray-500 mt-1"><span id="count-salary">0</span>/50자 이상</p>
                         </div>
                     </div>
 
                     <!-- 5. 안정성/전망 -->
-                    <div class="space-y-3 p-4 border rounded-lg">
+                    <div class="space-y-3 p-3 sm:p-4 border rounded-lg">
                         <div>
-                            <h4 class="font-medium">5. 안정성/전망 *</h4>
-                            <p class="text-sm text-gray-600 mt-1">회사의 안정성과 미래 전망에 대해 평가해주세요.</p>
+                            <h4 class="font-medium text-sm sm:text-base">5. 안정성/전망 *</h4>
+                            <p class="text-xs sm:text-sm text-gray-600 mt-1">회사의 안정성과 미래 전망에 대해 평가해주세요.</p>
                         </div>
                         <div>
-                            <label class="text-sm">평가</label>
-                            <select id="stability-rating" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <label class="text-xs sm:text-sm">평가</label>
+                            <select id="stability-rating" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base">
                                 <option value="">평가를 선택해주세요</option>
                                 <option value="5">5점 (매우 좋음)</option>
                                 <option value="4">4점 (좋음)</option>
@@ -414,21 +468,21 @@
                             </select>
                         </div>
                         <div>
-                            <label class="text-sm">상세 리뷰 *</label>
-                            <textarea id="stability-text" rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none" placeholder="최소 50자 이상 입력해주세요" oninput="updateTextCount('stability', this.value)"></textarea>
+                            <label class="text-xs sm:text-sm">상세 리뷰 *</label>
+                            <textarea id="stability-text" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none text-sm sm:text-base" placeholder="최소 50자 이상 입력해주세요" oninput="updateTextCount('stability', this.value)"></textarea>
                             <p class="text-xs text-gray-500 mt-1"><span id="count-stability">0</span>/50자 이상</p>
                         </div>
                     </div>
 
                     <!-- 6. 사람들 -->
-                    <div class="space-y-3 p-4 border rounded-lg">
+                    <div class="space-y-3 p-3 sm:p-4 border rounded-lg">
                         <div>
-                            <h4 class="font-medium">6. 사람들 *</h4>
-                            <p class="text-sm text-gray-600 mt-1">동료, 상사와의 관계, 조직문화 등을 평가해주세요.</p>
+                            <h4 class="font-medium text-sm sm:text-base">6. 사람들 *</h4>
+                            <p class="text-xs sm:text-sm text-gray-600 mt-1">동료, 상사와의 관계, 조직문화 등을 평가해주세요.</p>
                         </div>
                         <div>
-                            <label class="text-sm">평가</label>
-                            <select id="people-rating" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <label class="text-xs sm:text-sm">평가</label>
+                            <select id="people-rating" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base">
                                 <option value="">평가를 선택해주세요</option>
                                 <option value="5">5점 (매우 좋음)</option>
                                 <option value="4">4점 (좋음)</option>
@@ -438,21 +492,21 @@
                             </select>
                         </div>
                         <div>
-                            <label class="text-sm">상세 리뷰 *</label>
-                            <textarea id="people-text" rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none" placeholder="최소 50자 이상 입력해주세요" oninput="updateTextCount('people', this.value)"></textarea>
+                            <label class="text-xs sm:text-sm">상세 리뷰 *</label>
+                            <textarea id="people-text" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none text-sm sm:text-base" placeholder="최소 50자 이상 입력해주세요" oninput="updateTextCount('people', this.value)"></textarea>
                             <p class="text-xs text-gray-500 mt-1"><span id="count-people">0</span>/50자 이상</p>
                         </div>
                     </div>
 
                     <!-- 7. 취업준비 -->
-                    <div class="space-y-3 p-4 border rounded-lg">
+                    <div class="space-y-3 p-3 sm:p-4 border rounded-lg">
                         <div>
-                            <h4 class="font-medium">7. 취업준비 *</h4>
-                            <p class="text-sm text-gray-600 mt-1">이 회사 취업을 위한 준비 과정의 난이도를 평가해주세요.</p>
+                            <h4 class="font-medium text-sm sm:text-base">7. 취업준비 *</h4>
+                            <p class="text-xs sm:text-sm text-gray-600 mt-1">이 회사 취업을 위한 준비 과정의 난이도를 평가해주세요.</p>
                         </div>
                         <div>
-                            <label class="text-sm">난이도 평가</label>
-                            <select id="job-prep-difficulty" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <label class="text-xs sm:text-sm">난이도 평가</label>
+                            <select id="job-prep-difficulty" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base">
                                 <option value="">난이도를 선택해주세요</option>
                                 <option value="1">1 (쉬움)</option>
                                 <option value="2">2</option>
@@ -461,21 +515,21 @@
                             </select>
                         </div>
                         <div>
-                            <label class="text-sm">상세 리뷰 *</label>
-                            <textarea id="job-prep-text" rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none" placeholder="최소 50자 이상 입력해주세요" oninput="updateTextCount('job-prep', this.value)"></textarea>
+                            <label class="text-xs sm:text-sm">상세 리뷰 *</label>
+                            <textarea id="job-prep-text" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none text-sm sm:text-base" placeholder="최소 50자 이상 입력해주세요" oninput="updateTextCount('job-prep', this.value)"></textarea>
                             <p class="text-xs text-gray-500 mt-1"><span id="count-job-prep">0</span>/50자 이상</p>
                         </div>
                     </div>
 
                     <!-- 8. 면접준비 -->
-                    <div class="space-y-3 p-4 border rounded-lg">
+                    <div class="space-y-3 p-3 sm:p-4 border rounded-lg">
                         <div>
-                            <h4 class="font-medium">8. 면접준비 *</h4>
-                            <p class="text-sm text-gray-600 mt-1">면접 과정의 난이도를 평가해주세요.</p>
+                            <h4 class="font-medium text-sm sm:text-base">8. 면접준비 *</h4>
+                            <p class="text-xs sm:text-sm text-gray-600 mt-1">면접 과정의 난이도를 평가해주세요.</p>
                         </div>
                         <div>
-                            <label class="text-sm">난이도 평가</label>
-                            <select id="interview-difficulty" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <label class="text-xs sm:text-sm">난이도 평가</label>
+                            <select id="interview-difficulty" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base">
                                 <option value="">난이도를 선택해주세요</option>
                                 <option value="1">1 (쉬움)</option>
                                 <option value="2">2</option>
@@ -484,78 +538,33 @@
                             </select>
                         </div>
                         <div>
-                            <label class="text-sm">상세 리뷰 *</label>
-                            <textarea id="interview-text" rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none" placeholder="최소 50자 이상 입력해주세요" oninput="updateTextCount('interview', this.value)"></textarea>
+                            <label class="text-xs sm:text-sm">상세 리뷰 *</label>
+                            <textarea id="interview-text" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none text-sm sm:text-base" placeholder="최소 50자 이상 입력해주세요" oninput="updateTextCount('interview', this.value)"></textarea>
                             <p class="text-xs text-gray-500 mt-1"><span id="count-interview">0</span>/50자 이상</p>
                         </div>
                     </div>
 
                     <!-- 9. 이 곳에서 일하게 될 사람들에게 한마디 -->
-                    <div class="space-y-3 p-4 border rounded-lg">
+                    <div class="space-y-3 p-3 sm:p-4 border rounded-lg">
                         <div>
-                            <h4 class="font-medium">9. 이 곳에서 일하게 될 사람들에게 한마디 *</h4>
-                            <p class="text-sm text-gray-600 mt-1">이 회사에서 일하게 될 사람들에게 전하고 싶은 말을 적어주세요.</p>
+                            <h4 class="font-medium text-sm sm:text-base">9. 이 곳에서 일하게 될 사람들에게 한마디 *</h4>
+                            <p class="text-xs sm:text-sm text-gray-600 mt-1">이 회사에서 일하게 될 사람들에게 전하고 싶은 말을 적어주세요.</p>
                         </div>
                         <div>
-                            <label class="text-sm">상세 리뷰 *</label>
-                            <textarea id="advice-text" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none" placeholder="10자 이상 100자 이하로 입력해주세요" maxlength="100" oninput="updateTextCount('advice', this.value)"></textarea>
+                            <label class="text-xs sm:text-sm">상세 리뷰 *</label>
+                            <textarea id="advice-text" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none text-sm sm:text-base" placeholder="10자 이상 100자 이하로 입력해주세요" maxlength="100" oninput="updateTextCount('advice', this.value)"></textarea>
                             <p class="text-xs text-gray-500 mt-1"><span id="count-advice">0</span>/100자 이하</p>
                         </div>
                     </div>
 
-                    <div class="flex gap-4">
-                        <button onclick="prevPage()" class="flex-1 bg-transparent border border-gray-300 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-50">이전</button>
-                        <button onclick="submitForm()" id="submit-btn" class="flex-1 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700">제출하기</button>
+                    <div class="flex flex-col sm:flex-row gap-3 sm:gap-4">
+                        <button onclick="prevPage()" class="flex-1 bg-transparent border border-gray-300 text-gray-700 py-3 px-4 rounded-md hover:bg-gray-50 text-sm sm:text-base font-medium">이전</button>
+                        <button onclick="submitForm()" id="submit-btn" class="flex-1 bg-blue-600 text-white py-3 px-4 rounded-md hover:bg-blue-700 text-sm sm:text-base font-medium">제출하기</button>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-
-    <!-- Netlify Forms를 위한 숨겨진 폼 -->
-    <form name="demand-review-form" netlify netlify-honeypot="bot-field" action="/thank-you.html" method="POST" style="display: none;">
-        <input type="hidden" name="form-name" value="demand-review-form" />
-        <input type="text" name="bot-field" />
-        
-        <!-- 기본 정보 -->
-        <input type="text" name="name" />
-        <input type="email" name="email" />
-        <input type="tel" name="phone" />
-        <input type="text" name="source" />
-        <input type="text" name="education" />
-        <input type="text" name="company" />
-        <input type="text" name="postcode" />
-        <input type="text" name="roadAddress" />
-        <input type="text" name="detailAddress" />
-        <input type="text" name="jobCategory" />
-        <input type="text" name="jobSubCategory" />
-        <input type="text" name="workStartYear" />
-        <input type="text" name="workStartMonth" />
-        <input type="text" name="workEndYear" />
-        <input type="text" name="workEndMonth" />
-        <input type="text" name="isCurrentJob" />
-        <input type="file" name="proofFile" />
-        
-        <!-- 리뷰 항목들 -->
-        <textarea name="이 리뷰의 한줄 요약_text"></textarea>
-        <input type="text" name="review_summary" />
-        <input type="text" name="한줄요약" />
-        <input type="text" name="근무환경/시설_rating" />
-        <textarea name="근무환경/시설_text"></textarea>
-        <input type="text" name="근무강도/스트레스_rating" />
-        <textarea name="근무강도/스트레스_text"></textarea>
-        <input type="text" name="급여/복지_rating" />
-        <textarea name="급여/복지_text"></textarea>
-        <input type="text" name="안정성/전망_rating" />
-        <textarea name="안정성/전망_text"></textarea>
-        <input type="text" name="사람들_rating" />
-        <textarea name="사람들_text"></textarea>
-        <input type="text" name="취업준비_difficulty" />
-        <textarea name="취업준비_text"></textarea>
-        <input type="text" name="면접준비_difficulty" />
-        <textarea name="면접준비_text"></textarea>
-        <textarea name="이 곳에서 일하게 될 사람들에게 한마디_text"></textarea>
-    </form>
 
     <script>
         let currentPage = 1;
@@ -1213,7 +1222,7 @@
             }, 400);
         }
 
-        // 폼 제출
+        // 폼 제출 (통일된 필드명 사용)
         async function submitForm() {
             const errors = validateCurrentPage();
             if (errors.length > 0) {
@@ -1227,74 +1236,55 @@
             submitBtn.textContent = '제출 중...';
 
             try {
-                // FormData 생성
-                const formData = new FormData();
+                // 통일된 필드명으로 데이터 수집
+                const formData = {
+                    'form-name': 'demand-review-form',
+                    'name': document.getElementById('name').value,
+                    'email': document.getElementById('email').value,
+                    'phone': document.getElementById('phone').value,
+                    'source': document.getElementById('source').value,
+                    'education': document.getElementById('education').value,
+                    'company': document.getElementById('company').value,
+                    'postcode': document.getElementById('postcode').value,
+                    'roadAddress': document.getElementById('roadAddress').value,
+                    'detailAddress': document.getElementById('detailAddress').value,
+                    'jobCategory': document.getElementById('jobCategory').options[document.getElementById('jobCategory').selectedIndex].text,
+                    'jobSubCategory': document.getElementById('jobSubCategory').options[document.getElementById('jobSubCategory').selectedIndex].text,
+                    'workStartYear': document.getElementById('workStartYear').value,
+                    'workStartMonth': document.getElementById('workStartMonth').value,
+                    'workEndYear': document.getElementById('workEndYear').value,
+                    'workEndMonth': document.getElementById('workEndMonth').value,
+                    'isCurrentJob': document.getElementById('isCurrentJob').checked ? '예' : '아니오',
+                    // 통일된 리뷰 필드명 사용
+                    'review_summary': document.getElementById('review-summary').value,
+                    'work_env_rating': document.getElementById('work-env-rating').value,
+                    'work_env_text': document.getElementById('work-env-text').value,
+                    'work_stress_rating': document.getElementById('work-stress-rating').value,
+                    'work_stress_text': document.getElementById('work-stress-text').value,
+                    'salary_rating': document.getElementById('salary-rating').value,
+                    'salary_text': document.getElementById('salary-text').value,
+                    'stability_rating': document.getElementById('stability-rating').value,
+                    'stability_text': document.getElementById('stability-text').value,
+                    'people_rating': document.getElementById('people-rating').value,
+                    'people_text': document.getElementById('people-text').value,
+                    'job_prep_difficulty': document.getElementById('job-prep-difficulty').value,
+                    'job_prep_text': document.getElementById('job-prep-text').value,
+                    'interview_difficulty': document.getElementById('interview-difficulty').value,
+                    'interview_text': document.getElementById('interview-text').value,
+                    'advice_text': document.getElementById('advice-text').value
+                };
 
-                // 기본 정보
-                formData.append('form-name', 'demand-review-form');
-                formData.append('name', document.getElementById('name').value);
-                formData.append('email', document.getElementById('email').value);
-                formData.append('phone', document.getElementById('phone').value);
-                formData.append('source', document.getElementById('source').value);
-                formData.append('education', document.getElementById('education').value);
-                formData.append('company', document.getElementById('company').value);
-                formData.append('postcode', document.getElementById('postcode').value);
-                formData.append('roadAddress', document.getElementById('roadAddress').value);
-                formData.append('detailAddress', document.getElementById('detailAddress').value);
-
-                // 직무 정보 (이름으로 변환)
-                const jobCategorySelect = document.getElementById('jobCategory');
-                const jobSubCategorySelect = document.getElementById('jobSubCategory');
-                formData.append('jobCategory', jobCategorySelect.options[jobCategorySelect.selectedIndex].text);
-                formData.append('jobSubCategory', jobSubCategorySelect.options[jobSubCategorySelect.selectedIndex].text);
-
-                // 근무 기간
-                formData.append('workStartYear', document.getElementById('workStartYear').value);
-                formData.append('workStartMonth', document.getElementById('workStartMonth').value);
-                formData.append('workEndYear', document.getElementById('workEndYear').value);
-                formData.append('workEndMonth', document.getElementById('workEndMonth').value);
-                formData.append('isCurrentJob', document.getElementById('isCurrentJob').checked ? '예' : '아니오');
-
-                // 증빙 파일
-                const proofFile = document.getElementById('proofFile').files[0];
-                if (proofFile) {
-                    formData.append('proofFile', proofFile);
+                // URLSearchParams로 변환
+                const params = new URLSearchParams();
+                for (const [key, value] of Object.entries(formData)) {
+                    params.append(key, value);
                 }
-
-                // 리뷰 데이터
-                const reviewSummary = document.getElementById('review-summary').value;
-                formData.append('이 리뷰의 한줄 요약_text', reviewSummary);
-                formData.append('review_summary', reviewSummary);
-                formData.append('한줄요약', reviewSummary);
-
-                formData.append('근무환경/시설_rating', document.getElementById('work-env-rating').value);
-                formData.append('근무환경/시설_text', document.getElementById('work-env-text').value);
-
-                formData.append('근무강도/스트레스_rating', document.getElementById('work-stress-rating').value);
-                formData.append('근무강도/스트레스_text', document.getElementById('work-stress-text').value);
-
-                formData.append('급여/복지_rating', document.getElementById('salary-rating').value);
-                formData.append('급여/복지_text', document.getElementById('salary-text').value);
-
-                formData.append('안정성/전망_rating', document.getElementById('stability-rating').value);
-                formData.append('안정성/전망_text', document.getElementById('stability-text').value);
-
-                formData.append('사람들_rating', document.getElementById('people-rating').value);
-                formData.append('사람들_text', document.getElementById('people-text').value);
-
-                formData.append('취업준비_difficulty', document.getElementById('job-prep-difficulty').value);
-                formData.append('취업준비_text', document.getElementById('job-prep-text').value);
-
-                formData.append('면접준비_difficulty', document.getElementById('interview-difficulty').value);
-                formData.append('면접준비_text', document.getElementById('interview-text').value);
-
-                formData.append('이 곳에서 일하게 될 사람들에게 한마디_text', document.getElementById('advice-text').value);
 
                 // Netlify Forms로 제출
                 const response = await fetch('/', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: new URLSearchParams(formData).toString()
+                    body: params.toString()
                 });
 
                 if (response.ok) {
@@ -1310,6 +1300,28 @@
                 submitBtn.disabled = false;
                 submitBtn.textContent = '제출하기';
             }
+        }
+
+        // 전화번호 자동 포맷팅 함수
+        function formatPhoneNumber(input) {
+            // 숫자만 추출
+            let value = input.value.replace(/[^\d]/g, '');
+            
+            // 11자리 초과 시 자르기
+            if (value.length > 11) {
+                value = value.slice(0, 11);
+            }
+            
+            // 포맷팅 적용
+            if (value.length >= 7) {
+                // 010-0000-0000 형식
+                value = value.replace(/(\d{3})(\d{4})(\d{4})/, '$1-$2-$3');
+            } else if (value.length >= 3) {
+                // 010-0000 형식
+                value = value.replace(/(\d{3})(\d{0,4})/, '$1-$2');
+            }
+            
+            input.value = value;
         }
 
         // 초기화
