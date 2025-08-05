@@ -1,7 +1,5 @@
 "use client"
 
-import type React from "react"
-
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -468,10 +466,9 @@ const reviewItems = [
     type: "difficulty",
   },
   {
-    title: "이 리뷰의 한줄 요약",
-    description: "리뷰에서 제목으로 노출됩니다",
+    title: "이 곳에서 일하게 될 사람들에게 한마디",
+    description: "앞으로 이 회사에서 일하게 될 분들에게 조언이나 당부의 말씀을 남겨주세요.",
     type: "text",
-    maxLength: 50,
   },
 ]
 
@@ -575,17 +572,8 @@ export default function DemandReviewForm() {
     if (currentPage === 3) {
       reviewItems.forEach((item) => {
         const review = formData.reviews[item.title]
-        if (item.title === "이 리뷰의 한줄 요약") {
-          if (!review?.text || review.text.length < 10) {
-            errors.push(`${item.title}: 10자 이상 입력해주세요.`)
-          }
-          if (review?.text && review.text.length > 50) {
-            errors.push(`${item.title}: 50자 이하로 입력해주세요.`)
-          }
-        } else {
-          if (!review?.text || review.text.length < 50) {
-            errors.push(`${item.title}: 상세 리뷰를 50자 이상 입력해주세요.`)
-          }
+        if (!review?.text || review.text.length < 50) {
+          errors.push(`${item.title}: 상세 리뷰를 50자 이상 입력해주세요.`)
         }
         if (item.type === "rating" && !review?.rating) {
           errors.push(`${item.title}: 평가를 선택해주세요.`)
@@ -622,10 +610,8 @@ export default function DemandReviewForm() {
     }))
   }
 
-  // Netlify Forms 제출 (완전히 새로운 방식)
-  const handleSubmit = async (e?: React.FormEvent) => {
-    if (e) e.preventDefault()
-
+  // Netlify Forms 제출 (수정된 방식)
+  const handleSubmit = async () => {
     const validationErrors = validateCurrentPage()
     if (validationErrors.length > 0) {
       setErrors(validationErrors)
@@ -686,11 +672,10 @@ export default function DemandReviewForm() {
         }
       })
 
-      // Netlify Forms로 직접 제출
-      const response = await fetch("/", {
+      // Netlify Forms로 제출 (수정된 방식)
+      const response = await fetch("/forms/demand-review-form.html", {
         method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: new URLSearchParams(formDataToSubmit as any).toString(),
+        body: formDataToSubmit,
       })
 
       if (response.ok) {
@@ -719,42 +704,6 @@ export default function DemandReviewForm() {
 
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4">
-      {/* Netlify Forms를 위한 숨겨진 폼 */}
-      <form name="demand-review-form" netlify="true" netlify-honeypot="bot-field" hidden>
-        <input type="text" name="name" />
-        <input type="email" name="email" />
-        <input type="tel" name="phone" />
-        <input type="text" name="source" />
-        <input type="text" name="education" />
-        <input type="text" name="company" />
-        <input type="text" name="postcode" />
-        <input type="text" name="roadAddress" />
-        <input type="text" name="detailAddress" />
-        <input type="text" name="jobCategory" />
-        <input type="text" name="jobSubCategory" />
-        <input type="text" name="workStartYear" />
-        <input type="text" name="workStartMonth" />
-        <input type="text" name="workEndYear" />
-        <input type="text" name="workEndMonth" />
-        <input type="text" name="isCurrentJob" />
-        <input type="file" name="proofFile" />
-        <input type="text" name="근무환경/시설_rating" />
-        <textarea name="근무환경/시설_text"></textarea>
-        <input type="text" name="근무강도/스트레스_rating" />
-        <textarea name="근무강도/스트레스_text"></textarea>
-        <input type="text" name="급여/복지_rating" />
-        <textarea name="급여/복지_text"></textarea>
-        <input type="text" name="안정성/전망_rating" />
-        <textarea name="안정성/전망_text"></textarea>
-        <input type="text" name="사람들_rating" />
-        <textarea name="사람들_text"></textarea>
-        <input type="text" name="취업준비_difficulty" />
-        <textarea name="취업준비_text"></textarea>
-        <input type="text" name="면접준비_difficulty" />
-        <textarea name="면접준비_text"></textarea>
-        <textarea name="이 리뷰의 한줄 요약_text"></textarea>
-      </form>
-
       <div className="max-w-2xl mx-auto">
         <Card className={`${shake ? "animate-pulse" : ""}`}>
           <CardHeader className="text-center">
@@ -1154,13 +1103,10 @@ export default function DemandReviewForm() {
                     <div>
                       <Label className="text-sm">상세 리뷰 *</Label>
                       <Textarea
-                        rows={item.title === "이 리뷰의 한줄 요약" ? 2 : 4}
+                        rows={4}
                         value={formData.reviews[item.title]?.text || ""}
                         onChange={(e) => {
                           const text = e.target.value
-                          if (item.maxLength && text.length > item.maxLength) {
-                            return // 최대 글자수 초과 시 입력 제한
-                          }
                           setFormData((prev) => ({
                             ...prev,
                             reviews: {
@@ -1170,16 +1116,10 @@ export default function DemandReviewForm() {
                           }))
                           updateTextCount(item.title, text)
                         }}
-                        placeholder={
-                          item.title === "이 리뷰의 한줄 요약"
-                            ? "10자 이상 50자 이하로 입력해주세요"
-                            : "최소 50자 이상 입력해주세요"
-                        }
+                        placeholder="최소 50자 이상 입력해주세요"
                         className="resize-none"
                       />
-                      <p className="text-xs text-gray-500 mt-1">
-                        {textCounts[item.title] || 0}/{item.maxLength ? `${item.maxLength}자 이하` : "50자 이상"}
-                      </p>
+                      <p className="text-xs text-gray-500 mt-1">{textCounts[item.title] || 0}/50자 이상</p>
                     </div>
                   </div>
                 ))}
