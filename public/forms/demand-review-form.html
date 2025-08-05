@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Demand Review Form</title>
+</head>
+<body>
+    <form name="demand-review-form" netlify netlify-honeypot="bot-field" action="/thank-you" method="POST" style="display: none;">
+        <input type="hidden" name="form-name" value="demand-review-form" />
+        <input type="text" name="bot-field" />
+        
+        <!-- 기본 정보 -->
+        <input type="text" name="name" />
+        <input type="email" name="email" />
+        <input type="tel" name="phone" />
+        <input type="text" name="source" />
+        <input type="text" name="education" />
+        <input type="text" name="company" />
+        <input type="text" name="postcode" />
+        <input type="text" name="roadAddress" />
+        <input type="text" name="detailAddress" />
+        <input type="text" name="jobCategory" />
+        <input type="text" name="jobSubCategory" />
+        <input type="text" name="workStartYear" />
+        <input type="text" name="workStartMonth" />
+        <input type="text" name="workEndYear" />
+        <input type="text" name="workEndMonth" />
+        <input type="text" name="isCurrentJob" />
+        <input type="file" name="proofFile" />
+        
+        <!-- 리뷰 항목들 -->
+        <!-- 1번 항목: 이 리뷰의 한줄 요약 -->
+        <textarea name="이 리뷰의 한줄 요약_text"></textarea>
+        <input type="text" name="review_summary" />
+        <input type="text" name="한줄요약" />
+        
+        <!-- 2번 항목: 근무환경/시설 -->
+        <input type="text" name="근무환경/시설_rating" />
+        <textarea name="근무환경/시설_text"></textarea>
+        
+        <!-- 3번 항목: 근무강도/스트레스 -->
+        <input type="text" name="근무강도/스트레스_rating" />
+        <textarea name="근무강도/스트레스_text"></textarea>
+        
+        <!-- 4번 항목: 급여/복지 -->
+        <input type="text" name="급여/복지_rating" />
+        <textarea name="급여/복지_text"></textarea>
+        
+        <!-- 5번 항목: 안정성/전망 -->
+        <input type="text" name="안정성/전망_rating" />
+        <textarea name="안정성/전망_text"></textarea>
+        
+        <!-- 6번 항목: 사람들 -->
+        <input type="text" name="사람들_rating" />
+        <textarea name="사람들_text"></textarea>
+        
+        <!-- 7번 항목: 취업준비 -->
+        <input type="text" name="취업준비_difficulty" />
+        <textarea name="취업준비_text"></textarea>
+        
+        <!-- 8번 항목: 면접준비 -->
+        <input type="text" name="면접준비_difficulty" />
+        <textarea name="면접준비_text"></textarea>
+        
+        <!-- 9번 항목: 이 곳에서 일하게 될 사람들에게 한마디 -->
+        <textarea name="이 곳에서 일하게 될 사람들에게 한마디_text"></textarea>
+    </form>
+</body>
+</html>
