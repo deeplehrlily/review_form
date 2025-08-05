@@ -466,8 +466,8 @@ const reviewItems = [
     type: "difficulty",
   },
   {
-    title: "이 곳에서 일하게 될 사람들에게 한마디",
-    description: "앞으로 이 회사에서 일하게 될 분들에게 조언이나 당부의 말씀을 남겨주세요.",
+    title: "이 리뷰의 한줄 요약",
+    description: "리뷰에서 제목으로 노출됩니다",
     type: "text",
   },
 ]
