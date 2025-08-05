@@ -1,10 +1,14 @@
 [build]
   publish = ".next"
+  command = "npm run build"
+
+[build.environment]
+  NETLIFY_NEXT_PLUGIN_SKIP = "true"
 
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
 
-[build.environment]
-  NETLIFY_NEXT_PLUGIN_SKIP = "true"
+[functions]
+  directory = "netlify/functions"
