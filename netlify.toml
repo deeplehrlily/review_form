@@ -1,14 +1,18 @@
 [build]
-  publish = ".next"
+  publish = "out"
   command = "npm run build"
 
-[build.environment]
-  NETLIFY_NEXT_PLUGIN_SKIP = "true"
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
 
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
+
+[build.environment]
+  NETLIFY_NEXT_PLUGIN_SKIP = "true"
+  NODE_VERSION = "18"
 
 [functions]
   directory = "netlify/functions"
