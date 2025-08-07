@@ -166,7 +166,10 @@
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">사업장 주소 *</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">사업장 주소 (선택)</label>
+                        <div class="text-center p-2 bg-blue-50 rounded-lg border border-blue-200 mb-2">
+                            <p class="text-blue-700 font-bold text-xs sm:text-sm">주소를 입력해주실수록 상품 당첨 확률이 높아질 수 있습니다.</p>
+                        </div>
                         <div class="flex flex-col sm:flex-row gap-2 mb-2">
                             <input type="text" id="postcode" class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base" placeholder="우편번호" readonly>
                             <button type="button" onclick="execDaumPostcode()" class="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 text-sm whitespace-nowrap">주소 찾기</button>
@@ -181,17 +184,6 @@
                         <label class="block text-sm font-medium text-gray-700 mb-1">직무 대분류 *</label>
                         <select id="jobCategory" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base" onchange="updateJobSubCategories()">
                             <option value="">선택해주세요</option>
-                            <option value="10001">서비스업</option>
-                            <option value="10002">금융·은행업</option>
-                            <option value="10003">건설업</option>
-                            <option value="10004">의료·제약업</option>
-                            <option value="10005">미디어·광고업</option>
-                            <option value="10006">문화·예술·디자인업</option>
-                            <option value="10007">IT·정보통신업</option>
-                            <option value="10008">기관·협회</option>
-                            <option value="10009">제조·생산·화학업</option>
-                            <option value="10010">판매·유통업</option>
-                            <option value="10011">교육업</option>
                             <option value="10026">기획·전략</option>
                             <option value="10027">법무·사무·총무</option>
                             <option value="10028">인사·HR</option>
@@ -363,13 +355,16 @@
                         <p class="text-gray-600 mb-4 text-sm sm:text-base leading-relaxed">
                             증빙 자료를 첨부해주세요. 증빙이 인증되면 이벤트 보상 제공 대상에 자동으로 포함됩니다. 하지만, 증빙 자료가 첨부되지 않았더라도 근무했다는 사실이 리뷰를 통해 충분히 인정되면 이벤트 보상 제공 대상에 포함될 수 있습니다.
                         </p>
+                        <div class="text-center p-3 bg-blue-50 rounded-lg border border-blue-200 mb-4">
+                            <p class="text-blue-700 font-bold text-sm sm:text-base">증빙자료 및 정확한 정보를 제출해주실수록 상품 당첨 확률이 높아질 수 있습니다.</p>
+                        </div>
 
                         <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 sm:p-8 text-center">
                             <svg class="mx-auto h-10 sm:h-12 w-10 sm:w-12 text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                             </svg>
                             <p class="text-gray-600 mb-4 text-sm sm:text-base">
-                                증빙자료를 업로드해주세요<br>
+                                증빙자료를 업로드해주세요 <span class="font-semibold">(선택)</span><br>
                                 (예: 사원증, 사내 시스템 화면 등 / 이미지 또는 PDF 파일, 15일 이내 자동 삭제됩니다)
                             </p>
                             <input type="file" id="proofFile" accept="image/*,application/pdf" class="w-full max-w-xs mx-auto text-sm" onchange="updateFileName()">
@@ -620,99 +615,6 @@
 
         // 직무 소분류 데이터 (완전한 데이터)
         const jobSubCategories = {
-            "10001": [
-                { id: "1000001", name: "호텔·여행·항공" },
-                { id: "1000002", name: "스포츠·여가·레저" },
-                { id: "1000003", name: "음식료·외식·프랜차이즈" },
-                { id: "1000004", name: "뷰티·미용" },
-                { id: "1000005", name: "콜센터·아웃소싱·기타" },
-                { id: "1000006", name: "정비·A/S·카센터" },
-                { id: "1000007", name: "렌탈·임대·리스" },
-                { id: "1000008", name: "서치펌·헤드헌팅" },
-                { id: "1000009", name: "시설관리·빌딩·경비" },
-                { id: "1000010", name: "웨딩·상조·이벤트" }
-            ],
-            "10002": [
-                { id: "1000011", name: "은행·금융" },
-                { id: "1000012", name: "캐피탈·대출" },
-                { id: "1000013", name: "증권·보험·카드" },
-                { id: "1000999", name: "기타" }
-            ],
-            "10003": [
-                { id: "1000017", name: "부동산·중개·임대" },
-                { id: "1000018", name: "건축·설비·환경" },
-                { id: "1000019", name: "건설·시공·토목·조경" },
-                { id: "1000020", name: "인테리어·자재" },
-                { id: "1000999", name: "기타" }
-            ],
-            "10004": [
-                { id: "1000025", name: "의료(간호·원무·상담)" },
-                { id: "1000026", name: "의료(병원분류별)" },
-                { id: "1000027", name: "의료(진료과별)" },
-                { id: "1000028", name: "제약·보건·바이오" },
-                { id: "1000029", name: "사회복지·요양" },
-                { id: "1000999", name: "기타" }
-            ],
-            "10005": [
-                { id: "1000030", name: "방송·케이블·프로덕션" },
-                { id: "1000031", name: "신문·잡지·언론사" },
-                { id: "1000032", name: "광고·홍보·전시" },
-                { id: "1000033", name: "영화·음반·배급" },
-                { id: "1000034", name: "연예·엔터테인먼트" },
-                { id: "1000035", name: "출판·인쇄·사진" },
-                { id: "1000999", name: "기타" }
-            ],
-            "10006": [
-                { id: "1000036", name: "문화·공연·예술" },
-                { id: "1000037", name: "디자인·CAD" },
-                { id: "1000999", name: "기타" }
-            ],
-            "10007": [
-                { id: "1000038", name: "솔루션·SI·CRM·ERP" },
-                { id: "1000039", name: "웹에이전시" },
-                { id: "1000040", name: "쇼핑몰·오픈마켓·소셜커머스" },
-                { id: "1000041", name: "포털·컨텐츠·커뮤니티" },
-                { id: "1000042", name: "네트워크·통신서비스" },
-                { id: "1000043", name: "정보보안" },
-                { id: "1000044", name: "컴퓨터·하드웨어·장비" },
-                { id: "1000045", name: "게임·애니메이션" },
-                { id: "1000046", name: "모바일·APP" },
-                { id: "1000047", name: "IT컨설팅" }
-            ],
-            "10008": [
-                { id: "1000048", name: "공기업·공공기관" },
-                { id: "1000049", name: "협회·단체" },
-                { id: "1000050", name: "컨설팅·연구·조사" },
-                { id: "1000051", name: "회계·세무·법무" },
-                { id: "1000999", name: "기타" }
-            ],
-            "10009": [
-                { id: "1000052", name: "전기·전자·제어" },
-                { id: "1000053", name: "반도체·디스플레이·광학" },
-                { id: "1000054", name: "기계·기계설비" },
-                { id: "1000055", name: "자동차·조선·철강·항공" },
-                { id: "1000056", name: "금속·재료·자재" },
-                { id: "1000057", name: "화학·에너지·환경" },
-                { id: "1000058", name: "섬유·의류·패션" },
-                { id: "1000059", name: "생활화학·화장품" },
-                { id: "1000060", name: "생활용품·소비재·기타" },
-                { id: "1000061", name: "목재·제지·가구" },
-                { id: "1000062", name: "식품가공" },
-                { id: "1000063", name: "농축산·어업·임업" }
-            ],
-            "10010": [
-                { id: "1000014", name: "물류·운송·배송" },
-                { id: "1000015", name: "무역·상사" },
-                { id: "1000016", name: "백화점·유통·도소매" },
-                { id: "1000999", name: "기타" }
-            ],
-            "10011": [
-                { id: "1000021", name: "학교(초·중·고·대학·특수)" },
-                { id: "1000022", name: "유아·유치원·어린이집" },
-                { id: "1000023", name: "학원·어학원·교육원" },
-                { id: "1000024", name: "학습지·방문교육" },
-                { id: "1000999", name: "기타" }
-            ],
             "10026": [
                 { id: "1000185", name: "경영·비즈니스기획" },
                 { id: "1000186", name: "웹기획" },
@@ -1004,7 +906,6 @@
                 oncomplete: function(data) {
                     document.getElementById('postcode').value = data.zonecode;
                     document.getElementById('roadAddress').value = data.roadAddress;
-                    validateField('postcode');
                 }
             }).open();
         }
@@ -1091,8 +992,6 @@
                 if (!document.getElementById('source').value) errors.push('접촉 경로를 선택해주세요.');
                 if (!document.getElementById('education').value) errors.push('최종학력을 선택해주세요.');
                 if (!document.getElementById('company').value.trim()) errors.push('회사명(근무지명)을 입력해주세요.');
-                if (!document.getElementById('postcode').value) errors.push('사업장 주소를 입력해주세요.');
-                if (!document.getElementById('detailAddress').value.trim()) errors.push('상세주소를 입력해주세요.');
                 if (!document.getElementById('jobCategory').value) errors.push('직무 대분류를 선택해주세요.');
                 if (!document.getElementById('jobSubCategory').value) errors.push('직무 소분류를 선택해주세요.');
                 if (!document.getElementById('workStartYear').value || !document.getElementById('workStartMonth').value) {
@@ -1217,18 +1116,6 @@
                 case 'company':
                     if (!field.value.trim()) {
                         errorMessage = '회사명(근무지명)을 입력해주세요.';
-                        isValid = false;
-                    }
-                    break;
-                case 'postcode':
-                    if (!document.getElementById('postcode').value) {
-                        errorMessage = '사업장 주소를 입력해주세요.';
-                        isValid = false;
-                    }
-                    break;
-                case 'detailAddress':
-                    if (!field.value.trim()) {
-                        errorMessage = '상세주소를 입력해주세요.';
                         isValid = false;
                     }
                     break;
@@ -1434,7 +1321,7 @@
         async function submitForm() {
             let isValid = true;
 
-            isValid = validateField('name') && validateField('email') && validateField('phone') && validateField('source') && validateField('education') && validateField('company') && validateField('postcode') && validateField('detailAddress') && validateField('jobCategory') && validateField('jobSubCategory') && validateField('workStartYear') && validateField('workStartMonth');
+            isValid = validateField('name') && validateField('email') && validateField('phone') && validateField('source') && validateField('education') && validateField('company') && validateField('jobCategory') && validateField('jobSubCategory') && validateField('workStartYear') && validateField('workStartMonth');
             if (!document.getElementById('isCurrentJob').checked) {
                 isValid = isValid && validateField('workEndYear') && validateField('workEndMonth');
             }
