@@ -1,1305 +1,1293 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>근무 후기 이벤트</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
-  <style>
-      .animate-pulse {
-          animation: pulse 0.4s ease-in-out;
-      }
-      @keyframes pulse {
-          0%, 100% { transform: scale(1); }
-          50% { transform: scale(1.02); }
-      }
-      .progress-bar {
-          transition: width 0.3s ease;
-      }
-      /* 모바일 최적화 */
-      @media (max-width: 640px) {
-          .mobile-grid {
-              grid-template-columns: 1fr;
-          }
-          .mobile-text-sm {
-              font-size: 0.875rem;
-          }
-          .mobile-p-4 {
-              padding: 1rem;
-          }
-          .mobile-gap-2 {
-              gap: 0.5rem;
-          }
-      }
-      .error-field {
-          border-color: #ef4444 !important;
-          box-shadow: 0 0 0 1px #ef4444 !important;
-      }
-      .error-message {
-          color: #ef4444;
-          font-size: 0.75rem;
-          margin-top: 0.25rem;
-          display: none;
-          position: absolute;
-          background: white;
-          border: 1px solid #ef4444;
-          border-radius: 4px;
-          padding: 4px 8px;
-          z-index: 10;
-          box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-      }
-      .error-message.show {
-          display: block;
-      }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>근무 후기 이벤트</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+    <style>
+        .animate-pulse {
+            animation: pulse 0.4s ease-in-out;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+        .progress-bar {
+            transition: width 0.3s ease;
+        }
+        .error-field {
+            border-color: #ef4444 !important;
+            box-shadow: 0 0 0 1px #ef4444 !important;
+        }
+        .error-tooltip {
+            position: absolute;
+            background: #ef4444;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            z-index: 1000;
+            white-space: nowrap;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            opacity: 0;
+            transform: translateY(-5px);
+            transition: opacity 0.2s, transform 0.2s;
+            pointer-events: none;
+        }
+        .error-tooltip.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .error-tooltip::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 5px solid transparent;
+            border-top-color: #ef4444;
+        }
+    </style>
 </head>
 <body class="min-h-screen bg-gray-50 py-4 sm:py-12 px-2 sm:px-4">
-  <!-- Netlify Forms를 위한 숨겨진 폼 -->
-  <form name="demand-review-form" netlify netlify-honeypot="bot-field" hidden>
-      <input type="text" name="bot-field" />
-      <input type="text" name="name" />
-      <input type="email" name="email" />
-      <input type="tel" name="phone" />
-      <input type="text" name="source" />
-      <input type="text" name="education" />
-      <input type="text" name="company" />
-      <input type="text" name="contractType" />
-      <input type="text" name="postcode" />
-      <input type="text" name="roadAddress" />
-      <input type="text" name="detailAddress" />
-      <input type="text" name="jobCategory" />
-      <input type="text" name="jobSubCategory" />
-      <textarea name="jobRole"></textarea>
-      <input type="text" name="workStartYear" />
-      <input type="text" name="workStartMonth" />
-      <input type="text" name="workEndYear" />
-      <input type="text" name="workEndMonth" />
-      <input type="text" name="isCurrentJob" />
-      <input type="file" name="proofFile" />
-      <!-- 리뷰 필드들 -->
-      <textarea name="review_summary"></textarea>
-      <input type="text" name="work_env_rating" />
-      <textarea name="work_env_text"></textarea>
-      <input type="text" name="work_stress_rating" />
-      <textarea name="work_stress_text"></textarea>
-      <input type="text" name="salary_rating" />
-      <textarea name="salary_text"></textarea>
-      <input type="text" name="stability_rating" />
-      <textarea name="stability_text"></textarea>
-      <input type="text" name="people_rating" />
-      <textarea name="people_text"></textarea>
-      <input type="text" name="job_prep_difficulty" />
-      <textarea name="job_prep_text"></textarea>
-      <input type="text" name="interview_difficulty" />
-      <textarea name="interview_text"></textarea>
-      <textarea name="advice_text"></textarea>
-  </form>
-
-  <div class="max-w-2xl mx-auto">
-      <div id="main-card" class="bg-white rounded-lg shadow-md">
-          <!-- Header -->
-          <div class="text-center p-4 sm:p-6 border-b">
-              <h1 class="text-xl sm:text-2xl font-bold text-gray-900 mb-4">근무 후기 이벤트 참여</h1>
-              <div class="mt-4">
-                  <div class="w-full bg-gray-200 rounded-full h-2">
-                      <div id="progress-bar" class="bg-blue-600 h-2 rounded-full progress-bar" style="width: 33.33%"></div>
-                  </div>
-                  <p id="page-indicator" class="text-sm text-gray-600 mt-2">1 / 3</p>
-              </div>
-          </div>
-
-          <!-- Content -->
-          <div class="p-4 sm:p-6 space-y-4 sm:space-y-6">
-              <!-- 에러 메시지 -->
-              <div id="error-alert" class="hidden bg-red-50 border border-red-200 rounded-md p-4">
-                  <div class="flex">
-                      <div class="flex-shrink-0">
-                          <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-                              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-                          </svg>
-                      </div>
-                      <div class="ml-3">
-                          <h3 class="text-sm font-medium text-red-800">다음 항목을 확인해주세요:</h3>
-                          <div class="mt-2 text-sm text-red-700">
-                              <ul id="error-list" class="list-disc list-inside space-y-1"></ul>
-                          </div>
-                      </div>
-                  </div>
-              </div>
-
-              <!-- 1페이지: 기본 정보 -->
-              <div id="page-1" class="space-y-4">
-                  <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-1">이름 *</label>
-                      <input type="text" id="name" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base" placeholder="이름을 입력해주세요">
-                      <div id="name-error" class="error-message"></div>
-                  </div>
-
-                  <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-1">이메일 *</label>
-                      <input type="email" id="email" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base" placeholder="admin@domain.com">
-                      <div id="email-error" class="error-message"></div>
-                  </div>
-
-                  <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-1">전화번호 *</label>
-                      <input type="tel" id="phone" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base" placeholder="010-0000-0000" maxlength="13" oninput="formatPhoneNumber(this)">
-                      <div id="phone-error" class="error-message"></div>
-                  </div>
-
-                  <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-1">어떤 경로로 후기 이벤트를 접하게 되었나요? *</label>
-                      <select id="source" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base">
-                          <option value="">선택해주세요</option>
-                          <option value="디맨드 홈페이지">디맨드 홈페이지</option>
-                          <option value="디맨드 인스타그램">디맨드 인스타그램</option>
-                          <option value="디맨드 스레드">디맨드 스레드</option>
-                          <option value="디맨드 오픈채팅방">디맨드 오픈채팅방</option>
-                          <option value="인스타그램 광고">인스타그램 광고</option>
-                          <option value="디맨드 블로그">디맨드 블로그</option>
-                          <option value="기타">기타</option>
-                      </select>
-                      <div id="source-error" class="error-message"></div>
-                  </div>
-
-                  <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-1">최종학력 *</label>
-                      <select id="education" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base">
-                          <option value="">선택해주세요</option>
-                          <option value="고졸">고졸</option>
-                          <option value="초대졸">초대졸</option>
-                          <option value="대졸">대졸</option>
-                      </select>
-                      <div id="education-error" class="error-message"></div>
-                  </div>
-
-                  <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-1">회사명(근무지명) *</label>
-                      <p class="text-xs text-gray-500 mb-2">가능한 줄임 없이 풀어서 써주세요 (SK하이닉스, 복음교회, 서브웨이 선릉점)</p>
-                      <input type="text" id="company" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base" placeholder="회사명(근무지명)을 입력해주세요">
-                      <div id="company-error" class="error-message"></div>
-                  </div>
-
-                  <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-1">계약형태 *</label>
-                      <select id="contractType" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base">
-                          <option value="">선택해주세요</option>
-                          <option value="정규직">정규직</option>
-                          <option value="계약직">계약직</option>
-                          <option value="아르바이트">아르바이트</option>
-                          <option value="파견직">파견직</option>
-                          <option value="일용직">일용직</option>
-                          <option value="기타">기타</option>
-                      </select>
-                      <div id="contractType-error" class="error-message"></div>
-                  </div>
-
-                  <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-1">사업장 주소 (선택)</label>
-                      <div class="bg-blue-50 border border-blue-200 rounded-md p-3 mb-3">
-                          <p class="text-sm text-blue-600 font-medium">주소를 입력해주실수록 상품 당첨 확률이 높아질 수 있습니다.</p>
-                      </div>
-                      <div class="flex flex-col sm:flex-row gap-2 mb-2">
-                          <input type="text" id="postcode" class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base" placeholder="우편번호" readonly>
-                          <button type="button" onclick="execDaumPostcode()" class="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 text-sm whitespace-nowrap">주소 찾기</button>
-                      </div>
-                      <input type="text" id="roadAddress" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 mb-2 text-sm sm:text-base" placeholder="도로명 주소" readonly>
-                      <input type="text" id="detailAddress" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base" placeholder="상세주소 입력">
-                  </div>
-
-                  <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-1">직무 대분류 *</label>
-                      <select id="jobCategory" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base" onchange="updateJobSubCategories()">
-                          <option value="">선택해주세요</option>
-                          <option value="10026">기획·전략</option>
-                          <option value="10027">법무·사무·총무</option>
-                          <option value="10028">인사·HR</option>
-                          <option value="10029">회계·세무</option>
-                          <option value="10030">마케팅·광고·MD</option>
-                          <option value="10031">개발·데이터</option>
-                          <option value="10032">디자인</option>
-                          <option value="10033">물류·무역</option>
-                          <option value="10034">운전·운송·배송</option>
-                          <option value="10035">영업</option>
-                          <option value="10036">고객상담·TM</option>
-                          <option value="10037">금융·보험</option>
-                          <option value="10038">식·음료</option>
-                          <option value="10039">고객서비스·리테일</option>
-                          <option value="10040">엔지니어링·설계</option>
-                          <option value="10041">제조·생산</option>
-                          <option value="10042">교육</option>
-                          <option value="10043">건축·시설</option>
-                          <option value="10044">의료·바이오</option>
-                          <option value="10045">미디어·문화·스포츠</option>
-                          <option value="10046">공공·복지</option>
-                      </select>
-                      <div id="jobCategory-error" class="error-message"></div>
-                  </div>
-
-                  <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-1">직무 소분류 *</label>
-                      <select id="jobSubCategory" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base" disabled>
-                          <option value="">대분류를 먼저 선택해주세요</option>
-                      </select>
-                      <div id="jobSubCategory-error" class="error-message"></div>
-                  </div>
-
-                  <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-1">어떤 역할/어떤 일을 하셨나요? (선택)</label>
-                      <p class="text-xs text-gray-500 mb-2">편의점 캐셔로 일함. 계산/재고 처리/청소 등 업무 함</p>
-                      <textarea id="jobRole" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none text-sm sm:text-base" placeholder="구체적인 업무 내용을 100자 이하로 입력해주세요" maxlength="100" oninput="updateTextCount('jobRole', this.value)"></textarea>
-                      <p class="text-xs text-gray-500 mt-1"><span id="count-jobRole">0</span>/100자 이하</p>
-                  </div>
-
-                  <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-1">근무 기간 *</label>
-                      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                          <div>
-                              <p class="text-sm text-gray-600 mb-2">시작일</p>
-                              <div class="flex gap-2">
-                                  <select id="workStartYear" class="flex-1 px-2 sm:px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
-                                      <option value="">년도</option>
-                                      <option value="2025">2025년</option>
-                                      <option value="2024">2024년</option>
-                                      <option value="2023">2023년</option>
-                                      <option value="2022">2022년</option>
-                                      <option value="2021">2021년</option>
-                                      <option value="2020">2020년</option>
-                                      <option value="2019">2019년</option>
-                                      <option value="2018">2018년</option>
-                                      <option value="2017">2017년</option>
-                                      <option value="2016">2016년</option>
-                                      <option value="2015">2015년</option>
-                                      <option value="2014">2014년</option>
-                                      <option value="2013">2013년</option>
-                                      <option value="2012">2012년</option>
-                                      <option value="2011">2011년</option>
-                                      <option value="2010">2010년</option>
-                                      <option value="2009">2009년</option>
-                                      <option value="2008">2008년</option>
-                                      <option value="2007">2007년</option>
-                                      <option value="2006">2006년</option>
-                                      <option value="2005">2005년</option>
-                                      <option value="2004">2004년</option>
-                                      <option value="2003">2003년</option>
-                                      <option value="2002">2002년</option>
-                                      <option value="2001">2001년</option>
-                                      <option value="2000">2000년</option>
-                                      <option value="1999">1999년</option>
-                                      <option value="1998">1998년</option>
-                                      <option value="1997">1997년</option>
-                                      <option value="1996">1996년</option>
-                                      <option value="1995">1995년</option>
-                                      <option value="1994">1994년</option>
-                                  </select>
-                                  <select id="workStartMonth" class="flex-1 px-2 sm:px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
-                                      <option value="">월</option>
-                                      <option value="1">1월</option>
-                                      <option value="2">2월</option>
-                                      <option value="3">3월</option>
-                                      <option value="4">4월</option>
-                                      <option value="5">5월</option>
-                                      <option value="6">6월</option>
-                                      <option value="7">7월</option>
-                                      <option value="8">8월</option>
-                                      <option value="9">9월</option>
-                                      <option value="10">10월</option>
-                                      <option value="11">11월</option>
-                                      <option value="12">12월</option>
-                                  </select>
-                              </div>
-                          </div>
-                          <div>
-                              <p class="text-sm text-gray-600 mb-2">종료일</p>
-                              <div id="endDateInputs" class="flex gap-2 mb-2">
-                                  <select id="workEndYear" class="flex-1 px-2 sm:px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
-                                      <option value="">년도</option>
-                                      <option value="2025">2025년</option>
-                                      <option value="2024">2024년</option>
-                                      <option value="2023">2023년</option>
-                                      <option value="2022">2022년</option>
-                                      <option value="2021">2021년</option>
-                                      <option value="2020">2020년</option>
-                                      <option value="2019">2019년</option>
-                                      <option value="2018">2018년</option>
-                                      <option value="2017">2017년</option>
-                                      <option value="2016">2016년</option>
-                                      <option value="2015">2015년</option>
-                                      <option value="2014">2014년</option>
-                                      <option value="2013">2013년</option>
-                                      <option value="2012">2012년</option>
-                                      <option value="2011">2011년</option>
-                                      <option value="2010">2010년</option>
-                                      <option value="2009">2009년</option>
-                                      <option value="2008">2008년</option>
-                                      <option value="2007">2007년</option>
-                                      <option value="2006">2006년</option>
-                                      <option value="2005">2005년</option>
-                                      <option value="2004">2004년</option>
-                                      <option value="2003">2003년</option>
-                                      <option value="2002">2002년</option>
-                                      <option value="2001">2001년</option>
-                                      <option value="2000">2000년</option>
-                                      <option value="1999">1999년</option>
-                                      <option value="1998">1998년</option>
-                                      <option value="1997">1997년</option>
-                                      <option value="1996">1996년</option>
-                                      <option value="1995">1995년</option>
-                                      <option value="1994">1994년</option>
-                                  </select>
-                                  <select id="workEndMonth" class="flex-1 px-2 sm:px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
-                                      <option value="">월</option>
-                                      <option value="1">1월</option>
-                                      <option value="2">2월</option>
-                                      <option value="3">3월</option>
-                                      <option value="4">4월</option>
-                                      <option value="5">5월</option>
-                                      <option value="6">6월</option>
-                                      <option value="7">7월</option>
-                                      <option value="8">8월</option>
-                                      <option value="9">9월</option>
-                                      <option value="10">10월</option>
-                                      <option value="11">11월</option>
-                                      <option value="12">12월</option>
-                                  </select>
-                              </div>
-                              <div class="flex items-center gap-2">
-                                  <input type="checkbox" id="currentJob" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500" onchange="toggleCurrentJob()">
-                                  <label for="currentJob" class="text-sm text-gray-700">현재 재직중</label>
-                              </div>
-                          </div>
-                      </div>
-                      <div id="workPeriod-error" class="error-message"></div>
-                  </div>
-
-                  <div class="flex items-center space-x-2">
-                      <input type="checkbox" id="privacy" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-                      <label for="privacy" class="text-sm text-gray-700">개인정보 수집 및 활용에 동의합니다. (개인정보는 수집만 하고 어디에 노출되지 않습니다) *</label>
-                  </div>
-                  <div id="privacy-error" class="error-message"></div>
-
-                  <button onclick="nextPage()" class="w-full bg-blue-600 text-white py-3 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base font-medium">
-                      다음 (1/3)
-                  </button>
-              </div>
-
-              <!-- 2페이지: 현직자 인증 -->
-              <div id="page-2" class="space-y-4 hidden">
-                  <div>
-                      <h3 class="text-lg font-semibold mb-4">현직자 인증 <span class="text-red-600 font-bold">(선택)</span></h3>
-                      <p class="text-gray-600 mb-4 text-sm sm:text-base">
-                          증빙 자료를 첨부해주세요. 증빙이 인증되면 이벤트 보상 제공 대상에 자동으로 포함됩니다. 하지만, 증빙 자료가 첨부되지 않았더라도 근무했다는 사실이 리뷰를 통해 충분히 인정되면 이벤트 보상 제공 대상에 포함될 수 있습니다.
-                      </p>
-
-                      <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 sm:p-8 text-center">
-                          <svg class="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                          </svg>
-                          <p class="text-gray-600 mb-4 text-sm sm:text-base">
-                              증빙자료를 업로드해주세요 <span class="text-red-600 font-bold">(선택)</span>
-                              <br />
-                              (예: 사원증, 사내 시스템 화면 등 / 이미지 또는 PDF 파일, 15일 이내 자동 삭제됩니다)
-                          </p>
-                          <input type="file" id="proofFile" accept="image/*,application/pdf" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 mx-auto max-w-xs" onchange="handleFileUpload(this)">
-                          <div id="file-info" class="text-sm text-green-600 mt-2 hidden"></div>
-                      </div>
-                  </div>
-
-                  <div class="flex flex-col sm:flex-row gap-4">
-                      <button onclick="prevPage()" class="flex-1 bg-gray-100 text-gray-700 py-3 px-4 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 text-sm sm:text-base font-medium">
-                          이전
-                      </button>
-                      <button onclick="nextPage()" class="flex-1 bg-blue-600 text-white py-3 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base font-medium">
-                          다음 (2/3)
-                      </button>
-                  </div>
-              </div>
-
-              <!-- 3페이지: 상세 리뷰 -->
-              <div id="page-3" class="space-y-6 hidden">
-                  <h3 class="text-lg font-semibold">현직자 상세 리뷰</h3>
-
-                  <!-- 1. 이 리뷰의 한줄 요약 -->
-                  <div class="space-y-3 p-4 border rounded-lg">
-                      <div>
-                          <h4 class="font-medium">1. 이 리뷰의 한줄 요약 *</h4>
-                          <p class="text-sm text-gray-600 mt-1">리뷰에서 제목으로 노출됩니다</p>
-                      </div>
-                      <div>
-                          <textarea id="review-summary" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none text-sm sm:text-base" placeholder="10자 이상 50자 이하로 입력해주세요" maxlength="50" oninput="updateTextCount('review-summary', this.value)"></textarea>
-                          <p class="text-xs text-gray-500 mt-1"><span id="count-review-summary">0</span>/50자 이하</p>
-                      </div>
-                  </div>
-
-                  <!-- 2. 근무환경/시설 -->
-                  <div class="space-y-3 p-4 border rounded-lg">
-                      <div>
-                          <h4 class="font-medium">2. 근무환경/시설 *</h4>
-                          <p class="text-sm text-gray-600 mt-1">사무실 환경, 장비, 편의시설 등에 대해 평가해주세요.</p>
-                      </div>
-                      <div>
-                          <label class="text-sm font-medium text-gray-700">평가</label>
-                          <select id="work-env-rating" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base mt-1">
-                              <option value="">평가를 선택해주세요</option>
-                              <option value="5">5점 (매우 좋음)</option>
-                              <option value="4">4점 (좋음)</option>
-                              <option value="3">3점 (보통)</option>
-                              <option value="2">2점 (나쁨)</option>
-                              <option value="1">1점 (매우 나쁨)</option>
-                          </select>
-                      </div>
-                      <div>
-                          <label class="text-sm font-medium text-gray-700">상세 리뷰 *</label>
-                          <textarea id="work-env-text" rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none text-sm sm:text-base mt-1" placeholder="최소 50자 이상 입력해주세요" oninput="updateTextCount('work-env-text', this.value)"></textarea>
-                          <p class="text-xs text-gray-500 mt-1"><span id="count-work-env-text">0</span>/50자 이상</p>
-                      </div>
-                  </div>
-
-                  <!-- 3. 근무강도/스트레스 -->
-                  <div class="space-y-3 p-4 border rounded-lg">
-                      <div>
-                          <h4 class="font-medium">3. 근무강도/스트레스 *</h4>
-                          <p class="text-sm text-gray-600 mt-1">업무량, 야근 빈도, 스트레스 정도 등을 평가해주세요.</p>
-                      </div>
-                      <div>
-                          <label class="text-sm font-medium text-gray-700">평가</label>
-                          <select id="work-stress-rating" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base mt-1">
-                              <option value="">평가를 선택해주세요</option>
-                              <option value="5">5점 (매우 좋음)</option>
-                              <option value="4">4점 (좋음)</option>
-                              <option value="3">3점 (보통)</option>
-                              <option value="2">2점 (나쁨)</option>
-                              <option value="1">1점 (매우 나쁨)</option>
-                          </select>
-                      </div>
-                      <div>
-                          <label class="text-sm font-medium text-gray-700">상세 리뷰 *</label>
-                          <textarea id="work-stress-text" rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none text-sm sm:text-base mt-1" placeholder="최소 50자 이상 입력해주세요" oninput="updateTextCount('work-stress-text', this.value)"></textarea>
-                          <p class="text-xs text-gray-500 mt-1"><span id="count-work-stress-text">0</span>/50자 이상</p>
-                      </div>
-                  </div>
-
-                  <!-- 4. 급여/복지 -->
-                  <div class="space-y-3 p-4 border rounded-lg">
-                      <div>
-                          <h4 class="font-medium">4. 급여/복지 *</h4>
-                          <p class="text-sm text-gray-600 mt-1">급여 수준, 복리후생, 인센티브 등에 대해 평가해주세요.</p>
-                      </div>
-                      <div>
-                          <label class="text-sm font-medium text-gray-700">평가</label>
-                          <select id="salary-rating" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base mt-1">
-                              <option value="">평가를 선택해주세요</option>
-                              <option value="5">5점 (매우 좋음)</option>
-                              <option value="4">4점 (좋음)</option>
-                              <option value="3">3점 (보통)</option>
-                              <option value="2">2점 (나쁨)</option>
-                              <option value="1">1점 (매우 나쁨)</option>
-                          </select>
-                      </div>
-                      <div>
-                          <label class="text-sm font-medium text-gray-700">상세 리뷰 *</label>
-                          <textarea id="salary-text" rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none text-sm sm:text-base mt-1" placeholder="최소 50자 이상 입력해주세요" oninput="updateTextCount('salary-text', this.value)"></textarea>
-                          <p class="text-xs text-gray-500 mt-1"><span id="count-salary-text">0</span>/50자 이상</p>
-                      </div>
-                  </div>
-
-                  <!-- 5. 안정성/전망 -->
-                  <div class="space-y-3 p-4 border rounded-lg">
-                      <div>
-                          <h4 class="font-medium">5. 안정성/전망 *</h4>
-                          <p class="text-sm text-gray-600 mt-1">회사의 안정성과 미래 전망에 대해 평가해주세요.</p>
-                      </div>
-                      <div>
-                          <label class="text-sm font-medium text-gray-700">평가</label>
-                          <select id="stability-rating" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base mt-1">
-                              <option value="">평가를 선택해주세요</option>
-                              <option value="5">5점 (매우 좋음)</option>
-                              <option value="4">4점 (좋음)</option>
-                              <option value="3">3점 (보통)</option>
-                              <option value="2">2점 (나쁨)</option>
-                              <option value="1">1점 (매우 나쁨)</option>
-                          </select>
-                      </div>
-                      <div>
-                          <label class="text-sm font-medium text-gray-700">상세 리뷰 *</label>
-                          <textarea id="stability-text" rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none text-sm sm:text-base mt-1" placeholder="최소 50자 이상 입력해주세요" oninput="updateTextCount('stability-text', this.value)"></textarea>
-                          <p class="text-xs text-gray-500 mt-1"><span id="count-stability-text">0</span>/50자 이상</p>
-                      </div>
-                  </div>
-
-                  <!-- 6. 사람들 -->
-                  <div class="space-y-3 p-4 border rounded-lg">
-                      <div>
-                          <h4 class="font-medium">6. 사람들 *</h4>
-                          <p class="text-sm text-gray-600 mt-1">동료, 상사와의 관계, 조직문화 등을 평가해주세요.</p>
-                      </div>
-                      <div>
-                          <label class="text-sm font-medium text-gray-700">평가</label>
-                          <select id="people-rating" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base mt-1">
-                              <option value="">평가를 선택해주세요</option>
-                              <option value="5">5점 (매우 좋음)</option>
-                              <option value="4">4점 (좋음)</option>
-                              <option value="3">3점 (보통)</option>
-                              <option value="2">2점 (나쁨)</option>
-                              <option value="1">1점 (매우 나쁨)</option>
-                          </select>
-                      </div>
-                      <div>
-                          <label class="text-sm font-medium text-gray-700">상세 리뷰 *</label>
-                          <textarea id="people-text" rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none text-sm sm:text-base mt-1" placeholder="최소 50자 이상 입력해주세요" oninput="updateTextCount('people-text', this.value)"></textarea>
-                          <p class="text-xs text-gray-500 mt-1"><span id="count-people-text">0</span>/50자 이상</p>
-                      </div>
-                  </div>
-
-                  <!-- 7. 취업준비 -->
-                  <div class="space-y-3 p-4 border rounded-lg">
-                      <div>
-                          <h4 class="font-medium">7. 취업준비 *</h4>
-                          <p class="text-sm text-gray-600 mt-1">이 회사 취업을 위한 준비 과정의 난이도를 평가해주세요.</p>
-                      </div>
-                      <div>
-                          <label class="text-sm font-medium text-gray-700">난이도 평가</label>
-                          <select id="job-prep-difficulty" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base mt-1">
-                              <option value="">난이도를 선택해주세요</option>
-                              <option value="1">1 (쉬움)</option>
-                              <option value="2">2</option>
-                              <option value="3">3</option>
-                              <option value="4">4 (어려움)</option>
-                          </select>
-                      </div>
-                      <div>
-                          <label class="text-sm font-medium text-gray-700">상세 리뷰 *</label>
-                          <textarea id="job-prep-text" rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none text-sm sm:text-base mt-1" placeholder="최소 50자 이상 입력해주세요" oninput="updateTextCount('job-prep-text', this.value)"></textarea>
-                          <p class="text-xs text-gray-500 mt-1"><span id="count-job-prep-text">0</span>/50자 이상</p>
-                      </div>
-                  </div>
-
-                  <!-- 8. 면접준비 -->
-                  <div class="space-y-3 p-4 border rounded-lg">
-                      <div>
-                          <h4 class="font-medium">8. 면접준비 *</h4>
-                          <p class="text-sm text-gray-600 mt-1">면접 과정의 난이도를 평가해주세요.</p>
-                      </div>
-                      <div>
-                          <label class="text-sm font-medium text-gray-700">난이도 평가</label>
-                          <select id="interview-difficulty" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base mt-1">
-                              <option value="">난이도를 선택해주세요</option>
-                              <option value="1">1 (쉬움)</option>
-                              <option value="2">2</option>
-                              <option value="3">3</option>
-                              <option value="4">4 (어려움)</option>
-                          </select>
-                      </div>
-                      <div>
-                          <label class="text-sm font-medium text-gray-700">상세 리뷰 *</label>
-                          <textarea id="interview-text" rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none text-sm sm:text-base mt-1" placeholder="최소 50자 이상 입력해주세요" oninput="updateTextCount('interview-text', this.value)"></textarea>
-                          <p class="text-xs text-gray-500 mt-1"><span id="count-interview-text">0</span>/50자 이상</p>
-                      </div>
-                  </div>
-
-                  <!-- 9. 이 곳에서 일하게 될 사람들에게 한마디 -->
-                  <div class="space-y-3 p-4 border rounded-lg">
-                      <div>
-                          <h4 class="font-medium">9. 이 곳에서 일하게 될 사람들에게 한마디 *</h4>
-                          <p class="text-sm text-gray-600 mt-1">이 회사에서 일하게 될 사람들에게 전하고 싶은 말을 적어주세요.</p>
-                      </div>
-                      <div>
-                          <textarea id="advice-text" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none text-sm sm:text-base" placeholder="10자 이상 100자 이하로 입력해주세요" maxlength="100" oninput="updateTextCount('advice-text', this.value)"></textarea>
-                          <p class="text-xs text-gray-500 mt-1"><span id="count-advice-text">0</span>/100자 이하</p>
-                      </div>
-                  </div>
-
-                  <div class="flex flex-col sm:flex-row gap-4">
-                      <button onclick="prevPage()" class="flex-1 bg-gray-100 text-gray-700 py-3 px-4 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 text-sm sm:text-base font-medium">
-                          이전
-                      </button>
-                      <button onclick="submitForm()" id="submit-btn" class="flex-1 bg-blue-600 text-white py-3 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base font-medium">
-                          제출하기
-                      </button>
-                  </div>
-              </div>
-          </div>
-      </div>
-  </div>
-
-  <script>
-      let currentPage = 1;
-      const totalPages = 3;
-
-      // 직무 소분류 데이터 (삭제된 카테고리 제외)
-      const jobSubCategories = {
-          "10026": [
-              { id: "1000185", name: "경영·비즈니스기획" },
-              { id: "1000186", name: "웹기획" },
-              { id: "1000187", name: "마케팅기획" },
-              { id: "1000188", name: "PL·PM·PO" },
-              { id: "1000189", name: "컨설턴트" },
-              { id: "1000190", name: "CEO·COO·CTO" },
-              { id: "1000999", name: "기타" }
-          ],
-          "10027": [
-              { id: "1000191", name: "경영지원" },
-              { id: "1000192", name: "사무담당자" },
-              { id: "1000193", name: "총무" },
-              { id: "1000194", name: "사무보조" },
-              { id: "1000195", name: "법무담당자" },
-              { id: "1000196", name: "비서" },
-              { id: "1000197", name: "변호사" },
-              { id: "1000198", name: "법무사" },
-              { id: "1000199", name: "변리사" },
-              { id: "1000200", name: "노무사" },
-              { id: "1000999", name: "기타" }
-          ],
-          "10028": [
-              { id: "1000201", name: "인사담당자" },
-              { id: "1000202", name: "HRD·HRM" },
-              { id: "1000203", name: "노무관리자" },
-              { id: "1000204", name: "잡매니저" },
-              { id: "1000205", name: "헤드헌터" },
-              { id: "1000206", name: "직업상담사" },
-              { id: "1000999", name: "기타" }
-          ],
-          "10029": [
-              { id: "1000207", name: "회계담당자" },
-              { id: "1000208", name: "경리" },
-              { id: "1000209", name: "세무담당자" },
-              { id: "1000210", name: "재무담당자" },
-              { id: "1000211", name: "감사" },
-              { id: "1000212", name: "IR·공시" },
-              { id: "1000213", name: "회계사" },
-              { id: "1000214", name: "세무사" },
-              { id: "1000215", name: "관세사" },
-              { id: "1000999", name: "기타" }
-          ],
-          "10030": [
-              { id: "1000216", name: "AE(광고기획자)" },
-              { id: "1000217", name: "브랜드마케터" },
-              { id: "1000218", name: "퍼포먼스마케터" },
-              { id: "1000219", name: "CRM마케터" },
-              { id: "1000220", name: "온라인마케터" },
-              { id: "1000221", name: "콘텐츠마케터" },
-              { id: "1000222", name: "홍보" },
-              { id: "1000223", name: "설문·리서치" },
-              { id: "1000224", name: "MD" },
-              { id: "1000225", name: "카피라이터" },
-              { id: "1000226", name: "크리에이티브디렉터" },
-              { id: "1000227", name: "채널관리자" },
-              { id: "1000228", name: "그로스해커" },
-              { id: "1000999", name: "기타" }
-          ],
-          "10031": [
-              { id: "1000229", name: "백엔드개발자" },
-              { id: "1000230", name: "프론트엔드개발자" },
-              { id: "1000231", name: "웹개발자" },
-              { id: "1000232", name: "앱개발자" },
-              { id: "1000233", name: "시스템엔지니어" },
-              { id: "1000234", name: "네트워크엔지니어" },
-              { id: "1000235", name: "DBA" },
-              { id: "1000236", name: "데이터엔지니어" },
-              { id: "1000237", name: "데이터사이언티스트" },
-              { id: "1000238", name: "보안엔지니어" },
-              { id: "1000239", name: "소프트웨어개발자" },
-              { id: "1000240", name: "게임개발자" },
-              { id: "1000241", name: "하드웨어개발자" },
-              { id: "1000242", name: "머신러닝엔지니어" },
-              { id: "1000243", name: "블록체인개발자" },
-              { id: "1000244", name: "클라우드엔지니어" },
-              { id: "1000245", name: "웹퍼블리셔" },
-              { id: "1000246", name: "IT컨설팅" },
-              { id: "1000247", name: "QA" }
-          ],
-          "10032": [
-              { id: "1000248", name: "그래픽디자이너" },
-              { id: "1000249", name: "3D디자이너" },
-              { id: "1000250", name: "제품디자이너" },
-              { id: "1000251", name: "산업디자이너" },
-              { id: "1000252", name: "광고디자이너" },
-              { id: "1000253", name: "시각디자이너" },
-              { id: "1000254", name: "영상디자이너" },
-              { id: "1000255", name: "웹디자이너" },
-              { id: "1000256", name: "UI·UX디자이너" },
-              { id: "1000257", name: "패션디자이너" },
-              { id: "1000258", name: "편집디자이너" },
-              { id: "1000259", name: "실내디자이너" },
-              { id: "1000260", name: "공간디자이너" },
-              { id: "1000261", name: "캐릭터디자이너" },
-              { id: "1000262", name: "환경디자이너" },
-              { id: "1000263", name: "아트디렉터" },
-              { id: "1000264", name: "일러스트레이터" }
-          ],
-          "10033": [
-              { id: "1000265", name: "물류관리자" },
-              { id: "1000266", name: "구매관리자" },
-              { id: "1000267", name: "자재관리자" },
-              { id: "1000268", name: "유통관리자" },
-              { id: "1000269", name: "무역사무원" },
-              { id: "1000999", name: "기타" }
-          ],
-          "10034": [
-              { id: "1000270", name: "납품·배송기사" },
-              { id: "1000271", name: "배달기사" },
-              { id: "1000272", name: "수행·운전기사" },
-              { id: "1000273", name: "화물·중장비기사" },
-              { id: "1000274", name: "버스기사" },
-              { id: "1000275", name: "택시기사" },
-              { id: "1000276", name: "조종·기관사" },
-              { id: "1000999", name: "기타" }
-          ],
-          "10035": [
-              { id: "1000277", name: "제품영업" },
-              { id: "1000278", name: "서비스영업" },
-              { id: "1000279", name: "해외영업" },
-              { id: "1000280", name: "광고영업" },
-              { id: "1000281", name: "금융영업" },
-              { id: "1000282", name: "법인영업" },
-              { id: "1000283", name: "IT·기술영업" },
-              { id: "1000284", name: "영업관리" },
-              { id: "1000285", name: "영업지원" },
-              { id: "1000999", name: "기타" }
-          ],
-          "10036": [
-              { id: "1000286", name: "인바운드상담원" },
-              { id: "1000287", name: "아웃바운드상담원" },
-              { id: "1000288", name: "고객센터관리자" },
-              { id: "1000999", name: "기타" }
-          ],
-          "10037": [
-              { id: "1000289", name: "금융사무" },
-              { id: "1000290", name: "보험설계사" },
-              { id: "1000291", name: "손해사정사" },
-              { id: "1000292", name: "심사" },
-              { id: "1000293", name: "은행원·텔러" },
-              { id: "1000294", name: "계리사" },
-              { id: "1000295", name: "펀드매니저" },
-              { id: "1000296", name: "애널리스트" },
-              { id: "1000999", name: "기타" }
-          ],
-          "10038": [
-              { id: "1000297", name: "요리사" },
-              { id: "1000298", name: "조리사" },
-              { id: "1000299", name: "제과제빵사" },
-              { id: "1000300", name: "바리스타" },
-              { id: "1000301", name: "셰프·주방장" },
-              { id: "1000302", name: "카페·레스토랑매니저" },
-              { id: "1000303", name: "홀서버" },
-              { id: "1000304", name: "주방보조" },
-              { id: "1000305", name: "소믈리에·바텐더" },
-              { id: "1000306", name: "영양사" },
-              { id: "1000307", name: "식품연구원" },
-              { id: "1000308", name: "푸드스타일리스트" }
-          ],
-          "10039": [
-              { id: "1000309", name: "설치·수리기사" },
-              { id: "1000310", name: "정비기사" },
-              { id: "1000311", name: "호텔종사자" },
-              { id: "1000312", name: "여행에이전트" },
-              { id: "1000313", name: "매장관리자" },
-              { id: "1000314", name: "뷰티·미용사" },
-              { id: "1000315", name: "애견미용·훈련" },
-              { id: "1000316", name: "안내데스크·리셉셔니스트" },
-              { id: "1000317", name: "경호·경비" },
-              { id: "1000318", name: "운영보조·매니저" },
-              { id: "1000319", name: "이벤트·웨딩플래너" },
-              { id: "1000320", name: "주차·주유원" },
-              { id: "1000321", name: "스타일리스트" },
-              { id: "1000322", name: "장례지도사" },
-              { id: "1000323", name: "가사도우미" },
-              { id: "1000324", name: "승무원" },
-              { id: "1000325", name: "플로리스트" }
-          ],
-          "10040": [
-              { id: "1000326", name: "전기·전자엔지니어" },
-              { id: "1000327", name: "기계엔지니어" },
-              { id: "1000328", name: "설계엔지니어" },
-              { id: "1000329", name: "설비엔지니어" },
-              { id: "1000330", name: "반도체엔지니어" },
-              { id: "1000331", name: "화학엔지니어" },
-              { id: "1000332", name: "공정엔지니어" },
-              { id: "1000333", name: "하드웨어엔지니어" },
-              { id: "1000334", name: "통신엔지니어" },
-              { id: "1000335", name: "RF엔지니어" },
-              { id: "1000336", name: "필드엔지니어" },
-              { id: "1000337", name: "R&D·연구원" }
-          ],
-          "10041": [
-              { id: "1000338", name: "생산직종사자" },
-              { id: "1000339", name: "생산·공정관리자" },
-              { id: "1000340", name: "품질관리자" },
-              { id: "1000341", name: "포장·가공담당자" },
-              { id: "1000342", name: "공장관리자" },
-              { id: "1000343", name: "용접사" },
-              { id: "1000999", name: "기타" }
-          ],
-          "10042": [
-              { id: "1000344", name: "유치원·보육교사" },
-              { id: "1000345", name: "학교·특수학교 교사" },
-              { id: "1000346", name: "대학교수·강사" },
-              { id: "1000347", name: "학원강사" },
-              { id: "1000348", name: "외국어강사" },
-              { id: "1000349", name: "기술·전문강사" },
-              { id: "1000350", name: "학습지·방문교사" },
-              { id: "1000351", name: "학원상담·운영" },
-              { id: "1000352", name: "교직원·조교" },
-              { id: "1000353", name: "교재개발·교수설계" }
-          ],
-          "10043": [
-              { id: "1000354", name: "건축가" },
-              { id: "1000355", name: "건축기사" },
-              { id: "1000356", name: "시공기사" },
-              { id: "1000357", name: "전기기사" },
-              { id: "1000358", name: "토목기사" },
-              { id: "1000359", name: "시설관리자" },
-              { id: "1000360", name: "현장관리자" },
-              { id: "1000361", name: "안전관리자" },
-              { id: "1000362", name: "공무" },
-              { id: "1000363", name: "소방설비" },
-              { id: "1000364", name: "현장보조" },
-              { id: "1000365", name: "감리원" },
-              { id: "1000366", name: "도시·조경설계" },
-              { id: "1000367", name: "환경기사" },
-              { id: "1000368", name: "비파괴검사원" },
-              { id: "1000369", name: "공인중개사" },
-              { id: "1000370", name: "감정평가사" },
-              { id: "1000371", name: "분양매니저" }
-          ],
-          "10044": [
-              { id: "1000372", name: "의사" },
-              { id: "1000373", name: "한의사" },
-              { id: "1000374", name: "간호사" },
-              { id: "1000375", name: "간호조무사" },
-              { id: "1000376", name: "약사·한약사" },
-              { id: "1000377", name: "의료기사" },
-              { id: "1000378", name: "수의사" },
-              { id: "1000379", name: "수의테크니션" },
-              { id: "1000380", name: "병원코디네이터" },
-              { id: "1000381", name: "원무행정" },
-              { id: "1000382", name: "기타의료종사자" },
-              { id: "1000383", name: "의료·약무보조" },
-              { id: "1000384", name: "바이오·제약연구원" },
-              { id: "1000385", name: "임상연구원" }
-          ],
-          "10045": [
-              { id: "1000386", name: "PD·감독" },
-              { id: "1000387", name: "포토그래퍼" },
-              { id: "1000388", name: "영상편집자" },
-              { id: "1000389", name: "사운드엔지니어" },
-              { id: "1000390", name: "스태프" },
-              { id: "1000391", name: "출판·편집" },
-              { id: "1000392", name: "배급·제작자" },
-              { id: "1000393", name: "콘텐츠에디터" },
-              { id: "1000394", name: "크리에이터" },
-              { id: "1000395", name: "기자" },
-              { id: "1000396", name: "작가" },
-              { id: "1000397", name: "아나운서" },
-              { id: "1000398", name: "리포터·성우" },
-              { id: "1000399", name: "MC·쇼호스트" },
-              { id: "1000400", name: "모델" },
-              { id: "1000401", name: "연예인·매니저" },
-              { id: "1000402", name: "인플루언서" },
-              { id: "1000403", name: "통번역사" },
-              { id: "1000404", name: "큐레이터" },
-              { id: "1000405", name: "음반기획" },
-              { id: "1000406", name: "스포츠강사" }
-          ],
-          "10046": [
-              { id: "1000407", name: "사회복지사" },
-              { id: "1000408", name: "요양보호사" },
-              { id: "1000409", name: "환경미화원" },
-              { id: "1000410", name: "보건관리자" },
-              { id: "1000411", name: "사서" },
-              { id: "1000412", name: "자원봉사자" },
-              { id: "1000413", name: "방역·방재기사" },
-              { id: "1000999", name: "기타" }
-          ]
-      };
-
-      // 페이지 이동 함수
-      function nextPage() {
-          if (validateCurrentPage()) {
-              if (currentPage < totalPages) {
-                  document.getElementById(`page-${currentPage}`).classList.add('hidden');
-                  currentPage++;
-                  document.getElementById(`page-${currentPage}`).classList.remove('hidden');
-                  updateProgress();
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
-              }
-          }
-      }
-
-      function prevPage() {
-          if (currentPage > 1) {
-              document.getElementById(`page-${currentPage}`).classList.add('hidden');
-              currentPage--;
-              document.getElementById(`page-${currentPage}`).classList.remove('hidden');
-              updateProgress();
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-          }
-      }
-
-      function updateProgress() {
-          const progress = (currentPage / totalPages) * 100;
-          document.getElementById('progress-bar').style.width = `${progress}%`;
-          document.getElementById('page-indicator').textContent = `${currentPage} / ${totalPages}`;
-      }
-
-      // 유효성 검사
-      function validateCurrentPage() {
-          const errors = [];
-          clearErrors();
-
-          if (currentPage === 1) {
-              // 1페이지 유효성 검사
-              if (!document.getElementById('name').value.trim()) {
-                  errors.push('이름을 입력해주세요.');
-                  showFieldError('name', '이름을 입력해주세요.');
-              }
-
-              const email = document.getElementById('email').value.trim();
-              if (!email) {
-                  errors.push('이메일을 입력해주세요.');
-                  showFieldError('email', '이메일을 입력해주세요.');
-              } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-                  errors.push('올바른 이메일 형식을 입력해주세요.');
-                  showFieldError('email', '올바른 이메일 형식을 입력해주세요.');
-              }
-
-              const phone = document.getElementById('phone').value.trim();
-              if (!phone) {
-                  errors.push('전화번호를 입력해주세요.');
-                  showFieldError('phone', '전화번호를 입력해주세요.');
-              } else if (!/^010-\d{4}-\d{4}$/.test(phone)) {
-                  errors.push('올바른 전화번호 형식을 입력해주세요. (예: 010-0000-0000)');
-                  showFieldError('phone', '올바른 전화번호 형식을 입력해주세요.');
-              }
-
-              if (!document.getElementById('source').value) {
-                  errors.push('접촉 경로를 선택해주세요.');
-                  showFieldError('source', '접촉 경로를 선택해주세요.');
-              }
-
-              if (!document.getElementById('education').value) {
-                  errors.push('최종학력을 선택해주세요.');
-                  showFieldError('education', '최종학력을 선택해주세요.');
-              }
-
-              if (!document.getElementById('company').value.trim()) {
-                  errors.push('회사명(근무지명)을 입력해주세요.');
-                  showFieldError('company', '회사명(근무지명)을 입력해주세요.');
-              }
-
-              if (!document.getElementById('contractType').value) {
-                  errors.push('계약형태를 선택해주세요.');
-                  showFieldError('contractType', '계약형태를 선택해주세요.');
-              }
-
-              if (!document.getElementById('jobCategory').value) {
-                  errors.push('직무 대분류를 선택해주세요.');
-                  showFieldError('jobCategory', '직무 대분류를 선택해주세요.');
-              }
-
-              if (!document.getElementById('jobSubCategory').value) {
-                  errors.push('직무 소분류를 선택해주세요.');
-                  showFieldError('jobSubCategory', '직무 소분류를 선택해주세요.');
-              }
-
-              if (!document.getElementById('workStartYear').value || !document.getElementById('workStartMonth').value) {
-                  errors.push('근무 시작일을 입력해주세요.');
-                  showFieldError('workPeriod', '근무 시작일을 입력해주세요.');
-              }
-
-              const isCurrentJob = document.getElementById('currentJob').checked;
-              if (!isCurrentJob && (!document.getElementById('workEndYear').value || !document.getElementById('workEndMonth').value)) {
-                  errors.push('근무 종료일을 입력해주세요.');
-                  showFieldError('workPeriod', '근무 종료일을 입력해주세요.');
-              }
-
-              if (!document.getElementById('privacy').checked) {
-                  errors.push('개인정보 수집 및 활용에 동의해주세요.');
-                  showFieldError('privacy', '개인정보 수집 및 활용에 동의해주세요.');
-              }
-          }
-
-          if (currentPage === 3) {
-              // 3페이지 리뷰 유효성 검사
-              const reviewSummary = document.getElementById('review-summary').value.trim();
-              if (!reviewSummary || reviewSummary.length < 10) {
-                  errors.push('리뷰 한줄 요약: 10자 이상 입력해주세요.');
-              }
-
-              // 평가 항목들 검사
-              const ratingFields = [
-                  { id: 'work-env-rating', name: '근무환경/시설' },
-                  { id: 'work-stress-rating', name: '근무강도/스트레스' },
-                  { id: 'salary-rating', name: '급여/복지' },
-                  { id: 'stability-rating', name: '안정성/전망' },
-                  { id: 'people-rating', name: '사람들' }
-              ];
-
-              ratingFields.forEach(field => {
-                  if (!document.getElementById(field.id).value) {
-                      errors.push(`${field.name}: 평가를 선택해주세요.`);
-                  }
-              });
-
-              // 난이도 항목들 검사
-              const difficultyFields = [
-                  { id: 'job-prep-difficulty', name: '취업준비' },
-                  { id: 'interview-difficulty', name: '면접준비' }
-              ];
-
-              difficultyFields.forEach(field => {
-                  if (!document.getElementById(field.id).value) {
-                      errors.push(`${field.name}: 난이도를 선택해주세요.`);
-                  }
-              });
-
-              // 텍스트 항목들 검사
-              const textFields = [
-                  { id: 'work-env-text', name: '근무환경/시설', minLength: 50 },
-                  { id: 'work-stress-text', name: '근무강도/스트레스', minLength: 50 },
-                  { id: 'salary-text', name: '급여/복지', minLength: 50 },
-                  { id: 'stability-text', name: '안정성/전망', minLength: 50 },
-                  { id: 'people-text', name: '사람들', minLength: 50 },
-                  { id: 'job-prep-text', name: '취업준비', minLength: 50 },
-                  { id: 'interview-text', name: '면접준비', minLength: 50 }
-              ];
-
-              textFields.forEach(field => {
-                  const text = document.getElementById(field.id).value.trim();
-                  if (!text || text.length < field.minLength) {
-                      errors.push(`${field.name}: 상세 리뷰를 ${field.minLength}자 이상 입력해주세요.`);
-                  }
-              });
-
-              const adviceText = document.getElementById('advice-text').value.trim();
-              if (!adviceText || adviceText.length < 10) {
-                  errors.push('이 곳에서 일하게 될 사람들에게 한마디: 10자 이상 입력해주세요.');
-              }
-          }
-
-          if (errors.length > 0) {
-              showErrors(errors);
-              return false;
-          }
-
-          return true;
-      }
-
-      function showErrors(errors) {
-          const errorAlert = document.getElementById('error-alert');
-          const errorList = document.getElementById('error-list');
-          
-          errorList.innerHTML = '';
-          errors.forEach(error => {
-              const li = document.createElement('li');
-              li.textContent = error;
-              errorList.appendChild(li);
-          });
-          
-          errorAlert.classList.remove('hidden');
-          document.getElementById('main-card').classList.add('animate-pulse');
-          
-          setTimeout(() => {
-              document.getElementById('main-card').classList.remove('animate-pulse');
-          }, 400);
-      }
-
-      function clearErrors() {
-          document.getElementById('error-alert').classList.add('hidden');
-          // 필드별 에러 메시지도 숨김
-          document.querySelectorAll('.error-message').forEach(el => {
-              el.classList.remove('show');
-              el.textContent = '';
-          });
-          document.querySelectorAll('.error-field').forEach(el => {
-              el.classList.remove('error-field');
-          });
-      }
-
-      function showFieldError(fieldId, message) {
-          const field = document.getElementById(fieldId);
-          const errorElement = document.getElementById(`${fieldId}-error`);
-          
-          if (field) field.classList.add('error-field');
-          if (errorElement) {
-              errorElement.textContent = message;
-              errorElement.classList.add('show');
-          }
-      }
-
-      // 직무 소분류 업데이트
-      function updateJobSubCategories() {
-          const categorySelect = document.getElementById('jobCategory');
-          const subCategorySelect = document.getElementById('jobSubCategory');
-          const selectedCategory = categorySelect.value;
-
-          // 소분류 초기화
-          subCategorySelect.innerHTML = '<option value="">대분류를 먼저 선택해주세요</option>';
-          subCategorySelect.disabled = true;
-
-          if (selectedCategory && jobSubCategories[selectedCategory]) {
-              subCategorySelect.innerHTML = '<option value="">선택해주세요</option>';
-              jobSubCategories[selectedCategory].forEach(subCategory => {
-                  const option = document.createElement('option');
-                  option.value = subCategory.id;
-                  option.textContent = subCategory.name;
-                  subCategorySelect.appendChild(option);
-              });
-              subCategorySelect.disabled = false;
-          }
-      }
-
-      // 현재 재직중 체크박스 처리
-      function toggleCurrentJob() {
-          const currentJobCheckbox = document.getElementById('currentJob');
-          const endDateInputs = document.getElementById('endDateInputs');
-          const workEndYear = document.getElementById('workEndYear');
-          const workEndMonth = document.getElementById('workEndMonth');
-
-          if (currentJobCheckbox.checked) {
-              endDateInputs.style.display = 'none';
-              workEndYear.value = '';
-              workEndMonth.value = '';
-          } else {
-              endDateInputs.style.display = 'flex';
-          }
-      }
-
-      // 전화번호 포맷팅
-      function formatPhoneNumber(input) {
-          let value = input.value.replace(/[^0-9]/g, '');
-          
-          if (value.length <= 3) {
-              input.value = value;
-          } else if (value.length <= 7) {
-              input.value = value.slice(0, 3) + '-' + value.slice(3);
-          } else {
-              input.value = value.slice(0, 3) + '-' + value.slice(3, 7) + '-' + value.slice(7, 11);
-          }
-      }
-
-      // 주소 검색
-      function execDaumPostcode() {
-          new daum.Postcode({
-              oncomplete: function(data) {
-                  document.getElementById('postcode').value = data.zonecode;
-                  document.getElementById('roadAddress').value = data.roadAddress;
-                  document.getElementById('detailAddress').focus();
-              }
-          }).open();
-      }
-
-      // 파일 업로드 처리
-      function handleFileUpload(input) {
-          const fileInfo = document.getElementById('file-info');
-          if (input.files && input.files[0]) {
-              const file = input.files[0];
-              fileInfo.textContent = `선택된 파일: ${file.name}`;
-              fileInfo.classList.remove('hidden');
-          } else {
-              fileInfo.classList.add('hidden');
-          }
-      }
-
-      // 텍스트 카운트 업데이트
-      function updateTextCount(fieldId, text) {
-          const countElement = document.getElementById(`count-${fieldId}`);
-          if (countElement) {
-              countElement.textContent = text.length;
-          }
-      }
-
-      // 폼 제출
-      async function submitForm() {
-          if (!validateCurrentPage()) {
-              return;
-          }
-
-          const submitBtn = document.getElementById('submit-btn');
-          submitBtn.disabled = true;
-          submitBtn.textContent = '제출 중...';
-
-          try {
-              // FormData 생성
-              const formData = new FormData();
-              formData.append('form-name', 'demand-review-form');
-
-              // 기본 정보
-              formData.append('name', document.getElementById('name').value);
-              formData.append('email', document.getElementById('email').value);
-              formData.append('phone', document.getElementById('phone').value);
-              formData.append('source', document.getElementById('source').value);
-              formData.append('education', document.getElementById('education').value);
-              formData.append('company', document.getElementById('company').value);
-              formData.append('contractType', document.getElementById('contractType').value);
-              formData.append('postcode', document.getElementById('postcode').value);
-              formData.append('roadAddress', document.getElementById('roadAddress').value);
-              formData.append('detailAddress', document.getElementById('detailAddress').value);
-
-              // 직무 정보
-              const jobCategorySelect = document.getElementById('jobCategory');
-              const jobSubCategorySelect = document.getElementById('jobSubCategory');
-              formData.append('jobCategory', jobCategorySelect.options[jobCategorySelect.selectedIndex].text);
-              formData.append('jobSubCategory', jobSubCategorySelect.options[jobSubCategorySelect.selectedIndex].text);
-              formData.append('jobRole', document.getElementById('jobRole').value);
-
-              // 근무 기간
-              formData.append('workStartYear', document.getElementById('workStartYear').value);
-              formData.append('workStartMonth', document.getElementById('workStartMonth').value);
-              formData.append('workEndYear', document.getElementById('workEndYear').value);
-              formData.append('workEndMonth', document.getElementById('workEndMonth').value);
-              formData.append('isCurrentJob', document.getElementById('currentJob').checked ? '예' : '아니오');
-
-              // 증빙 파일
-              const proofFile = document.getElementById('proofFile').files[0];
-              if (proofFile) {
-                  formData.append('proofFile', proofFile);
-              }
-
-              // 리뷰 데이터
-              formData.append('review_summary', document.getElementById('review-summary').value);
-              formData.append('work_env_rating', document.getElementById('work-env-rating').value);
-              formData.append('work_env_text', document.getElementById('work-env-text').value);
-              formData.append('work_stress_rating', document.getElementById('work-stress-rating').value);
-              formData.append('work_stress_text', document.getElementById('work-stress-text').value);
-              formData.append('salary_rating', document.getElementById('salary-rating').value);
-              formData.append('salary_text', document.getElementById('salary-text').value);
-              formData.append('stability_rating', document.getElementById('stability-rating').value);
-              formData.append('stability_text', document.getElementById('stability-text').value);
-              formData.append('people_rating', document.getElementById('people-rating').value);
-              formData.append('people_text', document.getElementById('people-text').value);
-              formData.append('job_prep_difficulty', document.getElementById('job-prep-difficulty').value);
-              formData.append('job_prep_text', document.getElementById('job-prep-text').value);
-              formData.append('interview_difficulty', document.getElementById('interview-difficulty').value);
-              formData.append('interview_text', document.getElementById('interview-text').value);
-              formData.append('advice_text', document.getElementById('advice-text').value);
-
-              // Netlify Forms로 제출
-              const response = await fetch('/', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                  body: new URLSearchParams(formData).toString()
-              });
-
-              if (response.ok) {
-                  window.location.href = '/thank-you.html';
-              } else {
-                  throw new Error('제출에 실패했습니다.');
-              }
-          } catch (error) {
-              console.error('Form submission error:', error);
-              alert('제출 중 오류가 발생했습니다. 다시 시도해주세요.');
-              submitBtn.disabled = false;
-              submitBtn.textContent = '제출하기';
-          }
-      }
-
-      // 초기화
-      document.addEventListener('DOMContentLoaded', function() {
-          // 현재 재직중 체크박스 초기 상태 설정
-          toggleCurrentJob();
-      });
-  </script>
+    <form name="demand-review-form" netlify netlify-honeypot="bot-field" hidden>
+        <input type="text" name="bot-field" />
+        <input type="text" name="name" />
+        <input type="email" name="email" />
+        <input type="tel" name="phone" />
+        <input type="text" name="source" />
+        <input type="text" name="education" />
+        <input type="text" name="company" />
+        <input type="text" name="contractType" />
+        <input type="text" name="postcode" />
+        <input type="text" name="roadAddress" />
+        <input type="text" name="detailAddress" />
+        <input type="text" name="jobCategory" />
+        <input type="text" name="jobSubCategory" />
+        <textarea name="jobRole"></textarea>
+        <input type="text" name="workStartYear" />
+        <input type="text" name="workStartMonth" />
+        <input type="text" name="workEndYear" />
+        <input type="text" name="workEndMonth" />
+        <input type="text" name="isCurrentJob" />
+        <input type="file" name="proofFile" />
+        <textarea name="review_summary"></textarea>
+        <input type="text" name="work_env_rating" />
+        <textarea name="work_env_text"></textarea>
+        <input type="text" name="work_stress_rating" />
+        <textarea name="work_stress_text"></textarea>
+        <input type="text" name="salary_rating" />
+        <textarea name="salary_text"></textarea>
+        <input type="text" name="stability_rating" />
+        <textarea name="stability_text"></textarea>
+        <input type="text" name="people_rating" />
+        <textarea name="people_text"></textarea>
+        <input type="text" name="job_prep_difficulty" />
+        <textarea name="job_prep_text"></textarea>
+        <input type="text" name="interview_difficulty" />
+        <textarea name="interview_text"></textarea>
+        <textarea name="advice_text"></textarea>
+    </form>
+
+    <div class="max-w-2xl mx-auto">
+        <div id="main-card" class="bg-white rounded-lg shadow-md">
+            <div class="text-center p-4 sm:p-6 border-b">
+                <h1 class="text-xl sm:text-2xl font-bold text-gray-900 mb-4">근무 후기 이벤트 참여</h1>
+                <div class="mt-4">
+                    <div class="w-full bg-gray-200 rounded-full h-2">
+                        <div id="progress-bar" class="bg-blue-600 h-2 rounded-full progress-bar" style="width: 33.33%"></div>
+                    </div>
+                    <p id="page-indicator" class="text-sm text-gray-600 mt-2">1 / 3</p>
+                </div>
+            </div>
+
+            <div class="p-4 sm:p-6 space-y-4 sm:space-y-6">
+                <div id="page-1" class="space-y-4">
+                    <div class="relative">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">이름 *</label>
+                        <input type="text" id="name" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base" placeholder="이름을 입력해주세요">
+                        <div id="name-error" class="error-tooltip"></div>
+                    </div>
+
+                    <div class="relative">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">이메일 *</label>
+                        <input type="email" id="email" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base" placeholder="admin@domain.com">
+                        <div id="email-error" class="error-tooltip"></div>
+                    </div>
+
+                    <div class="relative">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">전화번호 *</label>
+                        <input type="tel" id="phone" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base" placeholder="010-0000-0000" maxlength="13">
+                        <div id="phone-error" class="error-tooltip"></div>
+                    </div>
+
+                    <div class="relative">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">어떤 경로로 후기 이벤트를 접하게 되었나요? *</label>
+                        <select id="source" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base">
+                            <option value="">선택해주세요</option>
+                            <option value="디맨드 홈페이지">디맨드 홈페이지</option>
+                            <option value="디맨드 인스타그램">디맨드 인스타그램</option>
+                            <option value="디맨드 스레드">디맨드 스레드</option>
+                            <option value="디맨드 오픈채팅방">디맨드 오픈채팅방</option>
+                            <option value="인스타그램 광고">인스타그램 광고</option>
+                            <option value="디맨드 블로그">디맨드 블로그</option>
+                            <option value="기타">기타</option>
+                        </select>
+                        <div id="source-error" class="error-tooltip"></div>
+                    </div>
+
+                    <div class="relative">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">최종학력 *</label>
+                        <select id="education" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base">
+                            <option value="">선택해주세요</option>
+                            <option value="고졸">고졸</option>
+                            <option value="초대졸">초대졸</option>
+                            <option value="대졸">대졸</option>
+                        </select>
+                        <div id="education-error" class="error-tooltip"></div>
+                    </div>
+
+                    <div class="relative">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">회사명(근무지명) *</label>
+                        <p class="text-xs text-gray-500 mb-2">가능한 줄임 없이 풀어서 써주세요 (SK하이닉스, 복음교회, 서브웨이 선릉점)</p>
+                        <input type="text" id="company" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base" placeholder="회사명(근무지명)을 입력해주세요">
+                        <div id="company-error" class="error-tooltip"></div>
+                    </div>
+
+                    <div class="relative">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">계약형태 *</label>
+                        <select id="contractType" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base">
+                            <option value="">선택해주세요</option>
+                            <option value="정규직">정규직</option>
+                            <option value="계약직">계약직</option>
+                            <option value="아르바이트">아르바이트</option>
+                            <option value="파견직">파견직</option>
+                            <option value="일용직">일용직</option>
+                            <option value="기타">기타</option>
+                        </select>
+                        <div id="contractType-error" class="error-tooltip"></div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">사업장 주소 (선택)</label>
+                        <div class="bg-blue-50 border border-blue-200 rounded-md p-3 mb-3">
+                            <p class="text-sm text-blue-600 font-medium">주소를 입력해주실수록 상품 당첨 확률이 높아질 수 있습니다.</p>
+                        </div>
+                        <div class="flex flex-col sm:flex-row gap-2 mb-2">
+                            <input type="text" id="postcode" class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base" placeholder="우편번호" readonly>
+                            <button type="button" id="address-btn" class="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 text-sm whitespace-nowrap">주소 찾기</button>
+                        </div>
+                        <input type="text" id="roadAddress" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 mb-2 text-sm sm:text-base" placeholder="도로명 주소" readonly>
+                        <input type="text" id="detailAddress" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base" placeholder="상세주소 입력">
+                    </div>
+
+                    <div class="relative">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">직무 대분류 *</label>
+                        <select id="jobCategory" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base">
+                            <option value="">선택해주세요</option>
+                            <option value="10026">기획·전략</option>
+                            <option value="10027">법무·사무·총무</option>
+                            <option value="10028">인사·HR</option>
+                            <option value="10029">회계·세무</option>
+                            <option value="10030">마케팅·광고·MD</option>
+                            <option value="10031">개발·데이터</option>
+                            <option value="10032">디자인</option>
+                            <option value="10033">물류·무역</option>
+                            <option value="10034">운전·운송·배송</option>
+                            <option value="10035">영업</option>
+                            <option value="10036">고객상담·TM</option>
+                            <option value="10037">금융·보험</option>
+                            <option value="10038">식·음료</option>
+                            <option value="10039">고객서비스·리테일</option>
+                            <option value="10040">엔지니어링·설계</option>
+                            <option value="10041">제조·생산</option>
+                            <option value="10042">교육</option>
+                            <option value="10043">건축·시설</option>
+                            <option value="10044">의료·바이오</option>
+                            <option value="10045">미디어·문화·스포츠</option>
+                            <option value="10046">공공·복지</option>
+                        </select>
+                        <div id="jobCategory-error" class="error-tooltip"></div>
+                    </div>
+
+                    <div class="relative">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">직무 소분류 *</label>
+                        <select id="jobSubCategory" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base" disabled>
+                            <option value="">대분류를 먼저 선택해주세요</option>
+                        </select>
+                        <div id="jobSubCategory-error" class="error-tooltip"></div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">어떤 역할/어떤 일을 하셨나요? (선택)</label>
+                        <p class="text-xs text-gray-500 mb-2">편의점 캐셔로 일함. 계산/재고 처리/청소 등 업무 함</p>
+                        <textarea id="jobRole" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none text-sm sm:text-base" placeholder="구체적인 업무 내용을 100자 이하로 입력해주세요" maxlength="100"></textarea>
+                        <p class="text-xs text-gray-500 mt-1"><span id="count-jobRole">0</span>/100자 이하</p>
+                    </div>
+
+                    <div class="relative">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">근무 기간 *</label>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <p class="text-sm text-gray-600 mb-2">시작일</p>
+                                <div class="flex gap-2">
+                                    <select id="workStartYear" class="flex-1 px-2 sm:px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+                                        <option value="">년도</option>
+                                        <option value="2025">2025년</option>
+                                        <option value="2024">2024년</option>
+                                        <option value="2023">2023년</option>
+                                        <option value="2022">2022년</option>
+                                        <option value="2021">2021년</option>
+                                        <option value="2020">2020년</option>
+                                        <option value="2019">2019년</option>
+                                        <option value="2018">2018년</option>
+                                        <option value="2017">2017년</option>
+                                        <option value="2016">2016년</option>
+                                        <option value="2015">2015년</option>
+                                        <option value="2014">2014년</option>
+                                        <option value="2013">2013년</option>
+                                        <option value="2012">2012년</option>
+                                        <option value="2011">2011년</option>
+                                        <option value="2010">2010년</option>
+                                    </select>
+                                    <select id="workStartMonth" class="flex-1 px-2 sm:px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+                                        <option value="">월</option>
+                                        <option value="1">1월</option>
+                                        <option value="2">2월</option>
+                                        <option value="3">3월</option>
+                                        <option value="4">4월</option>
+                                        <option value="5">5월</option>
+                                        <option value="6">6월</option>
+                                        <option value="7">7월</option>
+                                        <option value="8">8월</option>
+                                        <option value="9">9월</option>
+                                        <option value="10">10월</option>
+                                        <option value="11">11월</option>
+                                        <option value="12">12월</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-600 mb-2">종료일</p>
+                                <div id="endDateInputs" class="flex gap-2 mb-2">
+                                    <select id="workEndYear" class="flex-1 px-2 sm:px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+                                        <option value="">년도</option>
+                                        <option value="2025">2025년</option>
+                                        <option value="2024">2024년</option>
+                                        <option value="2023">2023년</option>
+                                        <option value="2022">2022년</option>
+                                        <option value="2021">2021년</option>
+                                        <option value="2020">2020년</option>
+                                        <option value="2019">2019년</option>
+                                        <option value="2018">2018년</option>
+                                        <option value="2017">2017년</option>
+                                        <option value="2016">2016년</option>
+                                        <option value="2015">2015년</option>
+                                        <option value="2014">2014년</option>
+                                        <option value="2013">2013년</option>
+                                        <option value="2012">2012년</option>
+                                        <option value="2011">2011년</option>
+                                        <option value="2010">2010년</option>
+                                    </select>
+                                    <select id="workEndMonth" class="flex-1 px-2 sm:px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+                                        <option value="">월</option>
+                                        <option value="1">1월</option>
+                                        <option value="2">2월</option>
+                                        <option value="3">3월</option>
+                                        <option value="4">4월</option>
+                                        <option value="5">5월</option>
+                                        <option value="6">6월</option>
+                                        <option value="7">7월</option>
+                                        <option value="8">8월</option>
+                                        <option value="9">9월</option>
+                                        <option value="10">10월</option>
+                                        <option value="11">11월</option>
+                                        <option value="12">12월</option>
+                                    </select>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <input type="checkbox" id="currentJob" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                                    <label for="currentJob" class="text-sm text-gray-700">현재 재직중</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="workPeriod-error" class="error-tooltip"></div>
+                    </div>
+
+                    <div class="relative flex items-center space-x-2">
+                        <input type="checkbox" id="privacy" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                        <label for="privacy" class="text-sm text-gray-700">개인정보 수집 및 활용에 동의합니다. (개인정보는 수집만 하고 어디에 노출되지 않습니다) *</label>
+                        <div id="privacy-error" class="error-tooltip"></div>
+                    </div>
+
+                    <button type="button" id="next-btn-1" class="w-full bg-blue-600 text-white py-3 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base font-medium">
+                        다음 (1/3)
+                    </button>
+                </div>
+
+                <div id="page-2" class="space-y-4 hidden">
+                    <div>
+                        <h3 class="text-lg font-semibold mb-4">현직자 인증 <span class="text-red-600 font-bold">(선택)</span></h3>
+                        <p class="text-gray-600 mb-4 text-sm sm:text-base">
+                            증빙 자료를 첨부해주세요. 증빙이 인증되면 이벤트 보상 제공 대상에 자동으로 포함됩니다. 하지만, 증빙 자료가 첨부되지 않았더라도 근무했다는 사실이 리뷰를 통해 충분히 인정되면 이벤트 보상 제공 대상에 포함될 수 있습니다.
+                        </p>
+
+                        <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 sm:p-8 text-center">
+                            <svg class="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                            </svg>
+                            <p class="text-gray-600 mb-4 text-sm sm:text-base">
+                                증빙자료를 업로드해주세요 <span class="text-red-600 font-bold">(선택)</span>
+                                <br />
+                                (예: 사원증, 사내 시스템 화면 등 / 이미지 또는 PDF 파일, 15일 이내 자동 삭제됩니다)
+                            </p>
+                            <input type="file" id="proofFile" accept="image/*,application/pdf" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 mx-auto max-w-xs">
+                            <div id="file-info" class="text-sm text-green-600 mt-2 hidden"></div>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row gap-4">
+                        <button type="button" id="prev-btn-2" class="flex-1 bg-gray-100 text-gray-700 py-3 px-4 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 text-sm sm:text-base font-medium">
+                            이전
+                        </button>
+                        <button type="button" id="next-btn-2" class="flex-1 bg-blue-600 text-white py-3 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base font-medium">
+                            다음 (2/3)
+                        </button>
+                    </div>
+                </div>
+
+                <div id="page-3" class="space-y-6 hidden">
+                    <h3 class="text-lg font-semibold">현직자 상세 리뷰</h3>
+
+                    <div class="space-y-3 p-4 border rounded-lg relative">
+                        <div>
+                            <h4 class="font-medium">1. 이 리뷰의 한줄 요약 *</h4>
+                            <p class="text-sm text-gray-600 mt-1">리뷰에서 제목으로 노출됩니다</p>
+                        </div>
+                        <div>
+                            <textarea id="review-summary" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none text-sm sm:text-base" placeholder="10자 이상 50자 이하로 입력해주세요" maxlength="50"></textarea>
+                            <p class="text-xs text-gray-500 mt-1"><span id="count-review-summary">0</span>/50자 이하</p>
+                        </div>
+                        <div id="review-summary-error" class="error-tooltip"></div>
+                    </div>
+
+                    <div class="space-y-3 p-4 border rounded-lg relative">
+                        <div>
+                            <h4 class="font-medium">2. 근무환경/시설 *</h4>
+                            <p class="text-sm text-gray-600 mt-1">사무실 환경, 장비, 편의시설 등에 대해 평가해주세요.</p>
+                        </div>
+                        <div>
+                            <label class="text-sm font-medium text-gray-700">평가</label>
+                            <select id="work-env-rating" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base mt-1">
+                                <option value="">평가를 선택해주세요</option>
+                                <option value="5">5점 (매우 좋음)</option>
+                                <option value="4">4점 (좋음)</option>
+                                <option value="3">3점 (보통)</option>
+                                <option value="2">2점 (나쁨)</option>
+                                <option value="1">1점 (매우 나쁨)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="text-sm font-medium text-gray-700">상세 리뷰 *</label>
+                            <textarea id="work-env-text" rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none text-sm sm:text-base mt-1" placeholder="최소 50자 이상 입력해주세요"></textarea>
+                            <p class="text-xs text-gray-500 mt-1"><span id="count-work-env-text">0</span>/50자 이상</p>
+                        </div>
+                        <div id="work-env-error" class="error-tooltip"></div>
+                    </div>
+
+                    <div class="space-y-3 p-4 border rounded-lg relative">
+                        <div>
+                            <h4 class="font-medium">3. 근무강도/스트레스 *</h4>
+                            <p class="text-sm text-gray-600 mt-1">업무량, 야근 빈도, 스트레스 정도 등을 평가해주세요.</p>
+                        </div>
+                        <div>
+                            <label class="text-sm font-medium text-gray-700">평가</label>
+                            <select id="work-stress-rating" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base mt-1">
+                                <option value="">평가를 선택해주세요</option>
+                                <option value="5">5점 (매우 좋음)</option>
+                                <option value="4">4점 (좋음)</option>
+                                <option value="3">3점 (보통)</option>
+                                <option value="2">2점 (나쁨)</option>
+                                <option value="1">1점 (매우 나쁨)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="text-sm font-medium text-gray-700">상세 리뷰 *</label>
+                            <textarea id="work-stress-text" rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none text-sm sm:text-base mt-1" placeholder="최소 50자 이상 입력해주세요"></textarea>
+                            <p class="text-xs text-gray-500 mt-1"><span id="count-work-stress-text">0</span>/50자 이상</p>
+                        </div>
+                        <div id="work-stress-error" class="error-tooltip"></div>
+                    </div>
+
+                    <div class="space-y-3 p-4 border rounded-lg relative">
+                        <div>
+                            <h4 class="font-medium">4. 급여/복지 *</h4>
+                            <p class="text-sm text-gray-600 mt-1">급여 수준, 복리후생, 인센티브 등에 대해 평가해주세요.</p>
+                        </div>
+                        <div>
+                            <label class="text-sm font-medium text-gray-700">평가</label>
+                            <select id="salary-rating" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base mt-1">
+                                <option value="">평가를 선택해주세요</option>
+                                <option value="5">5점 (매우 좋음)</option>
+                                <option value="4">4점 (좋음)</option>
+                                <option value="3">3점 (보통)</option>
+                                <option value="2">2점 (나쁨)</option>
+                                <option value="1">1점 (매우 나쁨)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="text-sm font-medium text-gray-700">상세 리뷰 *</label>
+                            <textarea id="salary-text" rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none text-sm sm:text-base mt-1" placeholder="최소 50자 이상 입력해주세요"></textarea>
+                            <p class="text-xs text-gray-500 mt-1"><span id="count-salary-text">0</span>/50자 이상</p>
+                        </div>
+                        <div id="salary-error" class="error-tooltip"></div>
+                    </div>
+
+                    <div class="space-y-3 p-4 border rounded-lg relative">
+                        <div>
+                            <h4 class="font-medium">5. 안정성/전망 *</h4>
+                            <p class="text-sm text-gray-600 mt-1">회사의 안정성과 미래 전망에 대해 평가해주세요.</p>
+                        </div>
+                        <div>
+                            <label class="text-sm font-medium text-gray-700">평가</label>
+                            <select id="stability-rating" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base mt-1">
+                                <option value="">평가를 선택해주세요</option>
+                                <option value="5">5점 (매우 좋음)</option>
+                                <option value="4">4점 (좋음)</option>
+                                <option value="3">3점 (보통)</option>
+                                <option value="2">2점 (나쁨)</option>
+                                <option value="1">1점 (매우 나쁨)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="text-sm font-medium text-gray-700">상세 리뷰 *</label>
+                            <textarea id="stability-text" rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none text-sm sm:text-base mt-1" placeholder="최소 50자 이상 입력해주세요"></textarea>
+                            <p class="text-xs text-gray-500 mt-1"><span id="count-stability-text">0</span>/50자 이상</p>
+                        </div>
+                        <div id="stability-error" class="error-tooltip"></div>
+                    </div>
+
+                    <div class="space-y-3 p-4 border rounded-lg relative">
+                        <div>
+                            <h4 class="font-medium">6. 사람들 *</h4>
+                            <p class="text-sm text-gray-600 mt-1">동료, 상사와의 관계, 조직문화 등을 평가해주세요.</p>
+                        </div>
+                        <div>
+                            <label class="text-sm font-medium text-gray-700">평가</label>
+                            <select id="people-rating" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base mt-1">
+                                <option value="">평가를 선택해주세요</option>
+                                <option value="5">5점 (매우 좋음)</option>
+                                <option value="4">4점 (좋음)</option>
+                                <option value="3">3점 (보통)</option>
+                                <option value="2">2점 (나쁨)</option>
+                                <option value="1">1점 (매우 나쁨)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="text-sm font-medium text-gray-700">상세 리뷰 *</label>
+                            <textarea id="people-text" rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none text-sm sm:text-base mt-1" placeholder="최소 50자 이상 입력해주세요"></textarea>
+                            <p class="text-xs text-gray-500 mt-1"><span id="count-people-text">0</span>/50자 이상</p>
+                        </div>
+                        <div id="people-error" class="error-tooltip"></div>
+                    </div>
+
+                    <div class="space-y-3 p-4 border rounded-lg relative">
+                        <div>
+                            <h4 class="font-medium">7. 취업준비 *</h4>
+                            <p class="text-sm text-gray-600 mt-1">이 회사 취업을 위한 준비 과정의 난이도를 평가해주세요.</p>
+                        </div>
+                        <div>
+                            <label class="text-sm font-medium text-gray-700">난이도 평가</label>
+                            <select id="job-prep-difficulty" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base mt-1">
+                                <option value="">난이도를 선택해주세요</option>
+                                <option value="1">1 (쉬움)</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4 (어려움)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="text-sm font-medium text-gray-700">상세 리뷰 *</label>
+                            <textarea id="job-prep-text" rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none text-sm sm:text-base mt-1" placeholder="최소 50자 이상 입력해주세요"></textarea>
+                            <p class="text-xs text-gray-500 mt-1"><span id="count-job-prep-text">0</span>/50자 이상</p>
+                        </div>
+                        <div id="job-prep-error" class="error-tooltip"></div>
+                    </div>
+
+                    <div class="space-y-3 p-4 border rounded-lg relative">
+                        <div>
+                            <h4 class="font-medium">8. 면접준비 *</h4>
+                            <p class="text-sm text-gray-600 mt-1">면접 과정의 난이도를 평가해주세요.</p>
+                        </div>
+                        <div>
+                            <label class="text-sm font-medium text-gray-700">난이도 평가</label>
+                            <select id="interview-difficulty" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base mt-1">
+                                <option value="">난이도를 선택해주세요</option>
+                                <option value="1">1 (쉬움)</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4 (어려움)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="text-sm font-medium text-gray-700">상세 리뷰 *</label>
+                            <textarea id="interview-text" rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none text-sm sm:text-base mt-1" placeholder="최소 50자 이상 입력해주세요"></textarea>
+                            <p class="text-xs text-gray-500 mt-1"><span id="count-interview-text">0</span>/50자 이상</p>
+                        </div>
+                        <div id="interview-error" class="error-tooltip"></div>
+                    </div>
+
+                    <div class="space-y-3 p-4 border rounded-lg relative">
+                        <div>
+                            <h4 class="font-medium">9. 이 곳에서 일하게 될 사람들에게 한마디 *</h4>
+                            <p class="text-sm text-gray-600 mt-1">이 회사에서 일하게 될 사람들에게 전하고 싶은 말을 적어주세요.</p>
+                        </div>
+                        <div>
+                            <textarea id="advice-text" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none text-sm sm:text-base" placeholder="10자 이상 100자 이하로 입력해주세요" maxlength="100"></textarea>
+                            <p class="text-xs text-gray-500 mt-1"><span id="count-advice-text">0</span>/100자 이하</p>
+                        </div>
+                        <div id="advice-error" class="error-tooltip"></div>
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row gap-4">
+                        <button type="button" id="prev-btn-3" class="flex-1 bg-gray-100 text-gray-700 py-3 px-4 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 text-sm sm:text-base font-medium">
+                            이전
+                        </button>
+                        <button type="button" id="submit-btn" class="flex-1 bg-blue-600 text-white py-3 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base font-medium">
+                            제출하기
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 전역 변수
+        let currentPage = 1;
+        const totalPages = 3;
+
+        // 직무 소분류 데이터
+        const jobSubCategories = {
+            "10026": [
+                { id: "1000185", name: "경영·비즈니스기획" },
+                { id: "1000186", name: "웹기획" },
+                { id: "1000187", name: "마케팅기획" },
+                { id: "1000188", name: "PL·PM·PO" },
+                { id: "1000189", name: "컨설턴트" },
+                { id: "1000190", name: "CEO·COO·CTO" },
+                { id: "1000999", name: "기타" }
+            ],
+            "10027": [
+                { id: "1000191", name: "경영지원" },
+                { id: "1000192", name: "사무담당자" },
+                { id: "1000193", name: "총무" },
+                { id: "1000194", name: "사무보조" },
+                { id: "1000195", name: "법무담당자" },
+                { id: "1000196", name: "비서" },
+                { id: "1000197", name: "변호사" },
+                { id: "1000198", name: "법무사" },
+                { id: "1000199", name: "변리사" },
+                { id: "1000200", name: "노무사" },
+                { id: "1000999", name: "기타" }
+            ],
+            "10028": [
+                { id: "1000201", name: "인사담당자" },
+                { id: "1000202", name: "HRD·HRM" },
+                { id: "1000203", name: "노무관리자" },
+                { id: "1000204", name: "잡매니저" },
+                { id: "1000205", name: "헤드헌터" },
+                { id: "1000206", name: "직업상담사" },
+                { id: "1000999", name: "기타" }
+            ],
+            "10029": [
+                { id: "1000207", name: "회계담당자" },
+                { id: "1000208", name: "경리" },
+                { id: "1000209", name: "세무담당자" },
+                { id: "1000210", name: "재무담당자" },
+                { id: "1000211", name: "감사" },
+                { id: "1000212", name: "IR·공시" },
+                { id: "1000213", name: "회계사" },
+                { id: "1000214", name: "세무사" },
+                { id: "1000215", name: "관세사" },
+                { id: "1000999", name: "기타" }
+            ],
+            "10030": [
+                { id: "1000216", name: "AE(광고기획자)" },
+                { id: "1000217", name: "브랜드마케터" },
+                { id: "1000218", name: "퍼포먼스마케터" },
+                { id: "1000219", name: "CRM마케터" },
+                { id: "1000220", name: "온라인마케터" },
+                { id: "1000221", name: "콘텐츠마케터" },
+                { id: "1000222", name: "홍보" },
+                { id: "1000223", name: "설문·리서치" },
+                { id: "1000224", name: "MD" },
+                { id: "1000225", name: "카피라이터" },
+                { id: "1000226", name: "크리에이티브디렉터" },
+                { id: "1000227", name: "채널관리자" },
+                { id: "1000228", name: "그로스해커" },
+                { id: "1000999", name: "기타" }
+            ],
+            "10031": [
+                { id: "1000229", name: "백엔드개발자" },
+                { id: "1000230", name: "프론트엔드개발자" },
+                { id: "1000231", name: "웹개발자" },
+                { id: "1000232", name: "앱개발자" },
+                { id: "1000233", name: "시스템엔지니어" },
+                { id: "1000234", name: "네트워크엔지니어" },
+                { id: "1000235", name: "DBA" },
+                { id: "1000236", name: "데이터엔지니어" },
+                { id: "1000237", name: "데이터사이언티스트" },
+                { id: "1000238", name: "보안엔지니어" },
+                { id: "1000239", name: "소프트웨어개발자" },
+                { id: "1000240", name: "게임개발자" },
+                { id: "1000241", name: "하드웨어개발자" },
+                { id: "1000242", name: "머신러닝엔지니어" },
+                { id: "1000243", name: "블록체인개발자" },
+                { id: "1000244", name: "클라우드엔지니어" },
+                { id: "1000245", name: "웹퍼블리셔" },
+                { id: "1000246", name: "IT컨설팅" },
+                { id: "1000247", name: "QA" }
+            ],
+            "10032": [
+                { id: "1000248", name: "그래픽디자이너" },
+                { id: "1000249", name: "3D디자이너" },
+                { id: "1000250", name: "제품디자이너" },
+                { id: "1000251", name: "산업디자이너" },
+                { id: "1000252", name: "광고디자이너" },
+                { id: "1000253", name: "시각디자이너" },
+                { id: "1000254", name: "영상디자이너" },
+                { id: "1000255", name: "웹디자이너" },
+                { id: "1000256", name: "UI·UX디자이너" },
+                { id: "1000257", name: "패션디자이너" },
+                { id: "1000258", name: "편집디자이너" },
+                { id: "1000259", name: "실내디자이너" },
+                { id: "1000260", name: "공간디자이너" },
+                { id: "1000261", name: "캐릭터디자이너" },
+                { id: "1000262", name: "환경디자이너" },
+                { id: "1000263", name: "아트디렉터" },
+                { id: "1000264", name: "일러스트레이터" }
+            ],
+            "10033": [
+                { id: "1000265", name: "물류관리자" },
+                { id: "1000266", name: "구매관리자" },
+                { id: "1000267", name: "자재관리자" },
+                { id: "1000268", name: "유통관리자" },
+                { id: "1000269", name: "무역사무원" },
+                { id: "1000999", name: "기타" }
+            ],
+            "10034": [
+                { id: "1000270", name: "납품·배송기사" },
+                { id: "1000271", name: "배달기사" },
+                { id: "1000272", name: "수행·운전기사" },
+                { id: "1000273", name: "화물·중장비기사" },
+                { id: "1000274", name: "버스기사" },
+                { id: "1000275", name: "택시기사" },
+                { id: "1000276", name: "조종·기관사" },
+                { id: "1000999", name: "기타" }
+            ],
+            "10035": [
+                { id: "1000277", name: "제품영업" },
+                { id: "1000278", name: "서비스영업" },
+                { id: "1000279", name: "해외영업" },
+                { id: "1000280", name: "광고영업" },
+                { id: "1000281", name: "금융영업" },
+                { id: "1000282", name: "법인영업" },
+                { id: "1000283", name: "IT·기술영업" },
+                { id: "1000284", name: "영업관리" },
+                { id: "1000285", name: "영업지원" },
+                { id: "1000999", name: "기타" }
+            ],
+            "10036": [
+                { id: "1000286", name: "인바운드상담원" },
+                { id: "1000287", name: "아웃바운드상담원" },
+                { id: "1000288", name: "고객센터관리자" },
+                { id: "1000999", name: "기타" }
+            ],
+            "10037": [
+                { id: "1000289", name: "금융사무" },
+                { id: "1000290", name: "보험설계사" },
+                { id: "1000291", name: "손해사정사" },
+                { id: "1000292", name: "심사" },
+                { id: "1000293", name: "은행원·텔러" },
+                { id: "1000294", name: "계리사" },
+                { id: "1000295", name: "펀드매니저" },
+                { id: "1000296", name: "애널리스트" },
+                { id: "1000999", name: "기타" }
+            ],
+            "10038": [
+                { id: "1000297", name: "요리사" },
+                { id: "1000298", name: "조리사" },
+                { id: "1000299", name: "제과제빵사" },
+                { id: "1000300", name: "바리스타" },
+                { id: "1000301", name: "셰프·주방장" },
+                { id: "1000302", name: "카페·레스토랑매니저" },
+                { id: "1000303", name: "홀서버" },
+                { id: "1000304", name: "주방보조" },
+                { id: "1000305", name: "소믈리에·바텐더" },
+                { id: "1000306", name: "영양사" },
+                { id: "1000307", name: "식품연구원" },
+                { id: "1000308", name: "푸드스타일리스트" }
+            ],
+            "10039": [
+                { id: "1000309", name: "설치·수리기사" },
+                { id: "1000310", name: "정비기사" },
+                { id: "1000311", name: "호텔종사자" },
+                { id: "1000312", name: "여행에이전트" },
+                { id: "1000313", name: "매장관리자" },
+                { id: "1000314", name: "뷰티·미용사" },
+                { id: "1000315", name: "애견미용·훈련" },
+                { id: "1000316", name: "안내데스크·리셉셔니스트" },
+                { id: "1000317", name: "경호·경비" },
+                { id: "1000318", name: "운영보조·매니저" },
+                { id: "1000319", name: "이벤트·웨딩플래너" },
+                { id: "1000320", name: "주차·주유원" },
+                { id: "1000321", name: "스타일리스트" },
+                { id: "1000322", name: "장례지도사" },
+                { id: "1000323", name: "가사도우미" },
+                { id: "1000324", name: "승무원" },
+                { id: "1000325", name: "플로리스트" }
+            ],
+            "10040": [
+                { id: "1000326", name: "전기·전자엔지니어" },
+                { id: "1000327", name: "기계엔지니어" },
+                { id: "1000328", name: "설계엔지니어" },
+                { id: "1000329", name: "설비엔지니어" },
+                { id: "1000330", name: "반도체엔지니어" },
+                { id: "1000331", name: "화학엔지니어" },
+                { id: "1000332", name: "공정엔지니어" },
+                { id: "1000333", name: "하드웨어엔지니어" },
+                { id: "1000334", name: "통신엔지니어" },
+                { id: "1000335", name: "RF엔지니어" },
+                { id: "1000336", name: "필드엔지니어" },
+                { id: "1000337", name: "R&D·연구원" }
+            ],
+            "10041": [
+                { id: "1000338", name: "생산직종사자" },
+                { id: "1000339", name: "생산·공정관리자" },
+                { id: "1000340", name: "품질관리자" },
+                { id: "1000341", name: "포장·가공담당자" },
+                { id: "1000342", name: "공장관리자" },
+                { id: "1000343", name: "용접사" },
+                { id: "1000999", name: "기타" }
+            ],
+            "10042": [
+                { id: "1000344", name: "유치원·보육교사" },
+                { id: "1000345", name: "학교·특수학교 교사" },
+                { id: "1000346", name: "대학교수·강사" },
+                { id: "1000347", name: "학원강사" },
+                { id: "1000348", name: "외국어강사" },
+                { id: "1000349", name: "기술·전문강사" },
+                { id: "1000350", name: "학습지·방문교사" },
+                { id: "1000351", name: "학원상담·운영" },
+                { id: "1000352", name: "교직원·조교" },
+                { id: "1000353", name: "교재개발·교수설계" }
+            ],
+            "10043": [
+                { id: "1000354", name: "건축가" },
+                { id: "1000355", name: "건축기사" },
+                { id: "1000356", name: "시공기사" },
+                { id: "1000357", name: "전기기사" },
+                { id: "1000358", name: "토목기사" },
+                { id: "1000359", name: "시설관리자" },
+                { id: "1000360", name: "현장관리자" },
+                { id: "1000361", name: "안전관리자" },
+                { id: "1000362", name: "공무" },
+                { id: "1000363", name: "소방설비" },
+                { id: "1000364", name: "현장보조" },
+                { id: "1000365", name: "감리원" },
+                { id: "1000366", name: "도시·조경설계" },
+                { id: "1000367", name: "환경기사" },
+                { id: "1000368", name: "비파괴검사원" },
+                { id: "1000369", name: "공인중개사" },
+                { id: "1000370", name: "감정평가사" },
+                { id: "1000371", name: "분양매니저" }
+            ],
+            "10044": [
+                { id: "1000372", name: "의사" },
+                { id: "1000373", name: "한의사" },
+                { id: "1000374", name: "간호사" },
+                { id: "1000375", name: "간호조무사" },
+                { id: "1000376", name: "약사·한약사" },
+                { id: "1000377", name: "의료기사" },
+                { id: "1000378", name: "수의사" },
+                { id: "1000379", name: "수의테크니션" },
+                { id: "1000380", name: "병원코디네이터" },
+                { id: "1000381", name: "원무행정" },
+                { id: "1000382", name: "기타의료종사자" },
+                { id: "1000383", name: "의료·약무보조" },
+                { id: "1000384", name: "바이오·제약연구원" },
+                { id: "1000385", name: "임상연구원" }
+            ],
+            "10045": [
+                { id: "1000386", name: "PD·감독" },
+                { id: "1000387", name: "포토그래퍼" },
+                { id: "1000388", name: "영상편집자" },
+                { id: "1000389", name: "사운드엔지니어" },
+                { id: "1000390", name: "스태프" },
+                { id: "1000391", name: "출판·편집" },
+                { id: "1000392", name: "배급·제작자" },
+                { id: "1000393", name: "콘텐츠에디터" },
+                { id: "1000394", name: "크리에이터" },
+                { id: "1000395", name: "기자" },
+                { id: "1000396", name: "작가" },
+                { id: "1000397", name: "아나운서" },
+                { id: "1000398", name: "리포터·성우" },
+                { id: "1000399", name: "MC·쇼호스트" },
+                { id: "1000400", name: "모델" },
+                { id: "1000401", name: "연예인·매니저" },
+                { id: "1000402", name: "인플루언서" },
+                { id: "1000403", name: "통번역사" },
+                { id: "1000404", name: "큐레이터" },
+                { id: "1000405", name: "음반기획" },
+                { id: "1000406", name: "스포츠강사" }
+            ],
+            "10046": [
+                { id: "1000407", name: "사회복지사" },
+                { id: "1000408", name: "요양보호사" },
+                { id: "1000409", name: "환경미화원" },
+                { id: "1000410", name: "보건관리자" },
+                { id: "1000411", name: "사서" },
+                { id: "1000412", name: "자원봉사자" },
+                { id: "1000413", name: "방역·방재기사" },
+                { id: "1000999", name: "기타" }
+            ]
+        };
+
+        // 페이지 이동 함수
+        function nextPage() {
+            if (validateCurrentPage()) {
+                if (currentPage < totalPages) {
+                    document.getElementById(`page-${currentPage}`).classList.add('hidden');
+                    currentPage++;
+                    document.getElementById(`page-${currentPage}`).classList.remove('hidden');
+                    updateProgress();
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+            }
+        }
+
+        function prevPage() {
+            if (currentPage > 1) {
+                document.getElementById(`page-${currentPage}`).classList.add('hidden');
+                currentPage--;
+                document.getElementById(`page-${currentPage}`).classList.remove('hidden');
+                updateProgress();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
+        function updateProgress() {
+            const progress = (currentPage / totalPages) * 100;
+            document.getElementById('progress-bar').style.width = `${progress}%`;
+            document.getElementById('page-indicator').textContent = `${currentPage} / ${totalPages}`;
+        }
+
+        // 유효성 검사 함수
+        function validateCurrentPage() {
+            clearErrors();
+
+            if (currentPage === 1) {
+                let hasError = false;
+
+                if (!document.getElementById('name').value.trim()) {
+                    showFieldError('name', '이름을 입력해주세요.');
+                    hasError = true;
+                }
+
+                const email = document.getElementById('email').value.trim();
+                if (!email) {
+                    showFieldError('email', '이메일을 입력해주세요.');
+                    hasError = true;
+                } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                    showFieldError('email', '올바른 이메일 형식을 입력해주세요.');
+                    hasError = true;
+                }
+
+                const phone = document.getElementById('phone').value.trim();
+                if (!phone) {
+                    showFieldError('phone', '전화번호를 입력해주세요.');
+                    hasError = true;
+                } else if (!/^010-\d{4}-\d{4}$/.test(phone)) {
+                    showFieldError('phone', '올바른 전화번호 형식을 입력해주세요.');
+                    hasError = true;
+                }
+
+                if (!document.getElementById('source').value) {
+                    showFieldError('source', '접촉 경로를 선택해주세요.');
+                    hasError = true;
+                }
+
+                if (!document.getElementById('education').value) {
+                    showFieldError('education', '최종학력을 선택해주세요.');
+                    hasError = true;
+                }
+
+                if (!document.getElementById('company').value.trim()) {
+                    showFieldError('company', '회사명(근무지명)을 입력해주세요.');
+                    hasError = true;
+                }
+
+                if (!document.getElementById('contractType').value) {
+                    showFieldError('contractType', '계약형태를 선택해주세요.');
+                    hasError = true;
+                }
+
+                if (!document.getElementById('jobCategory').value) {
+                    showFieldError('jobCategory', '직무 대분류를 선택해주세요.');
+                    hasError = true;
+                }
+
+                if (!document.getElementById('jobSubCategory').value) {
+                    showFieldError('jobSubCategory', '직무 소분류를 선택해주세요.');
+                    hasError = true;
+                }
+
+                if (!document.getElementById('workStartYear').value || !document.getElementById('workStartMonth').value) {
+                    showFieldError('workPeriod', '근무 시작일을 입력해주세요.');
+                    hasError = true;
+                }
+
+                const isCurrentJob = document.getElementById('currentJob').checked;
+                if (!isCurrentJob && (!document.getElementById('workEndYear').value || !document.getElementById('workEndMonth').value)) {
+                    showFieldError('workPeriod', '근무 종료일을 입력해주세요.');
+                    hasError = true;
+                }
+
+                if (!document.getElementById('privacy').checked) {
+                    showFieldError('privacy', '개인정보 수집 및 활용에 동의해주세요.');
+                    hasError = true;
+                }
+
+                return !hasError;
+            }
+
+            if (currentPage === 3) {
+                let hasError = false;
+
+                const reviewSummary = document.getElementById('review-summary').value.trim();
+                if (!reviewSummary || reviewSummary.length < 10) {
+                    showFieldError('review-summary', '10자 이상 입력해주세요.');
+                    hasError = true;
+                }
+
+                // 평가 항목들 검사
+                const ratingFields = [
+                    { id: 'work-env-rating', errorId: 'work-env', name: '근무환경/시설', textId: 'work-env-text' },
+                    { id: 'work-stress-rating', errorId: 'work-stress', name: '근무강도/스트레스', textId: 'work-stress-text' },
+                    { id: 'salary-rating', errorId: 'salary', name: '급여/복지', textId: 'salary-text' },
+                    { id: 'stability-rating', errorId: 'stability', name: '안정성/전망', textId: 'stability-text' },
+                    { id: 'people-rating', errorId: 'people', name: '사람들', textId: 'people-text' }
+                ];
+
+                ratingFields.forEach(field => {
+                    if (!document.getElementById(field.id).value) {
+                        showFieldError(field.errorId, `평가를 선택해주세요.`);
+                        hasError = true;
+                    }
+                    
+                    const text = document.getElementById(field.textId).value.trim();
+                    if (!text || text.length < 50) {
+                        showFieldError(field.errorId, `상세 리뷰를 50자 이상 입력해주세요.`);
+                        hasError = true;
+                    }
+                });
+
+                // 난이도 항목들 검사
+                const difficultyFields = [
+                    { id: 'job-prep-difficulty', errorId: 'job-prep', name: '취업준비', textId: 'job-prep-text' },
+                    { id: 'interview-difficulty', errorId: 'interview', name: '면접준비', textId: 'interview-text' }
+                ];
+
+                difficultyFields.forEach(field => {
+                    if (!document.getElementById(field.id).value) {
+                        showFieldError(field.errorId, `난이도를 선택해주세요.`);
+                        hasError = true;
+                    }
+                    
+                    const text = document.getElementById(field.textId).value.trim();
+                    if (!text || text.length < 50) {
+                        showFieldError(field.errorId, `상세 리뷰를 50자 이상 입력해주세요.`);
+                        hasError = true;
+                    }
+                });
+
+                const adviceText = document.getElementById('advice-text').value.trim();
+                if (!adviceText || adviceText.length < 10) {
+                    showFieldError('advice', '10자 이상 입력해주세요.');
+                    hasError = true;
+                }
+
+                return !hasError;
+            }
+
+            return true;
+        }
+
+        // 에러 처리 함수
+        function clearErrors() {
+            document.querySelectorAll('.error-tooltip').forEach(el => {
+                el.classList.remove('show');
+                el.textContent = '';
+            });
+            document.querySelectorAll('.error-field').forEach(el => {
+                el.classList.remove('error-field');
+            });
+        }
+
+        function showFieldError(fieldId, message) {
+            const field = document.getElementById(fieldId);
+            const errorElement = document.getElementById(`${fieldId}-error`);
+            
+            if (field) {
+                field.classList.add('error-field');
+                field.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+            
+            if (errorElement) {
+                errorElement.textContent = message;
+                errorElement.classList.add('show');
+                
+                setTimeout(() => {
+                    errorElement.classList.remove('show');
+                    if (field) field.classList.remove('error-field');
+                }, 3000);
+            }
+        }
+
+        // 직무 소분류 업데이트 함수
+        function updateJobSubCategories() {
+            const categorySelect = document.getElementById('jobCategory');
+            const subCategorySelect = document.getElementById('jobSubCategory');
+            const selectedCategory = categorySelect.value;
+
+            subCategorySelect.innerHTML = '<option value="">대분류를 먼저 선택해주세요</option>';
+            subCategorySelect.disabled = true;
+
+            if (selectedCategory && jobSubCategories[selectedCategory]) {
+                subCategorySelect.innerHTML = '<option value="">선택해주세요</option>';
+                jobSubCategories[selectedCategory].forEach(subCategory => {
+                    const option = document.createElement('option');
+                    option.value = subCategory.id;
+                    option.textContent = subCategory.name;
+                    subCategorySelect.appendChild(option);
+                });
+                subCategorySelect.disabled = false;
+            }
+        }
+
+        // 현재 재직중 체크박스 토글 함수
+        function toggleCurrentJob() {
+            const currentJobCheckbox = document.getElementById('currentJob');
+            const endDateInputs = document.getElementById('endDateInputs');
+            const workEndYear = document.getElementById('workEndYear');
+            const workEndMonth = document.getElementById('workEndMonth');
+
+            if (currentJobCheckbox.checked) {
+                endDateInputs.style.display = 'none';
+                workEndYear.value = '';
+                workEndMonth.value = '';
+            } else {
+                endDateInputs.style.display = 'flex';
+            }
+        }
+
+        // 전화번호 포맷팅 함수
+        function formatPhoneNumber(input) {
+            let value = input.value.replace(/[^0-9]/g, '');
+            
+            if (value.length <= 3) {
+                input.value = value;
+            } else if (value.length <= 7) {
+                input.value = value.slice(0, 3) + '-' + value.slice(3);
+            } else {
+                input.value = value.slice(0, 3) + '-' + value.slice(3, 7) + '-' + value.slice(7, 11);
+            }
+        }
+
+        // 주소 검색 함수
+        function execDaumPostcode() {
+            new daum.Postcode({
+                oncomplete: function(data) {
+                    document.getElementById('postcode').value = data.zonecode;
+                    document.getElementById('roadAddress').value = data.roadAddress;
+                    document.getElementById('detailAddress').focus();
+                }
+            }).open();
+        }
+
+        // 파일 업로드 처리 함수
+        function handleFileUpload(input) {
+            const fileInfo = document.getElementById('file-info');
+            if (input.files && input.files[0]) {
+                const file = input.files[0];
+                fileInfo.textContent = `선택된 파일: ${file.name}`;
+                fileInfo.classList.remove('hidden');
+            } else {
+                fileInfo.classList.add('hidden');
+            }
+        }
+
+        // 텍스트 카운트 업데이트 함수
+        function updateTextCount(fieldId, text) {
+            const countElement = document.getElementById(`count-${fieldId}`);
+            if (countElement) {
+                countElement.textContent = text.length;
+            }
+        }
+
+        // 폼 제출 함수
+        async function submitForm() {
+            if (!validateCurrentPage()) {
+                return;
+            }
+
+            const submitBtn = document.getElementById('submit-btn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = '제출 중...';
+
+            try {
+                const formData = new FormData();
+                formData.append('form-name', 'demand-review-form');
+
+                formData.append('name', document.getElementById('name').value);
+                formData.append('email', document.getElementById('email').value);
+                formData.append('phone', document.getElementById('phone').value);
+                formData.append('source', document.getElementById('source').value);
+                formData.append('education', document.getElementById('education').value);
+                formData.append('company', document.getElementById('company').value);
+                formData.append('contractType', document.getElementById('contractType').value);
+                formData.append('postcode', document.getElementById('postcode').value);
+                formData.append('roadAddress', document.getElementById('roadAddress').value);
+                formData.append('detailAddress', document.getElementById('detailAddress').value);
+
+                const jobCategorySelect = document.getElementById('jobCategory');
+                const jobSubCategorySelect = document.getElementById('jobSubCategory');
+                formData.append('jobCategory', jobCategorySelect.options[jobCategorySelect.selectedIndex].text);
+                formData.append('jobSubCategory', jobSubCategorySelect.options[jobSubCategorySelect.selectedIndex].text);
+                formData.append('jobRole', document.getElementById('jobRole').value);
+
+                formData.append('workStartYear', document.getElementById('workStartYear').value);
+                formData.append('workStartMonth', document.getElementById('workStartMonth').value);
+                formData.append('workEndYear', document.getElementById('workEndYear').value);
+                formData.append('workEndMonth', document.getElementById('workEndMonth').value);
+                formData.append('isCurrentJob', document.getElementById('currentJob').checked ? '예' : '아니오');
+
+                const proofFile = document.getElementById('proofFile').files[0];
+                if (proofFile) {
+                    formData.append('proofFile', proofFile);
+                }
+
+                formData.append('review_summary', document.getElementById('review-summary').value);
+                formData.append('work_env_rating', document.getElementById('work-env-rating').value);
+                formData.append('work_env_text', document.getElementById('work-env-text').value);
+                formData.append('work_stress_rating', document.getElementById('work-stress-rating').value);
+                formData.append('work_stress_text', document.getElementById('work-stress-text').value);
+                formData.append('salary_rating', document.getElementById('salary-rating').value);
+                formData.append('salary_text', document.getElementById('salary-text').value);
+                formData.append('stability_rating', document.getElementById('stability-rating').value);
+                formData.append('stability_text', document.getElementById('stability-text').value);
+                formData.append('people_rating', document.getElementById('people-rating').value);
+                formData.append('people_text', document.getElementById('people-text').value);
+                formData.append('job_prep_difficulty', document.getElementById('job-prep-difficulty').value);
+                formData.append('job_prep_text', document.getElementById('job-prep-text').value);
+                formData.append('interview_difficulty', document.getElementById('interview-difficulty').value);
+                formData.append('interview_text', document.getElementById('interview-text').value);
+                formData.append('advice_text', document.getElementById('advice-text').value);
+
+                const response = await fetch('/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams(formData).toString()
+                });
+
+                if (response.ok) {
+                    window.location.href = '/thank-you.html';
+                } else {
+                    throw new Error('제출에 실패했습니다.');
+                }
+            } catch (error) {
+                console.error('Form submission error:', error);
+                alert('제출 중 오류가 발생했습니다. 다시 시도해주세요.');
+                submitBtn.disabled = false;
+                submitBtn.textContent = '제출하기';
+            }
+        }
+
+        // 이벤트 리스너 등록
+        document.addEventListener('DOMContentLoaded', function() {
+            // 전화번호 포맷팅
+            document.getElementById('phone').addEventListener('input', function() {
+                formatPhoneNumber(this);
+            });
+
+            // 직무 대분류 변경
+            document.getElementById('jobCategory').addEventListener('change', updateJobSubCategories);
+
+            // 현재 재직중 체크박스
+            document.getElementById('currentJob').addEventListener('change', toggleCurrentJob);
+
+            // 주소 찾기 버튼
+            document.getElementById('address-btn').addEventListener('click', execDaumPostcode);
+
+            // 파일 업로드
+            document.getElementById('proofFile').addEventListener('change', function() {
+                handleFileUpload(this);
+            });
+
+            // 텍스트 카운트 업데이트
+            document.getElementById('jobRole').addEventListener('input', function() {
+                updateTextCount('jobRole', this.value);
+            });
+
+            document.getElementById('review-summary').addEventListener('input', function() {
+                updateTextCount('review-summary', this.value);
+            });
+
+            document.getElementById('work-env-text').addEventListener('input', function() {
+                updateTextCount('work-env-text', this.value);
+            });
+
+            document.getElementById('work-stress-text').addEventListener('input', function() {
+                updateTextCount('work-stress-text', this.value);
+            });
+
+            document.getElementById('salary-text').addEventListener('input', function() {
+                updateTextCount('salary-text', this.value);
+            });
+
+            document.getElementById('stability-text').addEventListener('input', function() {
+                updateTextCount('stability-text', this.value);
+            });
+
+            document.getElementById('people-text').addEventListener('input', function() {
+                updateTextCount('people-text', this.value);
+            });
+
+            document.getElementById('job-prep-text').addEventListener('input', function() {
+                updateTextCount('job-prep-text', this.value);
+            });
+
+            document.getElementById('interview-text').addEventListener('input', function() {
+                updateTextCount('interview-text', this.value);
+            });
+
+            document.getElementById('advice-text').addEventListener('input', function() {
+                updateTextCount('advice-text', this.value);
+            });
+
+            // 페이지 이동 버튼들
+            document.getElementById('next-btn-1').addEventListener('click', nextPage);
+            document.getElementById('prev-btn-2').addEventListener('click', prevPage);
+            document.getElementById('next-btn-2').addEventListener('click', nextPage);
+            document.getElementById('prev-btn-3').addEventListener('click', prevPage);
+            document.getElementById('submit-btn').addEventListener('click', submitForm);
+
+            // 초기 설정
+            toggleCurrentJob();
+        });
+    </script>
 </body>
 </html>
