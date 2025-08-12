@@ -513,8 +513,9 @@
                         </div>
                         <div>
                             <label class="text-sm font-medium text-gray-700">상세 리뷰 *</label>
-                            <textarea id="job-prep-text" rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none text-sm sm:text-base mt-1" placeholder="최소 50자 이상 입력해주세요"></textarea>
-                            <p class="text-xs text-gray-500 mt-1"><span id="count-job-prep-text">0</span>/50자 이상</p>
+                            <!-- 7번 글자수 제한 제거 -->
+                            <textarea id="job-prep-text" rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none text-sm sm:text-base mt-1" placeholder="취업 준비 과정에 대해 자유롭게 작성해주세요"></textarea>
+                            <p class="text-xs text-gray-500 mt-1"><span id="count-job-prep-text">0</span>자</p>
                         </div>
                         <div id="job-prep-error" class="error-tooltip"></div>
                     </div>
@@ -524,20 +525,28 @@
                             <h4 class="font-medium">8. 면접준비 *</h4>
                             <p class="text-sm text-gray-600 mt-1">면접 과정의 난이도를 평가해주세요.</p>
                         </div>
-                        <div>
-                            <label class="text-sm font-medium text-gray-700">난이도 평가</label>
-                            <select id="interview-difficulty" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base mt-1">
-                                <option value="">난이도를 선택해주세요</option>
-                                <option value="1">1 (쉬움)</option>
-                                <option value="2">2</option>
-                                <option value="3">3</option>
-                                <option value="4">4 (어려움)</option>
-                            </select>
+                        <!-- 8번에 '면접 과정이 없었음' 체크박스 추가 -->
+                        <div class="flex items-center space-x-2 mb-3">
+                            <input type="checkbox" id="no-interview" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2">
+                            <label for="no-interview" class="text-sm font-medium text-gray-700">면접 과정이 없었음</label>
                         </div>
-                        <div>
-                            <label class="text-sm font-medium text-gray-700">상세 리뷰 *</label>
-                            <textarea id="interview-text" rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none text-sm sm:text-base mt-1" placeholder="최소 50자 이상 입력해주세요"></textarea>
-                            <p class="text-xs text-gray-500 mt-1"><span id="count-interview-text">0</span>/50자 이상</p>
+                        <div id="interview-fields">
+                            <div>
+                                <label class="text-sm font-medium text-gray-700">난이도 평가</label>
+                                <select id="interview-difficulty" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base mt-1">
+                                    <option value="">난이도를 선택해주세요</option>
+                                    <option value="1">1 (쉬움)</option>
+                                    <option value="2">2</option>
+                                    <option value="3">3</option>
+                                    <option value="4">4 (어려움)</option>
+                                </select>
+                            </div>
+                            <div class="mt-3">
+                                <label class="text-sm font-medium text-gray-700">상세 리뷰 *</label>
+                                <!-- 8번 글자수 제한 제거 -->
+                                <textarea id="interview-text" rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none text-sm sm:text-base mt-1" placeholder="면접 과정에 대해 자유롭게 작성해주세요"></textarea>
+                                <p class="text-xs text-gray-500 mt-1"><span id="count-interview-text">0</span>자</p>
+                            </div>
                         </div>
                         <div id="interview-error" class="error-tooltip"></div>
                     </div>
@@ -1005,15 +1014,19 @@
                 ];
 
                 difficultyFields.forEach(field => {
+                    if (field.id === 'interview-difficulty' && document.getElementById('no-interview').checked) {
+                        return; // 면접 과정이 없었음이 체크되면 검증 건너뛰기
+                    }
+                    
                     if (!document.getElementById(field.id).value) {
                         showFieldError(field.errorId, `난이도를 선택해주세요.`);
                         hasError = true;
-                    }
-                    
-                    const text = document.getElementById(field.textId).value.trim();
-                    if (!text || text.length < 50) {
-                        showFieldError(field.errorId, `상세 리뷰를 50자 이상 입력해주세요.`);
-                        hasError = true;
+                    } else {
+                        const textValue = document.getElementById(field.textId).value.trim();
+                        if (!textValue) {
+                            showFieldError(field.errorId, `상세 리뷰를 입력해주세요.`);
+                            hasError = true;
+                        }
                     }
                 });
 
@@ -1196,8 +1209,15 @@
                 formData.append('people_text', document.getElementById('people-text').value);
                 formData.append('job_prep_difficulty', document.getElementById('job-prep-difficulty').value);
                 formData.append('job_prep_text', document.getElementById('job-prep-text').value);
-                formData.append('interview_difficulty', document.getElementById('interview-difficulty').value);
-                formData.append('interview_text', document.getElementById('interview-text').value);
+                
+                if (document.getElementById('no-interview').checked) {
+                    formData.append('interview_difficulty', '면접 과정 없음');
+                    formData.append('interview_text', '면접 과정이 없었습니다.');
+                } else {
+                    formData.append('interview_difficulty', document.getElementById('interview-difficulty').value);
+                    formData.append('interview_text', document.getElementById('interview-text').value);
+                }
+                
                 formData.append('advice_text', document.getElementById('advice-text').value);
 
                 const response = await fetch('/', {
@@ -1271,6 +1291,19 @@
 
             document.getElementById('job-prep-text').addEventListener('input', function() {
                 updateTextCount('job-prep-text', this.value);
+            });
+
+            document.getElementById('no-interview').addEventListener('change', function() {
+                const interviewFields = document.getElementById('interview-fields');
+                if (this.checked) {
+                    interviewFields.style.display = 'none';
+                    // 필드 초기화
+                    document.getElementById('interview-difficulty').value = '';
+                    document.getElementById('interview-text').value = '';
+                    updateTextCount('interview-text', '');
+                } else {
+                    interviewFields.style.display = 'block';
+                }
             });
 
             document.getElementById('interview-text').addEventListener('input', function() {
