@@ -1194,6 +1194,11 @@
                 const proofFile = document.getElementById('proofFile').files[0];
                 if (proofFile) {
                     formData.append('proofFile', proofFile);
+                    formData.append('proofFileName', proofFile.name);
+                    formData.append('proofFileSize', proofFile.size);
+                    formData.append('hasProofFile', '예');
+                } else {
+                    formData.append('hasProofFile', '아니오');
                 }
 
                 formData.append('review_summary', document.getElementById('review-summary').value);
@@ -1222,8 +1227,7 @@
 
                 const response = await fetch('/', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: new URLSearchParams(formData).toString()
+                    body: formData
                 });
 
                 if (response.ok) {
